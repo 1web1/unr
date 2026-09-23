@@ -8,7 +8,7 @@
     <!-- خطوط جوجل -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
     
-    <!-- مكتبة FontAwesome للأيقونات (فيسبوك، واتساب، الخ) -->
+    <!-- مكتبة FontAwesome للأيقونات -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- مكتبة ضغط الصور في متصفح الطالب لتسريع الرفع -->
@@ -93,7 +93,7 @@
             gap: 12px;
             cursor: pointer;
             transition: transform 0.3s ease;
-            z-index: 1001; /* ليبقى فوق القائمة المنسدلة */
+            z-index: 1001;
         }
         
         .navbar-brand:hover { transform: scale(1.02); }
@@ -142,7 +142,6 @@
         .btn-danger { background-color: rgba(220, 53, 69, 0.8); border-color: transparent; }
         .btn-danger:hover { background-color: #c82333; }
 
-        /* زر القائمة للموبايل */
         .mobile-menu-btn {
             display: none;
             background: none;
@@ -168,7 +167,6 @@
             flex-direction: column;
         }
 
-        /* Hero Section */
         #heroView { text-align: center; }
         .hero-title {
             font-size: clamp(2rem, 6vw, 5rem);
@@ -197,7 +195,6 @@
         }
         .btn-hero:hover { transform: scale(1.05); background: rgba(255,255,255,0.15); }
 
-        /* Forms & Boxes */
         .form-container, .login-box, .status-box, .about-content { width: 100%; box-sizing: border-box;}
         .form-container { max-width: 600px; padding: 40px; }
         .login-box, .status-box { max-width: 450px; padding: 40px; }
@@ -333,7 +330,7 @@
             /* تحويل القائمة لموبايل */
             .mobile-menu-btn { display: block; }
             #navButtons {
-                display: none; /* مخفية افتراضياً وتظهر بالضغط */
+                display: none; 
                 flex-direction: column;
                 position: absolute;
                 top: 100%;
@@ -367,11 +364,9 @@
 
     <!-- أيقونات السوشيال ميديا العائمة -->
     <div class="floating-social">
-        <!-- رابط الواتساب (تم تنسيق الرقم دولياً ليفتح التطبيق مباشرة) -->
         <a href="https://wa.me/201099583667" target="_blank" class="social-btn btn-whatsapp" title="تواصل معنا عبر واتساب">
             <i class="fab fa-whatsapp"></i>
         </a>
-        <!-- رابط جروب الفيسبوك -->
         <a href="https://www.facebook.com/share/19PMpQ3kAy/?mibextid=wwXIfr" target="_blank" class="social-btn btn-facebook" title="انضم لجروب المبادرة على فيسبوك">
             <i class="fab fa-facebook-f"></i>
         </a>
@@ -380,7 +375,8 @@
     <!-- شريط التنقل -->
     <div class="navbar">
         <div class="navbar-brand" id="btnGoHome">
-            <img src="لوجو المبادرة شفاف.png" alt="لوجو المبادرة" class="nav-logo">
+            <!-- تم تحديث رابط اللوجو هنا -->
+            <img src="https://res.cloudinary.com/wbmanqyt/image/upload/f_auto/q_auto/logo.png.png" alt="لوجو المبادرة" class="nav-logo">
             <h3>رعاية الشباب - جامعة القاهرة</h3>
         </div>
         
