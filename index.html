@@ -233,7 +233,7 @@ a{color:var(--gold)}
           <div class="fg"><label for="gmail">البريد الإلكتروني (Gmail)</label><input type="email" id="gmail" placeholder="example@gmail.com" dir="ltr" required><div class="err">بريد إلكتروني غير صحيح</div></div>
           <div class="fg"><label for="profileImage">الصورة الشخصية</label><input type="file" id="profileImage" accept="image/*" required><div class="err">ارفع صورة شخصية</div></div>
           <div class="fg"><label for="idImage">صورة البطاقة</label><input type="file" id="idImage" accept="image/*" required><div class="err">ارفع صورة البطاقة</div></div>
-          <div class="fg"><label for="cardImage">صورة الكارنيه <small>(إن وجد)</small></label><input type="file" id="cardImage" accept="image/*"></div>
+          <div class="fg"><label for="cardImage">صورة الكارنيه أو بطاقة الترشيح</label><input type="file" id="cardImage" accept="image/*" required><div class="err">ارفع صورة الكارنيه أو بطاقة الترشيح</div></div>
           <button type="submit" class="btn-main" id="submitBtn">إرسال البيانات</button>
           <div class="progress" id="progress"><div class="bar"><div class="fill" id="fill"></div></div><p id="progressText"></p></div>
           <div id="regNotice" class="notice" role="status"></div>
@@ -287,7 +287,7 @@ a{color:var(--gold)}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, getDoc, doc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, getDoc, doc, writeBatch, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey: "AIzaSyCNDOwLJXeCCdlcW-ffxbggbiETS86r3mc",
@@ -310,12 +310,12 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function retry(fn, tries = 4) {
   let last;
   for (let i = 0; i < tries; i++) {
-    try { return await fn(i); } catch (e) { last = e; await sleep(800 * 2 ** i + Math.random() * 700); } // تأخير عشوائي يمنع ازدحام الطلبات معاً
+    try { return await fn(i); } catch (e) { last = e; await sleep(800 * 2 ** i + Math.random() * 700); }
   }
   throw last;
 }
 
-/* ---------- معرض الصور (أسفل عن المبادرة) ---------- */
+/* ---------- معرض الصور ---------- */
 const GALLERY = [
   ["Screenshot 2026-09-23 162915.png","تعريف المبادرة","مبادرة طلاب من أجل مصر هي حركة طلابية في الجامعات المصرية تهدف إلى تنمية الوعي الوطني والمساهمة في خطط التنمية المستدامة في مصر."],
   ["Screenshot 2026-09-23 162941.png","أهداف المبادرة","تشمل أهدافها: إعداد قادة المستقبل، ودعم ريادة الأعمال لدى الشباب، وتعزيز العمل الجماعي، والمسؤولية المجتمعية، وإطلاق طاقات الطلاب الإبداعية."],
@@ -342,7 +342,6 @@ function showSite(id) {
 }
 document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => { navButtons.classList.remove("show"); showSite(b.dataset.go); }));
 
-// تمييز القسم الحالي في الشريط العلوي
 const navMap = {};
 document.querySelectorAll(".nav-btn[data-go]").forEach(b => navMap[b.dataset.go] = b);
 const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting && navMap[e.target.id]) { Object.values(navMap).forEach(x => x.classList.remove("active")); navMap[e.target.id].classList.add("active"); } }), { rootMargin: "-45% 0px -50% 0px" });
@@ -355,18 +354,23 @@ $("btnAdmin").onclick = () => {
   $("loginBox").style.display = logged ? "none" : ""; $("dash").style.display = logged ? "" : "none";
   if (logged) fetchStudents();
 };
-$("btnLogout").onclick = () => signOut(auth).then(() => showSite("hero"));
+
+// تعديل تسجيل الخروج لغلق الاتصال المباشر بقاعدة البيانات
+$("btnLogout").onclick = () => signOut(auth).then(() => { 
+  if (unsubscribe) unsubscribe(); 
+  showSite("hero"); 
+});
+
 onAuthStateChanged(auth, user => {
   $("btnLogout").style.display = user ? "" : "none";
   if (user && adminView.classList.contains("show")) { $("loginBox").style.display = "none"; $("dash").style.display = ""; fetchStudents(); }
 });
-$("loginForm").addEventListener("submit", e => {
-  e.preventDefault(); $("loginError").style.display = "none";
+$("loginForm").addEventListener("submit", e => {   e.preventDefault(); $("loginError").style.display = "none";
   signInWithEmailAndPassword(auth, $("adminEmail").value, $("adminPassword").value).catch(() => $("loginError").style.display = "block");
 });
 
-/* ---------- رفع الصور (ضغط + إعادة محاولة + رفع متوازي) ---------- */
-const uploaded = new Map(); // يحفظ الروابط المرفوعة كي لا تُرفع مرة ثانية لو فشل الحفظ
+/* ---------- رفع الصور ---------- */
+const uploaded = new Map();
 async function uploadImage(file, label, onDone) {
   const key = `${label}|${file.name}|${file.size}|${file.lastModified}`;
   if (uploaded.has(key)) { onDone(); return uploaded.get(key); }
@@ -390,13 +394,14 @@ function validate() {
   let bad = false;
   bad |= setInvalid("fullName", v("fullName").split(/\s+/).filter(Boolean).length < 4);
   bad |= setInvalid("phone", !/^01[0125]\d{8}$/.test(v("phone")));
-  bad |= setInvalid("nationalId", !/^[23]\d{13}$/.test(v("nationalId")));
+  bad |= setInvalid("nationalId", !/^\d{14}$/.test(v("nationalId"))); 
   bad |= setInvalid("college", !$("college").value);
   bad |= setInvalid("level", !$("level").value);
   bad |= setInvalid("facebookLink", !/facebook\.com|fb\.com|fb\.me/i.test(v("facebookLink")));
   bad |= setInvalid("gmail", !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v("gmail")));
   bad |= setInvalid("profileImage", !$("profileImage").files[0]);
   bad |= setInvalid("idImage", !$("idImage").files[0]);
+  bad |= setInvalid("cardImage", !$("cardImage").files[0]); 
   ["profileImage","idImage","cardImage"].forEach(id => { const f = $(id).files[0]; if (f && !f.type.startsWith("image/")) bad |= setInvalid(id, true); });
   return !bad;
 }
@@ -411,22 +416,21 @@ form.addEventListener("submit", async e => {
   if (!navigator.onLine) { notice(box, "bad", "لا يوجد اتصال بالإنترنت. بياناتك ما زالت في الصفحة، أعد المحاولة عند عودة الاتصال."); return; }
 
   submitting = true; $("submitBtn").disabled = true; $("progress").style.display = "block";
-  const setP = (n, t) => { $("fill").style.width = n + "%"; $("progressText").textContent = t; };
+  const setP = (n, t) => { $("fill").style.width = n + "\%"; $("progressText").textContent = t; };
   try {
     setP(5, "جاري رفع الصور...");
     let done = 0;
-    const tick = () => setP(5 + (++done) * 25, `تم رفع ${done} من ${$("cardImage").files[0] ? 3 : 2} صور`);
+    const tick = () => setP(5 + (++done) * 25, `تم رفع ${done} من 3 صور`); 
     const [profileUrl, idUrl, cardUrl] = await Promise.all([
       uploadImage($("profileImage").files[0], "p", tick),
       uploadImage($("idImage").files[0], "i", tick),
-      $("cardImage").files[0] ? uploadImage($("cardImage").files[0], "c", tick) : Promise.resolve("")
+      uploadImage($("cardImage").files[0], "c", tick) 
     ]);
 
     setP(90, "جاري حفظ البيانات...");
     const nid = toLatin($("nationalId").value);
     let fb = toLatin($("facebookLink").value); if (!/^https?:\/\//i.test(fb)) fb = "https://" + fb;
 
-    // كتابة ذرّية: إما تُحفظ البيانات وحالة الطلب معاً أو لا يُحفظ شيء
     await retry(async () => {
       const batch = writeBatch(db);
       batch.set(doc(db, "students", nid), {
@@ -458,7 +462,7 @@ $("statusForm").addEventListener("submit", async e => {
   e.preventDefault();
   const nid = toLatin($("searchNid").value), err = $("statusErr"), res = $("statusResult");
   err.className = "notice"; res.style.display = "none";
-  if (!/^[23]\d{13}$/.test(nid)) return notice(err, "bad", "اكتب رقماً قومياً صحيحاً من 14 رقم.");
+  if (!/^\d{14}$/.test(nid)) return notice(err, "bad", "اكتب رقماً قومياً صحيحاً من 14 رقم."); 
   $("statusBtn").disabled = true;
   try {
     const snap = await retry(() => getDoc(doc(db, "status", nid)), 2);
@@ -472,8 +476,10 @@ $("statusForm").addEventListener("submit", async e => {
   finally { $("statusBtn").disabled = false; }
 });
 
-/* ---------- لوحة الإدارة ---------- */
+/* ---------- لوحة الإدارة بالتحديث اللحظي (Real-time) ---------- */
 let cache = [];
+let unsubscribe = null; // متغير لحفظ الاتصال المباشر
+
 const STAT = { pending: "مراجعة", accepted: "مقبول", rejected: "مرفوض" };
 const badge = s => `<span class="badge badge-${STAT[s] ? s : "pending"}">${STAT[s] || "مراجعة"}</span>`;
 const opt = (list, cur) => list.map(([v, t]) => `<option value="${esc(v)}" ${v === cur ? "selected" : ""}>${esc(t || v)}</option>`).join("");
@@ -509,21 +515,37 @@ function render(list) {
           <button class="btn-sm b-del" data-act="delete" data-id="${esc(id)}">🗑 مسح</button></td></tr>`;
   }).join("");
 }
+
 function filtered() {
   const t = toLatin($("adminSearch").value).toLowerCase();
   return !t ? cache : cache.filter(s => `${s.data.fullName} ${s.data.phone} ${s.data.nationalId}`.toLowerCase().includes(t));
 }
-async function fetchStudents() {
+
+// دالة الجلب بالتحديث اللحظي باستخدام onSnapshot
+function fetchStudents() {
   const load = $("dataLoading"); load.style.display = "block"; load.textContent = "جاري جلب البيانات...";
-  try {
-    const snap = await getDocs(collection(db, "students"));
+  
+  // غلق أي اتصال سابق لتجنب التكرار
+  if (unsubscribe) unsubscribe();
+
+  // فتح الاتصال المباشر
+  unsubscribe = onSnapshot(collection(db, "students"), (snap) => {
     cache = snap.docs.map(s => ({ id: s.id, data: s.data() }))
       .sort((a, b) => (b.data.timestamp?.seconds || 0) - (a.data.timestamp?.seconds || 0));
+    
     const c = s => cache.filter(x => (x.data.status || "pending") === s).length;
-    $("stTotal").textContent = cache.length; $("stPending").textContent = c("pending"); $("stAccepted").textContent = c("accepted"); $("stRejected").textContent = c("rejected");
-    render(filtered()); load.style.display = "none";
-  } catch { load.className = "notice bad"; load.textContent = "خطأ في الجلب. تأكد من صلاحيات الحساب."; }
+    $("stTotal").textContent = cache.length; 
+    $("stPending").textContent = c("pending"); 
+    $("stAccepted").textContent = c("accepted"); 
+    $("stRejected").textContent = c("rejected");
+    
+    render(filtered()); 
+    load.style.display = "none";
+  }, (error) => {
+    load.className = "notice bad"; load.textContent = "خطأ في الجلب. تأكد من صلاحيات الحساب.";
+  });
 }
+
 $("adminSearch").addEventListener("input", () => render(filtered()));
 $("btnRefresh").onclick = fetchStudents;
 $("tabReview").onclick = () => { $("tabReview").classList.add("active"); $("tabEdit").classList.remove("active"); $("reviewWrap").style.display = ""; $("editWrap").style.display = "none"; };
@@ -535,6 +557,7 @@ async function saveStatus(id, patch, statusPatch) {
   if (statusPatch) b.set(doc(db, "status", id), statusPatch, { merge: true });
   await b.commit();
 }
+
 document.addEventListener("click", async e => {
   const btn = e.target.closest("[data-act]"); if (!btn) return;
   const id = btn.dataset.id, act = btn.dataset.act;
@@ -551,7 +574,7 @@ document.addEventListener("click", async e => {
       row.querySelectorAll("[data-f]").forEach(i => p[i.dataset.f] = i.value.trim());
       await saveStatus(id, p, { status: p.status });
     }
-    fetchStudents();
+    // لم نعد بحاجة لكتابة fetchStudents() هنا، لأن onSnapshot ستقوم بتحديث الجدول لحظياً بمجرد إتمام الحفظ!
   } catch { alert("حدث خطأ أثناء الحفظ، حاول مرة أخرى."); }
 });
 
