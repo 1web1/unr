@@ -36,6 +36,7 @@
             color: var(--text-light);
             -webkit-font-smoothing: antialiased;
             overflow-x: hidden;
+            scroll-behavior: smooth;
         }
 
         /* فيديو الخلفية */
@@ -66,6 +67,13 @@
         @keyframes fade-rise {
             from { opacity: 0; transform: translateY(24px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* حركة السهم للأسفل */
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-15px); }
+            60% { transform: translateY(-7px); }
         }
 
         .active-view .animate-fade-rise { animation: fade-rise 0.8s ease-out both; }
@@ -167,7 +175,9 @@
             flex-direction: column;
         }
 
-        #heroView { text-align: center; }
+        #heroView { text-align: center; padding: 0; }
+        #heroView.active-view { display: block; } /* لضمان التمرير الطبيعي للأسفل داخل الهيرو */
+
         .hero-title {
             font-size: clamp(2rem, 6vw, 5rem);
             line-height: 1.2;
@@ -321,6 +331,62 @@
         .activity-info p { margin: 0; font-size: 0.8rem; color: rgba(255,255,255,0.8); line-height: 1.4;}
         .activity-tag { position: absolute; top: 10px; left: 10px; z-index: 2; background: var(--secondary-color); color: #000; font-size: 10px; padding: 3px 10px; border-radius: 15px; font-weight: bold;}
 
+        /* --- معرض صور صفحة عن المبادرة --- */
+        .about-gallery {
+            margin-top: 50px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .about-gallery h3 {
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+            font-weight: 800;
+            font-size: 1.4rem;
+        }
+
+        .gallery-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            overflow: hidden;
+            width: 100%;
+            max-width: 700px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+        }
+
+        .gallery-img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .gallery-caption {
+            padding: 20px;
+        }
+
+        .gallery-caption h4 {
+            margin: 0 0 10px 0;
+            color: #fff;
+            font-size: 1.2rem;
+        }
+
+        .gallery-caption p {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
         /* --- Media Queries للموبايل والتابلت --- */
         @media (max-width: 768px) {
             .navbar { padding: 10px 15px; }
@@ -375,7 +441,6 @@
     <!-- شريط التنقل -->
     <div class="navbar">
         <div class="navbar-brand" id="btnGoHome">
-            <!-- تم تحديث رابط اللوجو هنا -->
             <img src="https://res.cloudinary.com/wbmanqyt/image/upload/f_auto/q_auto/logo.png.png" alt="لوجو المبادرة" class="nav-logo">
             <h3>رعاية الشباب - جامعة القاهرة</h3>
         </div>
@@ -394,83 +459,92 @@
         </div>
     </div>
 
-    <!-- 0. واجهة البداية -->
+    <!-- 0. واجهة البداية والتسجيل (مدموجة) -->
     <main id="heroView" class="view-section active-view">
-        <h1 class="hero-title animate-fade-rise">
-            حيث ترتقي <em>الأحلام</em> وتُصنع <em>القيادات.</em>
-        </h1>
-        <p class="hero-desc animate-fade-rise-delay">
-            نصمم مساحات رقمية للطلاب والمبدعين. وسط صخب الحياة الجامعية، نبني بيئة للتركيز العميق والعمل الملهم لدعم رحلتك.
-        </p>
-        <button id="btnStartJourney" class="liquid-glass btn-hero animate-fade-rise-delay-2">
-            ابدأ التسجيل الآن
-        </button>
-    </main>
-
-    <!-- 1. واجهة تسجيل الطلاب -->
-    <div id="registrationView" class="view-section">
-        <div class="form-container liquid-glass animate-fade-rise">
-            <h2>تسجيل بيانات الطالب</h2>
-            <form id="registrationForm">
-                <div class="form-group">
-                    <label>الاسم رباعي</label>
-                    <input type="text" id="fullName" placeholder="أدخل اسمك رباعي" required>
-                </div>
-                <div class="form-group">
-                    <label>رقم الهاتف (واتساب)</label>
-                    <input type="tel" id="phone" placeholder="أدخل رقم الهاتف" required>
-                </div>
-                <div class="form-group">
-                    <label>الرقم القومي (14 رقم)</label>
-                    <input type="text" id="nationalId" pattern="[0-9]{14}" title="يجب أن يتكون من 14 رقم" required>
-                </div>
-                <div class="form-group">
-                    <label>الكلية</label>
-                    <select id="college" required>
-                        <option value="" disabled selected>اختر كليتك</option>
-                        <option value="الآداب">الآداب</option>
-                        <option value="الهندسة">الهندسة</option>
-                        <option value="التجارة">التجارة</option>
-                        <option value="الحقوق">الحقوق</option>
-                        <option value="العلوم">العلوم</option>
-                        <option value="أخرى">أخرى</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>الفرقة</label>
-                    <select id="level" required>
-                        <option value="" disabled selected>اختر الفرقة</option>
-                        <option value="الأولى">الفرقة الأولى</option>
-                        <option value="الثانية">الفرقة الثانية</option>
-                        <option value="الثالثة">الفرقة الثالثة</option>
-                        <option value="الرابعة">الفرقة الرابعة</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>رابط حساب الفيسبوك</label>
-                    <input type="text" id="facebookLink" placeholder="facebook.com/username" required dir="ltr">
-                </div>
-                <div class="form-group">
-                    <label>البريد الإلكتروني (Gmail)</label>
-                    <input type="email" id="gmailAddress" placeholder="example@gmail.com" required dir="ltr">
-                </div>
-                <div class="form-group">
-                    <label>الصورة الشخصية</label>
-                    <input type="file" id="profileImage" accept="image/*" required>
-                </div>
-                <div class="form-group">
-                    <label>صورة البطاقة</label>
-                    <input type="file" id="idImage" accept="image/*" required>
-                </div>
-                <div class="form-group">
-                    <label>صورة الكارنيه (إن وجد)</label>
-                    <input type="file" id="studentCardImage" accept="image/*" required>
-                </div>
-                <button type="submit" id="submitBtn">إرسال البيانات</button>
-                <div id="loadingText" class="loading"><i class="fas fa-spinner fa-spin"></i> جاري المراجعة ورفع الملفات...</div>
-            </form>
+        
+        <!-- قسم الترحيب -->
+        <div style="min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;">
+            <h1 class="hero-title animate-fade-rise">
+                حيث ترتقي <em>الأحلام</em> وتُصنع <em>القيادات.</em>
+            </h1>
+            <p class="hero-desc animate-fade-rise-delay">
+                نصمم مساحات رقمية للطلاب والمبدعين. وسط صخب الحياة الجامعية، نبني بيئة للتركيز العميق والعمل الملهم لدعم رحلتك.
+            </p>
+            <button id="btnStartJourney" class="liquid-glass btn-hero animate-fade-rise-delay-2">
+                ابدأ التسجيل الآن
+            </button>
+            
+            <!-- سهم للأسفل لتشجيع التمرير -->
+            <div style="margin-top: 60px; animation: bounce 2s infinite; color: var(--secondary-color); font-size: 24px; opacity: 0.8; cursor: pointer;" onclick="document.getElementById('registrationFormSection').scrollIntoView({ behavior: 'smooth' });">
+                <i class="fas fa-chevron-down"></i>
+            </div>
         </div>
-    </div>
+
+        <!-- قسم فورم التسجيل -->
+        <div id="registrationFormSection" style="display: flex; justify-content: center; align-items: center; padding: 40px 20px; min-height: 100vh; scroll-margin-top: 80px;">
+            <div class="form-container liquid-glass">
+                <h2>تسجيل بيانات الطالب</h2>
+                <form id="registrationForm">
+                    <div class="form-group">
+                        <label>الاسم رباعي</label>
+                        <input type="text" id="fullName" placeholder="أدخل اسمك رباعي" required>
+                    </div>
+                    <div class="form-group">
+                        <label>رقم الهاتف (واتساب)</label>
+                        <input type="tel" id="phone" placeholder="أدخل رقم الهاتف" required>
+                    </div>
+                    <div class="form-group">
+                        <label>الرقم القومي (14 رقم)</label>
+                        <input type="text" id="nationalId" pattern="[0-9]{14}" title="يجب أن يتكون من 14 رقم" required>
+                    </div>
+                    <div class="form-group">
+                        <label>الكلية</label>
+                        <select id="college" required>
+                            <option value="" disabled selected>اختر كليتك</option>
+                            <option value="الآداب">الآداب</option>
+                            <option value="الهندسة">الهندسة</option>
+                            <option value="التجارة">التجارة</option>
+                            <option value="الحقوق">الحقوق</option>
+                            <option value="العلوم">العلوم</option>
+                            <option value="أخرى">أخرى</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>الفرقة</label>
+                        <select id="level" required>
+                            <option value="" disabled selected>اختر الفرقة</option>
+                            <option value="الأولى">الفرقة الأولى</option>
+                            <option value="الثانية">الفرقة الثانية</option>
+                            <option value="الثالثة">الفرقة الثالثة</option>
+                            <option value="الرابعة">الفرقة الرابعة</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>رابط حساب الفيسبوك</label>
+                        <input type="text" id="facebookLink" placeholder="facebook.com/username" required dir="ltr">
+                    </div>
+                    <div class="form-group">
+                        <label>البريد الإلكتروني (Gmail)</label>
+                        <input type="email" id="gmailAddress" placeholder="example@gmail.com" required dir="ltr">
+                    </div>
+                    <div class="form-group">
+                        <label>الصورة الشخصية</label>
+                        <input type="file" id="profileImage" accept="image/*" required>
+                    </div>
+                    <div class="form-group">
+                        <label>صورة البطاقة</label>
+                        <input type="file" id="idImage" accept="image/*" required>
+                    </div>
+                    <div class="form-group">
+                        <label>صورة الكارنيه (إن وجد)</label>
+                        <input type="file" id="studentCardImage" accept="image/*" required>
+                    </div>
+                    <button type="submit" id="submitBtn">إرسال البيانات</button>
+                    <div id="loadingText" class="loading"><i class="fas fa-spinner fa-spin"></i> جاري المراجعة ورفع الملفات...</div>
+                </form>
+            </div>
+        </div>
+    </main>
 
     <!-- 2. واجهة الاستعلام عن حالة الطلب -->
     <div id="statusView" class="view-section">
@@ -609,6 +683,104 @@
                     <p>فعاليات تثري الحياة الجامعية</p>
                 </div>
             </div>
+
+            <!-- قسم المعرض بالصور الحقيقية -->
+            <div class="about-gallery">
+                <h3>معرض الصور والفعاليات</h3>
+                
+                <!-- 1. تعريف المبادرة -->
+                <div class="gallery-item">
+                    <img src="Screenshot 2026-09-23 162915.png" alt="تعريف المبادرة" class="gallery-img">
+                    <div class="gallery-caption">
+                        <h4>تعريف المبادرة</h4>
+                        <p>مبادرة طلاب من أجل مصر هي حركة طلابية في الجامعات المصرية تهدف إلى تنمية الوعي الوطني والمساهمة في خطط التنمية المستدامة في مصر.</p>
+                    </div>
+                </div>
+
+                <!-- 2. أهداف المبادرة -->
+                <div class="gallery-item">
+                    <img src="Screenshot 2026-09-23 162941.png" alt="أهداف المبادرة" class="gallery-img">
+                    <div class="gallery-caption">
+                        <h4>أهداف المبادرة</h4>
+                        <p>تشمل أهدافها: إعداد قادة المستقبل، ودعم ريادة الأعمال لدى الشباب، وتعزيز العمل الجماعي، والمسؤولية المجتمعية، وإطلاق طاقات الطلاب الإبداعية.</p>
+                    </div>
+                </div>
+
+                <!-- 3. الأنشطة والبرامج التدريبية -->
+                <div class="gallery-item">
+                    <img src="Screenshot 2026-09-23 163013.png" alt="الأنشطة والبرامج التدريبية" class="gallery-img">
+                    <div class="gallery-caption">
+                        <h4>الأنشطة والبرامج التدريبية</h4>
+                        <p>تنظيم برامج تدريبية في مجالات إدارة الموارد البشرية، الأمن السيبراني، وكتابة السيرة الذاتية، بالإضافة إلى إقامة فعاليات وأنشطة لدعم المشروعات الطلابية.</p>
+                    </div>
+                </div>
+
+                <!-- 4. معسكر إعداد القادة -->
+                <div class="gallery-item">
+                    <img src="Screenshot 2026-09-23 163027.png" alt="معسكر إعداد القادة" class="gallery-img">
+                    <div class="gallery-caption">
+                        <h4>معسكر إعداد القادة</h4>
+                        <p>إقامة معسكرات وورش عمل لتداول الخبرات والتواصل بين طلاب الجامعات المصرية لتنمية المهارات القيادية.</p>
+                    </div>
+                </div>
+
+                <!-- 5. المعايشات -->
+                <div class="gallery-item">
+                    <img src="Screenshot 2026-09-23 163044.png" alt="المعايشات" class="gallery-img">
+                    <div class="gallery-caption">
+                        <h4>المعايشات</h4>
+                        <p>تنظيم فترات معايشة ميدانية للطلاب لتعزيز الجانب العملي والوطني وتنمية روح الولاء والانتماء.</p>
+                    </div>
+                </div>
+
+                <!-- 6. زيارات عسكرية -->
+                <div class="gallery-item">
+                    <img src="Screenshot 2026-09-23 163057.png" alt="زيارات عسكرية" class="gallery-img">
+                    <div class="gallery-caption">
+                        <h4>زيارات عسكرية</h4>
+                        <p>تنظيم زيارات عسكرية، مثل زيارة مركز بحوث الشرطة، بهدف ترسيخ روح الولاء والانتماء لدى الطلاب وتعزيز مكانة مصر.</p>
+                    </div>
+                </div>
+
+                <!-- 7. الفعاليات وحفل الإفطار -->
+                <div class="gallery-item">
+                    <img src="Screenshot 2026-09-23 163108.png" alt="الفعاليات وحفل الإفطار" class="gallery-img">
+                    <div class="gallery-caption">
+                        <h4>الفعاليات وحفل الإفطار</h4>
+                        <p>إقامة فعاليات اجتماعية وثقافية لتعزيز التواصل بين الطلاب، ومن أبرزها حفل الإفطار السنوي لطلاب من أجل مصر بجامعة القاهرة.</p>
+                    </div>
+                </div>
+
+                <!-- 8. برامج تدريبية متخصصة -->
+                <div class="gallery-item">
+                    <img src="Screenshot 2026-09-23 163142.png" alt="برامج تدريبية متخصصة" class="gallery-img">
+                    <div class="gallery-caption">
+                        <h4>برامج تدريبية متخصصة</h4>
+                        <p>توفير برامج في إدارة الأزمات، التخطيط الاستراتيجي، ريادة الأعمال، وتقديم الدعم الفني واللوجستي للطلاب والخريجين لتنفيذ مشروعاتهم وتعزيز العمل الجماعي وتشجيع الطلاب على التعاون وتبادل الخبرات لخلق حلول مبتكرة للتحديات المستقبلية.</p>
+                    </div>
+                </div>
+
+                <!-- 9. إنجازات المبادرة في الجامعة -->
+                <div class="gallery-item">
+                    <img src="Screenshot 2026-09-23 163131.png" alt="إنجازات المبادرة في الجامعة" class="gallery-img">
+                    <div class="gallery-caption">
+                        <h4>إنجازات المبادرة في الجامعة</h4>
+                        <p>مشاركة مئات الطلاب من مختلف الفرق الدراسية، تنفيذ أنشطة خدمية في الكلية والمناطق المجاورة، دعم الطلاب المتفوقين والأنشطة الطلابية الإيجابية، وتعاون دائم مع إدارة رعاية الشباب واتحاد الطلاب.</p>
+                    </div>
+                </div>
+
+                <!-- 10. أثر المبادرة على الطلاب -->
+                <div class="gallery-item">
+                    <img src="Screenshot 2026-09-23 163119.png" alt="أثر المبادرة على الطلاب" class="gallery-img">
+                    <div class="gallery-caption">
+                        <h4>أثر المبادرة على الطلاب</h4>
+                        <p>زادت روح التعاون والانتماء بين الطلاب، وفرت فرص تدريبية وتطوعية حقيقية داخل الجامعة، جعلت الطلاب يشعرون أنهم يشاركون حقاً في بناء بلدهم، وساهمت في تحسين البيئة الجامعية وتجميلها.</p>
+                    </div>
+                </div>
+
+            </div>
+            <!-- نهاية قسم المعرض -->
+            
         </div>
     </div>
 
@@ -673,7 +845,6 @@
 
         const views = {
             hero: document.getElementById("heroView"),
-            reg: document.getElementById("registrationView"),
             login: document.getElementById("loginView"),
             dash: document.getElementById("dashboardView"),
             status: document.getElementById("statusView"),
@@ -756,7 +927,7 @@
             setTimeout(() => {
                 views[viewName].classList.add("active-view");
                 
-                if (["hero", "reg", "status", "about", "activities"].includes(viewName)) {
+                if (["hero", "status", "about", "activities"].includes(viewName)) {
                     btns.admin.style.display = "block";
                     btns.status.style.display = "block";
                     btns.about.style.display = "block";
@@ -777,8 +948,20 @@
         }
 
         btns.home.addEventListener("click", () => switchView("hero"));
-        btns.start.addEventListener("click", () => switchView("reg"));
-        btns.reg.addEventListener("click", () => switchView("reg"));
+        
+        // عند الضغط على زر ابدأ التسجيل في الواجهة ينزل لفورم التسجيل
+        btns.start.addEventListener("click", () => {
+            document.getElementById('registrationFormSection').scrollIntoView({ behavior: 'smooth' });
+        });
+        
+        // عند الضغط على زر التسجيل من الـ Navbar يفتح الرئيسية وينزل تحت
+        btns.reg.addEventListener("click", () => {
+            switchView("hero");
+            setTimeout(() => {
+                document.getElementById('registrationFormSection').scrollIntoView({ behavior: 'smooth' });
+            }, 50);
+        });
+
         btns.status.addEventListener("click", () => switchView("status"));
         btns.about.addEventListener("click", () => switchView("about"));
         btns.activities.addEventListener("click", () => switchView("activities"));
