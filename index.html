@@ -33,22 +33,18 @@
             padding: 0;
             font-family: 'Cairo', sans-serif;
             background-color: #040d14; 
+            
+            /* طريقة دمج الصورة كخلفية مع طبقة تعتيم (overlay) في نفس الوقت لضمان الظهور */
+            background-image: linear-gradient(rgba(4, 13, 20, 0.65), rgba(4, 13, 20, 0.65)), url('5881993502294478439.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            
             color: var(--text-light);
             -webkit-font-smoothing: antialiased;
             overflow-x: hidden;
             scroll-behavior: smooth;
-        }
-
-        /* فيديو الخلفية */
-        .video-bg {
-            position: fixed;
-            inset: 0;
-            width: 100vw;
-            height: 100vh;
-            object-fit: cover;
-            z-index: -1;
-            pointer-events: none;
-            filter: brightness(0.4);
         }
 
         /* التأثير الزجاجي */
@@ -424,9 +420,6 @@
     </style>
 </head>
 <body>
-
-    <!-- فيديو الخلفية -->
-    <video autoPlay loop muted playsInline class="video-bg" src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4"></video>
 
     <!-- أيقونات السوشيال ميديا العائمة -->
     <div class="floating-social">
