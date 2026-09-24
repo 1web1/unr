@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https://res.cloudinary.com https://*.cloudinary.com https://*.googleusercontent.com; connect-src 'self' /api/upload https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com; form-action 'self'; base-uri 'self'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https://res.cloudinary.com https://*.cloudinary.com https://*.googleusercontent.com; connect-src 'self' https://api.cloudinary.com https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com; form-action 'self'; base-uri 'self'; object-src 'none'">
 <title>مبادرة رعاية الشباب - جامعة القاهرة</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -302,6 +302,8 @@ const app = initializeApp({
   appId: "1:968782552349:web:f51d53d0fdf5e9396dd5f4"
 });
 const auth = getAuth(app), db = getFirestore(app);
+const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/wbmanqyt/image/upload";
+const PRESET = "cairo_uni_preset";
 const $ = id => document.getElementById(id);
 
 /* ---------- أدوات أمان ---------- */
@@ -325,14 +327,6 @@ async function retry(fn, tries = 4) {
   }
   throw last;
 }
-
-/* ---------- تحويل الصورة لـ Base64 ---------- */
-const fileToBase64 = file => new Promise((resolve, reject) => {
-  const reader = new FileReader();
-  reader.onload = () => resolve(reader.result);
-  reader.onerror = reject;
-  reader.readAsDataURL(file);
-});
 
 /* ---------- معرض الصور ---------- */
 const GALLERY = [
@@ -374,6 +368,7 @@ $("btnAdmin").onclick = () => {
   if (logged) fetchStudents();
 };
 
+// تعديل تسجيل الخروج لغلق الاتصال المباشر بقاعدة البيانات
 $("btnLogout").onclick = () => signOut(auth).then(() => { 
   if (unsubscribe) unsubscribe(); 
   showSite("hero"); 
@@ -387,36 +382,27 @@ $("loginForm").addEventListener("submit", e => {   e.preventDefault(); $("loginE
   signInWithEmailAndPassword(auth, $("adminEmail").value, $("adminPassword").value).catch(() => $("loginError").style.display = "block");
 });
 
-/* ---------- الرفع الآمن المخفي للصور ---------- */
+/* ---------- رفع الصور ---------- */
 const uploaded = new Map();
 async function uploadImage(file, label, onDone) {
   if (!file || !allowedImageTypes.has(file.type) || file.size > MAX_IMAGE_BYTES) throw new Error("invalid-image");
   const key = `${label}|${file.name}|${file.size}|${file.lastModified}`;
   if (uploaded.has(key)) { onDone(); return uploaded.get(key); }
-  
   let body = file;
   try { body = await imageCompression(file, { maxSizeMB: 0.3, maxWidthOrHeight: 1200, useWebWorker: true }); }
   catch { throw new Error("image-compression-failed"); }
-  
-  const base64Image = await fileToBase64(body);
-
   const url = await retry(async () => {
-    const res = await fetch("/api/upload", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ image: base64Image })
-    });
-    const data = await res.json();
+    const fd = new FormData(); fd.append("file", body); fd.append("upload_preset", PRESET);
+    const res = await fetch(CLOUDINARY_URL, { method: "POST", body: fd });
     if (!res.ok) throw new Error("upload " + res.status);
-    return data.secure_url;
+    return (await res.json()).secure_url;
   });
-  
   uploaded.set(key, url); onDone(); return url;
 }
 
 /* ---------- التسجيل ---------- */
 const form = $("regForm");
-function setInvalid(id, bad) { const field = $(id).closest(".fg") \vert{}\vert{} $(id).parentElement; field?.classList.toggle("invalid", bad); return bad; }
+function setInvalid(id, bad) { const field = $(id).closest(".fg") || $(id).parentElement; field?.classList.toggle("invalid", bad); return bad; }
 function validate() {
   const v = id => toLatin($(id).value);
   let bad = false;
@@ -483,7 +469,7 @@ form.addEventListener("submit", async e => {
     const dup = err && (err.code === "permission-denied");
     notice(box, "bad", dup
       ? "هذا الرقم القومي مسجل من قبل. استعلم عن حالة طلبك من قسم «حالة الطلب» أو تواصل معنا على واتساب."
-      : "تعذر إتمام الإرسال. قد تكون المشكلة في حجم الصورة أو الاتصال. حاول مرة أخرى.");
+      : "تعذر إتمام الإرسال بسبب ضعف الاتصال. بياناتك وصورك ما زالت في الصفحة، اضغط «إرسال البيانات» مرة أخرى.");
   } finally {
     submitting = false; $("submitBtn").disabled = false; setTimeout(() => $("progress").style.display = "none", 800);
   }
@@ -510,9 +496,9 @@ $("statusForm").addEventListener("submit", async e => {
   finally { $("statusBtn").disabled = false; }
 });
 
-/* ---------- لوحة الإدارة بالتحديث اللحظي ---------- */
+/* ---------- لوحة الإدارة بالتحديث اللحظي (Real-time) ---------- */
 let cache = [];
-let unsubscribe = null; 
+let unsubscribe = null; // متغير لحفظ الاتصال المباشر
 
 const STAT = { pending: "مراجعة", accepted: "مقبول", rejected: "مرفوض" };
 const badge = s => `<span class="badge badge-${STAT[s] ? s : "pending"}">${STAT[s] || "مراجعة"}</span>`;
@@ -555,10 +541,14 @@ function filtered() {
   return !t ? cache : cache.filter(s => `${s.data.fullName} ${s.data.phone} ${s.data.nationalId}`.toLowerCase().includes(t));
 }
 
+// دالة الجلب بالتحديث اللحظي باستخدام onSnapshot
 function fetchStudents() {
   const load = $("dataLoading"); load.style.display = "block"; load.textContent = "جاري جلب البيانات...";
+  
+  // غلق أي اتصال سابق لتجنب التكرار
   if (unsubscribe) unsubscribe();
 
+  // فتح الاتصال المباشر
   unsubscribe = onSnapshot(collection(db, "students"), (snap) => {
     cache = snap.docs.map(s => ({ id: s.id, data: s.data() }))
       .sort((a, b) => (b.data.timestamp?.seconds || 0) - (a.data.timestamp?.seconds || 0));
@@ -574,8 +564,8 @@ function fetchStudents() {
   }, (error) => {
     load.className = "notice bad";
     load.textContent = error.code === "permission-denied"
-      ? "تم تسجيل الدخول، لكن هذا الحساب لا يملك صلاحية لوحة الإدارة."
-      : "تعذر جلب البيانات الآن. تحقق من الاتصال ثم حاول مرة أخرى.";
+      ? "تم تسجيل الدخول، لكن هذا الحساب لا يملك صلاحية لوحة الإدارة. سجّل الدخول ببريد الإدارة نفسه الموجود في قواعد Firestore."
+      : "تعذر جلب البيانات الآن. تحقق من اتصال الإنترنت وإعدادات Firebase ثم حاول مرة أخرى.";
   });
 }
 
@@ -588,7 +578,7 @@ async function saveStatus(id, patch, statusPatch) {
   const b = writeBatch(db);
   b.update(doc(db, "students", id), patch);
   const student = cache.find(x => x.id === id)?.data;
-  const statusId = student?.trackingCode || id; 
+  const statusId = student?.trackingCode || id; // يظل متوافقاً مع الطلبات القديمة.
   if (statusPatch) b.set(doc(db, "status", statusId), statusPatch, { merge: true });
   await b.commit();
 }
@@ -611,6 +601,7 @@ document.addEventListener("click", async e => {
       row.querySelectorAll("[data-f]").forEach(i => p[i.dataset.f] = i.value.trim());
       await saveStatus(id, p, { status: p.status });
     }
+    // لم نعد بحاجة لكتابة fetchStudents() هنا، لأن onSnapshot ستقوم بتحديث الجدول لحظياً بمجرد إتمام الحفظ!
   } catch { alert("حدث خطأ أثناء الحفظ، حاول مرة أخرى."); }
 });
 
