@@ -182,6 +182,12 @@ a.act:hover{transform:translateY(-4px);border-color:var(--gold)}
 .empty h3{margin:0 0 8px}.empty p{margin:0 0 20px;color:var(--muted);line-height:1.9}
 .empty .btn-main{width:auto;padding:12px 32px}
 .act-body{line-height:2;color:rgba(255,255,255,.9)}
+.uni-event{margin-bottom:40px}
+.uni-event:last-child{margin-bottom:0}
+.uni-event h4{color:var(--gold);font-size:1.25rem;font-weight:800;margin:0 0 8px}
+.uni-event p{margin:0 0 16px;color:rgba(255,255,255,.85);line-height:1.9;font-size:.98rem}
+.uni-imgs{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.uni-imgs img{width:100%;height:210px;object-fit:cover;border-radius:14px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.25);display:block}
 .more-title{color:var(--gold);margin:44px 0 14px;font-size:1.15rem}
 .more-acts{display:flex;gap:10px;flex-wrap:wrap}
 .more-acts a{padding:8px 16px;border-radius:30px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#fff;text-decoration:none;font-size:13px;font-weight:600}
@@ -313,7 +319,6 @@ label.ck input[type=checkbox]{width:18px;height:18px;flex:none;margin:4px 0 0;pa
           <div class="fg"><label for="facebookLink">رابط حساب الفيسبوك</label><input type="text" id="facebookLink" placeholder="facebook.com/username" dir="ltr" required><div class="err">اكتب رابط فيسبوك صحيح</div></div>
           <div class="fg"><label for="gmail">البريد الإلكتروني (Gmail)</label><input type="email" id="gmail" placeholder="example@gmail.com" dir="ltr" required><div class="err">بريد إلكتروني غير صحيح</div></div>
           <div class="fg"><label for="profileImage">الصورة الشخصية</label><input type="file" id="profileImage" accept="image/*" required><div class="photo-rule"><i class="fas fa-circle-info"></i> <b>شروط الصورة الشخصية:</b> صورة رسمية لائقة، الوجه واضح والخلفية بسيطة، <b>وليست سيلفي</b>، بدون فلاتر أو نظارة شمس أو صور جماعية. الصور غير المطابقة يتم رفض الطلب بسببها.</div><div class="err">ارفع صورة شخصية</div></div>
-          <div class="fg"><label class="ck"><input type="checkbox" id="pOk"><span>أتعهد أن الصورة الشخصية المرفوعة لائقة وليست سيلفي وتنطبق عليها الشروط أعلاه.</span></label><div class="err">لازم توافق على شروط الصورة الشخصية</div></div>
           <div class="fg"><label for="idImage">صورة البطاقة</label><input type="file" id="idImage" accept="image/*" required><div class="err">ارفع صورة البطاقة</div></div>
           <div class="fg"><label for="cardImage">صورة الكارنيه أو بطاقة الترشيح</label><input type="file" id="cardImage" accept="image/*" required><div class="err">ارفع صورة الكارنيه أو بطاقة الترشيح</div></div>
           <button type="submit" class="btn-main" id="submitBtn">إرسال البيانات</button>
@@ -365,7 +370,6 @@ label.ck input[type=checkbox]{width:18px;height:18px;flex:none;margin:4px 0 0;pa
             </div><div class="photo-rule"><i class="fas fa-circle-info"></i> <b>شرط التخصص:</b> اختر فقط التخصص الذي <b>تعلّمته وتتقنه فعلاً</b>، وسيتم مراجعة أعمالك في رابط Google Drive للتأكد من مستواك في كل تخصص اخترته.</div><div class="err">اختر تخصصاً واحداً على الأقل</div></div>
           <div class="fg"><label class="ck"><input type="checkbox" id="mrOk"><span>أتعهد أنني متعلّم وعندي خبرة كافية في كل تخصص اخترته، وأن الأعمال المرفقة من تنفيذي.</span></label><div class="err">لازم توافق على شرط التخصص</div></div>
           <div class="fg"><label for="mProfile">الصورة الشخصية</label><input type="file" id="mProfile" accept="image/*" required><div class="photo-rule"><i class="fas fa-circle-info"></i> <b>شروط الصورة الشخصية:</b> صورة رسمية لائقة، الوجه واضح والخلفية بسيطة، <b>وليست سيلفي</b>، بدون فلاتر أو نظارة شمس أو صور جماعية. الصور غير المطابقة يتم رفض الطلب بسببها.</div><div class="err">ارفع صورة شخصية</div></div>
-          <div class="fg"><label class="ck"><input type="checkbox" id="mpOk"><span>أتعهد أن الصورة الشخصية المرفوعة لائقة وليست سيلفي وتنطبق عليها الشروط أعلاه.</span></label><div class="err">لازم توافق على شروط الصورة الشخصية</div></div>
           <div class="fg"><label for="mCard">صورة الكارنيه</label><input type="file" id="mCard" accept="image/*" required><div class="err">ارفع صورة الكارنيه</div></div>
           <div class="fg"><label for="mId">صورة البطاقة</label><input type="file" id="mId" accept="image/*" required><div class="err">ارفع صورة البطاقة</div></div>
           <div class="fg"><label for="mDrive">رابط Google Drive لأعمالك</label><input type="text" id="mDrive" placeholder="https://drive.google.com/..." dir="ltr" required><small class="hint">تأكد أن الرابط متاح لأي شخص لديه الرابط (Anyone with the link).</small><div class="err">اكتب رابط Google Drive صحيح</div></div>
@@ -486,7 +490,58 @@ label.ck input[type=checkbox]{width:18px;height:18px;flex:none;margin:4px 0 0;pa
   var ACTS = {
     skills:    { title: "المعايشات", tag: "معايشة", img: B + "people/kitchen-bar.jpg",       desc: "فترات معايشة ميدانية لتعزيز الجانب العملي وروح الانتماء", content: "" },
     volunteer: { title: "معسكرات",   tag: "معسكرات", img: B + "people/boy-snow-hoodie.jpg",   desc: "معسكرات وورش عمل لتنمية المهارات القيادية وتبادل الخبرات",                 content: "" },
-    culture:   { title: "أنشطة داخل الجامعة",  tag: "الجامعة", img: "__UNI__",      desc: "فعاليات وبرامج تدريبية وخدمية داخل الجامعة",                      content: "" },
+    culture:   { title: "أنشطة داخل الجامعة",  tag: "الجامعة", img: "__UNI__",      desc: "فعاليات وبرامج تدريبية وخدمية داخل الجامعة",                      content:
+      '<div class="uni-event">' +
+        '<h4>احتفالية يوم أفريقيا الـ63</h4>' +
+        '<p>مشاركة جامعة القاهرة في الاحتفال بيوم أفريقيا الـ63، بحضور رئيس الجامعة وعدد من القيادات الأفريقية والدولية، وبمشاركة واسعة من الطلاب والأساتذة.</p>' +
+        '<div class="uni-imgs">' +
+          '<img src="images/uni-africa-day-1.jpg" alt="احتفالية يوم أفريقيا الـ63" loading="lazy">' +
+          '<img src="images/uni-africa-day-2.jpg" alt="احتفالية يوم أفريقيا الـ63" loading="lazy">' +
+          '<img src="images/uni-africa-day-3.jpg" alt="احتفالية يوم أفريقيا الـ63" loading="lazy">' +
+        '</div>' +
+      '</div>' +
+      '<div class="uni-event">' +
+        '<h4>الاحتفال بنجوم دولة التلاوة</h4>' +
+        '<p>تكريم المشاركين والفائزين في برنامج "دولة التلاوة" برعاية رئيس جامعة القاهرة، تقديراً لتميزهم في تلاوة القرآن الكريم.</p>' +
+        '<div class="uni-imgs">' +
+          '<img src="images/uni-quran-stars-1.jpg" alt="الاحتفال بنجوم دولة التلاوة" loading="lazy">' +
+          '<img src="images/uni-quran-stars-2.jpg" alt="الاحتفال بنجوم دولة التلاوة" loading="lazy">' +
+        '</div>' +
+      '</div>' +
+      '<div class="uni-event">' +
+        '<h4>الماراثون الرياضي الجامعي</h4>' +
+        '<p>فعاليات رياضية متنوعة شملت كرة السلة وتنس الطاولة وغيرها، بمشاركة حشد كبير من طلاب الجامعة في أجواء تنافسية وحماسية.</p>' +
+        '<div class="uni-imgs">' +
+          '<img src="images/uni-sports-marathon-1.jpg" alt="الماراثون الرياضي الجامعي" loading="lazy">' +
+          '<img src="images/uni-sports-marathon-2.jpg" alt="الماراثون الرياضي الجامعي" loading="lazy">' +
+        '</div>' +
+      '</div>' +
+      '<div class="uni-event">' +
+        '<h4>حفل إفطار طلاب من أجل مصر</h4>' +
+        '<p>إقامة حفل الإفطار السنوي لمبادرة "طلاب من أجل مصر" بجامعة القاهرة، وسط أجواء رمضانية احتفالية شملت فقرات غنائية وفنون شعبية.</p>' +
+        '<div class="uni-imgs">' +
+          '<img src="images/uni-iftar-1.jpg" alt="حفل إفطار طلاب من أجل مصر" loading="lazy">' +
+          '<img src="images/uni-iftar-2.jpg" alt="حفل إفطار طلاب من أجل مصر" loading="lazy">' +
+          '<img src="images/uni-iftar-3.jpg" alt="حفل إفطار طلاب من أجل مصر" loading="lazy">' +
+        '</div>' +
+      '</div>' +
+      '<div class="uni-event">' +
+        '<h4>زيارة المتحف المصري الكبير للمتميزين في الأنشطة</h4>' +
+        '<p>تنظيم زيارة إلى المتحف المصري الكبير للطلاب المتميزين في الأنشطة الطلابية، تقديراً لجهودهم وتعزيزاً لانتمائهم الحضاري والوطني.</p>' +
+        '<div class="uni-imgs">' +
+          '<img src="images/uni-museum-visit-1.jpg" alt="زيارة المتحف المصري الكبير للمتميزين في الأنشطة" loading="lazy">' +
+          '<img src="images/uni-museum-visit-2.jpg" alt="زيارة المتحف المصري الكبير للمتميزين في الأنشطة" loading="lazy">' +
+        '</div>' +
+      '</div>' +
+      '<div class="uni-event">' +
+        '<h4>زيارة رئيس كوريا الجنوبية لجامعة القاهرة</h4>' +
+        '<p>استقبال جامعة القاهرة لرئيس جمهورية كوريا الجنوبية ضمن فعاليات تعزيز التعاون التعليمي والثقافي بين البلدين.</p>' +
+        '<div class="uni-imgs">' +
+          '<img src="images/uni-korea-visit-1.jpg" alt="زيارة رئيس كوريا الجنوبية لجامعة القاهرة" loading="lazy">' +
+          '<img src="images/uni-korea-visit-2.jpg" alt="زيارة رئيس كوريا الجنوبية لجامعة القاهرة" loading="lazy">' +
+        '</div>' +
+      '</div>'
+    },
     camps:     { title: "أهم الزيارات",          tag: "زيارات", img: B + "landscapes/nature-mountains.jpg", desc: "زيارات ميدانية ومؤسسية مهمة للطلاب",                 content: "" }
   };
 
@@ -731,7 +786,6 @@ function validate() {
   bad |= setInvalid("profileImage", !$("profileImage").files[0]);
   bad |= setInvalid("idImage", !$("idImage").files[0]);
   bad |= setInvalid("cardImage", !$("cardImage").files[0]);
-  bad |= setInvalid("pOk", !$("pOk").checked); 
   ["profileImage","idImage","cardImage"].forEach(id => { const f = $(id).files[0]; if (f && !f.type.startsWith("image/")) bad |= setInvalid(id, true); });
   return !bad;
 }
@@ -971,7 +1025,6 @@ function validateMedia() {
   bad |= setInvalid("mPhone", !/^01[0125]\d{8}$/.test(v("mPhone")));
   bad |= setInvalid("mDrive", !DRIVE_RE.test(v("mDrive")));
   bad |= setInvalid("mRoles", getRoles().length === 0);
-  bad |= setInvalid("mpOk", !$("mpOk").checked);
   bad |= setInvalid("mrOk", !$("mrOk").checked);
   ["mProfile", "mCard", "mId"].forEach(id => { const f = $(id).files[0]; bad |= setInvalid(id, !f || !f.type.startsWith("image/")); });
   return !bad;
