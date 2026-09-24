@@ -287,10 +287,10 @@ label.ck input[type=checkbox]{width:18px;height:18px;flex:none;margin:4px 0 0;pa
     <h2>الأنشطة الطلابية</h2>
     <p class="sub">برامج وفعاليات متنوعة على مدار العام.</p>
     <div class="acts">
-      <a class="act" href="#activity/skills" data-go="activity/skills" style="background-image:url('https://res.cloudinary.com/demo/image/upload/w_500,q_auto,f_auto/samples/people/kitchen-bar.jpg')"><span class="tag">معايشة</span><div class="info"><h4>المعايشات</h4><p>فترات معايشة ميدانية لتعزيز الجانب العملي وروح الانتماء</p><span class="go">عرض التفاصيل</span></div></a>
+      <a class="act" href="#activity/skills" data-go="activity/skills" style="background-image:url('images/livein-military-2.jpg');background-position:center 30%"><span class="tag">معايشة</span><div class="info"><h4>المعايشات</h4><p>فترات معايشة ميدانية لتعزيز الجانب العملي وروح الانتماء</p><span class="go">عرض التفاصيل</span></div></a>
       <a class="act" href="#activity/volunteer" data-go="activity/volunteer" style="background-image:url('https://res.cloudinary.com/demo/image/upload/w_500,q_auto,f_auto/samples/people/boy-snow-hoodie.jpg')"><span class="tag">معسكرات</span><div class="info"><h4>معسكرات</h4><p>معسكرات وورش عمل لتنمية المهارات القيادية وتبادل الخبرات</p><span class="go">عرض التفاصيل</span></div></a>
       <a class="act" href="#activity/culture" data-go="activity/culture" style="background-image:var(--uni-img);background-position:center 45%"><span class="tag">الجامعة</span><div class="info"><h4>أنشطة داخل الجامعة</h4><p>فعاليات وبرامج تدريبية وخدمية داخل الجامعة</p><span class="go">عرض التفاصيل</span></div></a>
-      <a class="act" href="#activity/camps" data-go="activity/camps" style="background-image:url('https://res.cloudinary.com/demo/image/upload/w_500,q_auto,f_auto/samples/landscapes/nature-mountains.jpg')"><span class="tag">زيارات</span><div class="info"><h4>أهم الزيارات</h4><p>زيارات ميدانية ومؤسسية مهمة للطلاب</p><span class="go">عرض التفاصيل</span></div></a>
+      <a class="act" href="#activity/camps" data-go="activity/camps" style="background-image:url('images/visit-army-2.jpg');background-position:center 35%"><span class="tag">زيارات</span><div class="info"><h4>أهم الزيارات</h4><p>زيارات ميدانية ومؤسسية مهمة للطلاب</p><span class="go">عرض التفاصيل</span></div></a>
     </div>
   </section>
 
@@ -498,7 +498,25 @@ label.ck input[type=checkbox]{width:18px;height:18px;flex:none;margin:4px 0 0;pa
 
   /* محتوى صفحات الأنشطة — حط المحتوى لاحقاً في حقل content (HTML) */
   var ACTS = {
-    skills:    { title: "المعايشات", tag: "معايشة", img: B + "people/kitchen-bar.jpg",       desc: "فترات معايشة ميدانية لتعزيز الجانب العملي وروح الانتماء", content: "" },
+    skills:    { title: "المعايشات", tag: "معايشة", img: "images/livein-military-2.jpg", desc: "فترات معايشة ميدانية لتعزيز الجانب العملي وروح الانتماء", content:
+      '<div class="uni-event">' +
+        '<h4>معايشة الشرطة</h4>' +
+        '<p>معايشة ميدانية للطلاب مع أكاديمية الشرطة، للتعرف على العمل الشرطي عن قرب وتعزيز قيم الانضباط والانتماء للوطن.</p>' +
+        '<div class="uni-imgs">' +
+          '<img src="images/livein-police.jpg" alt="معايشة الشرطة" style="grid-column:1/-1;height:auto;max-height:480px;object-fit:cover" loading="lazy">' +
+        '</div>' +
+      '</div>' +
+      '<div class="uni-event">' +
+        '<h4>معايشة الأكاديمية العسكرية</h4>' +
+        '<p>معايشة عسكرية للطلاب داخل الأكاديمية العسكرية، عاشوا خلالها الحياة العسكرية وتشاركوا الطعام والتدريب مع الطلبة العسكريين في أجواء من الانضباط والتقدير.</p>' +
+        '<div class="uni-imgs">' +
+          '<img src="images/livein-military-1.jpg" alt="معايشة الأكاديمية العسكرية" loading="lazy">' +
+          '<img src="images/livein-military-2.jpg" alt="معايشة الأكاديمية العسكرية" loading="lazy">' +
+          '<img src="images/livein-military-3.jpg" alt="معايشة الأكاديمية العسكرية" style="grid-column:1/-1;height:auto;max-height:480px;object-fit:cover" loading="lazy">' +
+          '<img src="images/livein-military-4.jpg" alt="معايشة الأكاديمية العسكرية" style="grid-column:1/-1;height:auto;max-height:480px;object-fit:cover" loading="lazy">' +
+        '</div>' +
+      '</div>'
+    },
     volunteer: { title: "معسكرات",   tag: "معسكرات", img: B + "people/boy-snow-hoodie.jpg",   desc: "معسكرات وورش عمل لتنمية المهارات القيادية وتبادل الخبرات",                 content: "" },
     culture:   { title: "أنشطة داخل الجامعة",  tag: "الجامعة", img: "__UNI__",      desc: "فعاليات وبرامج تدريبية وخدمية داخل الجامعة",                      content:
       '<div class="uni-event">' +
@@ -552,7 +570,39 @@ label.ck input[type=checkbox]{width:18px;height:18px;flex:none;margin:4px 0 0;pa
         '</div>' +
       '</div>'
     },
-    camps:     { title: "أهم الزيارات",          tag: "زيارات", img: B + "landscapes/nature-mountains.jpg", desc: "زيارات ميدانية ومؤسسية مهمة للطلاب",                 content: "" }
+    camps:     { title: "أهم الزيارات",          tag: "زيارات", img: "images/visit-army-2.jpg", desc: "زيارات ميدانية ومؤسسية مهمة للطلاب", content:
+      '<div class="uni-event">' +
+        '<h4>زيارة قيادة قوات الصاعقة المصرية</h4>' +
+        '<p>زيارة طلاب مبادرة "طلاب من أجل مصر" إلى قيادة قوات الصاعقة المصرية، للتعرف على دور القوات المسلحة وترسيخ روح الولاء والانتماء للوطن.</p>' +
+        '<div class="uni-imgs">' +
+          '<img src="images/visit-ranger.jpg" alt="زيارة قيادة قوات الصاعقة المصرية" loading="lazy">' +
+        '</div>' +
+      '</div>' +
+      '<div class="uni-event">' +
+        '<h4>المشاركة في فعاليات اصطفاف القوات المسلحة</h4>' +
+        '<p>مشاركة طلاب جامعة القاهرة في فعاليات اصطفاف القوات المسلحة وتفتيش الحرب ورفع الكفاءة القتالية لتشكيل عسكري.</p>' +
+        '<div class="uni-imgs">' +
+          '<img src="images/visit-army-1.jpg" alt="المشاركة في فعاليات اصطفاف القوات المسلحة" loading="lazy">' +
+          '<img src="images/visit-army-2.jpg" alt="المشاركة في فعاليات اصطفاف القوات المسلحة" loading="lazy">' +
+        '</div>' +
+      '</div>' +
+      '<div class="uni-event">' +
+        '<h4>زيارة مستشفى الناس</h4>' +
+        '<p>زيارة الطلاب إلى مستشفى الناس بحضور رئيس الجامعة وعدد من القيادات، ومشاركة الأطفال المرضى لحظات من الدعم والفرحة.</p>' +
+        '<div class="uni-imgs">' +
+          '<img src="images/visit-alnas-1.jpg" alt="زيارة مستشفى الناس" loading="lazy">' +
+          '<img src="images/visit-alnas-2.jpg" alt="زيارة مستشفى الناس" loading="lazy">' +
+        '</div>' +
+      '</div>' +
+      '<div class="uni-event">' +
+        '<h4>زيارة معرض القاهرة الدولي للكتاب</h4>' +
+        '<p>زيارة جناح جامعة القاهرة في معرض القاهرة الدولي للكتاب، ومشاركة الطلاب مع رئيس الجامعة وعدد من القيادات في فعاليات المعرض.</p>' +
+        '<div class="uni-imgs">' +
+          '<img src="images/visit-bookfair-1.jpg" alt="زيارة معرض القاهرة الدولي للكتاب" loading="lazy">' +
+          '<img src="images/visit-bookfair-2.jpg" alt="زيارة معرض القاهرة الدولي للكتاب" loading="lazy">' +
+        '</div>' +
+      '</div>'
+    }
   };
 
   var SECTIONS = ["hero", "about", "activities", "status", "register"];
