@@ -267,14 +267,14 @@ a{color:var(--gold)}
       <table><thead><tr><th>الصورة</th><th>الاسم</th><th>الهاتف</th><th>الكلية</th><th>الفرقة</th><th>فيسبوك</th><th>إيميل</th><th>الحالة</th><th>حفظ</th></tr></thead><tbody id="editBody"></tbody></table>
     </div>
     
-    <!-- زر عرض المزيد الجديد -->
+    <!-- زر عرض المزيد -->
     <div style="text-align:center; padding: 20px 0;">
       <button id="btnLoadMore" class="btn-main" style="display:none; width: auto; padding: 10px 40px; background: var(--gold); color: #000;">⬇ عرض المزيد من الطلبات القديمة</button>
     </div>
   </div>
 </div>
 
-<!-- 1. سكربت واجهة المستخدم -->
+<!-- 1. سكربت واجهة المستخدم (يعمل بشكل فوري) -->
 <script>
   const _$ = id => document.getElementById(id);
   const _esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -307,6 +307,19 @@ a{color:var(--gold)}
     });
   });
 
+  // التعديل هنا: برمجة زر الإدارة أصبحت فوريّة ولا تعتمد على تحميل الفايربيز
+  if (_$("btnAdmin")) {
+    _$("btnAdmin").onclick = () => {
+      navButtons?.classList.remove("show");
+      if (siteView) siteView.style.display = "none";
+      adminView?.classList.add("show");
+      window.scrollTo(0,0);
+      
+      // إرسال إشارة خفية لفايربيز عشان يكمل شغله ويجيب البيانات
+      window.dispatchEvent(new Event('adminViewOpened'));
+    };
+  }
+
   const navMap = {};
   document.querySelectorAll(".nav-btn[data-go]").forEach(b => navMap[b.dataset.go] = b);
   const io = new IntersectionObserver(es => es.forEach(e => {
@@ -334,7 +347,6 @@ a{color:var(--gold)}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-// تمت إضافة getDocs هنا لكي نستخدمها في زر الإكسيل
 import { getFirestore, collection, getDoc, getDocs, doc, writeBatch, serverTimestamp, onSnapshot, query, limit, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const app = initializeApp({
@@ -349,6 +361,10 @@ const auth = getAuth(app), db = getFirestore(app);
 const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/wbmanqyt/image/upload";
 const PRESET = "cairo_uni_preset";
 const $ = id => document.getElementById(id);
+
+let cache = [];
+let unsubscribe = null; 
+let currentLimit = 300; 
 
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const safeUrl = u => { try { const x = new URL(u); return x.protocol === "https:" ? x.href : "#"; } catch { return "#"; } };
@@ -371,21 +387,16 @@ async function retry(fn, tries = 4) {
   throw last;
 }
 
-if ($("btnAdmin")) {
-  $("btnAdmin").onclick = () => {
-    $("navButtons")?.classList.remove("show");
-    if($("siteView")) $("siteView").style.display = "none"; 
-    $("adminView")?.classList.add("show"); 
-    window.scrollTo(0,0);
-    const logged = !!auth.currentUser;
-    if($("loginBox")) $("loginBox").style.display = logged ? "none" : ""; 
-    if($("dash")) $("dash").style.display = logged ? "" : "none";
-    if (logged) {
-      currentLimit = 300; // إعادة ضبط الحد عند فتح الإدارة
-      fetchStudents();
-    }
-  };
-}
+// استقبال الإشارة من زر الإدارة (سيعمل حتى لو تأخر فايربيز في التحميل)
+window.addEventListener('adminViewOpened', () => {
+  const logged = !!auth.currentUser;
+  if($("loginBox")) $("loginBox").style.display = logged ? "none" : "";
+  if($("dash")) $("dash").style.display = logged ? "" : "none";
+  if (logged) {
+    currentLimit = 300;
+    fetchStudents();
+  }
+});
 
 if ($("btnLogout")) {
   $("btnLogout").onclick = () => signOut(auth).then(() => { 
@@ -394,12 +405,16 @@ if ($("btnLogout")) {
   });
 }
 
+// فحص الدخول التلقائي
 onAuthStateChanged(auth, user => {
   if($("btnLogout")) $("btnLogout").style.display = user ? "" : "none";
-  if (user && $("adminView")?.classList.contains("show")) { 
-    if($("loginBox")) $("loginBox").style.display = "none"; 
-    if($("dash")) $("dash").style.display = ""; 
-    fetchStudents(); 
+  if ($("adminView")?.classList.contains("show")) { 
+    if($("loginBox")) $("loginBox").style.display = user ? "none" : ""; 
+    if($("dash")) $("dash").style.display = user ? "" : "none"; 
+    if(user) {
+      currentLimit = 300;
+      fetchStudents(); 
+    }
   }
 });
 
@@ -540,10 +555,6 @@ if ($("statusForm")) {
 }
 
 /* ---------- لوحة الإدارة بالتحديث اللحظي ونظام الـ Pagination ---------- */
-let cache = [];
-let unsubscribe = null; 
-let currentLimit = 300; // المتغير المسؤول عن عدد الطلبات المعروضة
-
 const STAT = { pending: "مراجعة", accepted: "مقبول", rejected: "مرفوض" };
 const badge = s => `<span class="badge badge-${STAT[s] ? s : "pending"}">${STAT[s] || "مراجعة"}</span>`;
 const opt = (list, cur) => list.map(([v, t]) => `<option value="${esc(v)}" ${v === cur ? "selected" : ""}>${esc(t || v)}</option>`).join("");
@@ -593,7 +604,6 @@ function fetchStudents() {
   if(load) { load.style.display = "block"; load.textContent = "جاري جلب البيانات..."; }
   if (unsubscribe) unsubscribe();
 
-  // جلب الطلبات بناءً على الـ currentLimit الحالي
   const q = query(collection(db, "students"), orderBy("timestamp", "desc"), limit(currentLimit));
   unsubscribe = onSnapshot(q, (snap) => {
     cache = snap.docs.map(s => ({ id: s.id, data: s.data() }));
@@ -607,7 +617,6 @@ function fetchStudents() {
     render(filtered()); 
     if(load) load.style.display = "none";
 
-    // إظهار زر "عرض المزيد" إذا كان عدد المستندات المسترجعة يساوي الحد الأقصى (مما يعني أن هناك المزيد)
     if (snap.docs.length >= currentLimit) {
       if($("btnLoadMore")) $("btnLoadMore").style.display = "inline-block";
     } else {
@@ -618,10 +627,9 @@ function fetchStudents() {
   });
 }
 
-// تشغيل زر عرض المزيد
 if ($("btnLoadMore")) {
   $("btnLoadMore").onclick = () => {
-    currentLimit += 300; // يضيف 300 طلب جديد
+    currentLimit += 300; 
     fetchStudents();
   };
 }
@@ -635,7 +643,7 @@ if ($("adminSearch")) {
 }
 
 if ($("btnRefresh")) $("btnRefresh").onclick = () => {
-  currentLimit = 300; // يرجع للـ 300 الافتراضي عند التحديث
+  currentLimit = 300; 
   fetchStudents();
 };
 
@@ -665,7 +673,6 @@ document.addEventListener("click", async e => {
   } catch { alert("حدث خطأ أثناء الحفظ، حاول مرة أخرى."); }
 });
 
-// تصدير الإكسيل المُحسّن (يسحب كل البيانات من قاعدة البيانات وليس المعروض فقط)
 if ($("btnExport")) {
   $("btnExport").onclick = async () => {
     const btn = $("btnExport");
@@ -674,7 +681,6 @@ if ($("btnExport")) {
     btn.disabled = true;
 
     try {
-      // الاتصال المباشر بقاعدة البيانات لجلب كل المستندات دون التقييد بـ 300
       const snap = await getDocs(collection(db, "students"));
       const allData = snap.docs.map(s => s.data());
 
