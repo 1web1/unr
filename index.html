@@ -302,8 +302,6 @@ const app = initializeApp({
   appId: "1:968782552349:web:f51d53d0fdf5e9396dd5f4"
 });
 const auth = getAuth(app), db = getFirestore(app);
-const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/wbmanqyt/image/upload";
-const PRESET = "cairo_uni_preset";
 const $ = id => document.getElementById(id);
 
 /* ---------- أدوات أمان ---------- */
@@ -368,7 +366,6 @@ $("btnAdmin").onclick = () => {
   if (logged) fetchStudents();
 };
 
-// تعديل تسجيل الخروج لغلق الاتصال المباشر بقاعدة البيانات
 $("btnLogout").onclick = () => signOut(auth).then(() => { 
   if (unsubscribe) unsubscribe(); 
   showSite("hero"); 
@@ -382,27 +379,48 @@ $("loginForm").addEventListener("submit", e => {   e.preventDefault(); $("loginE
   signInWithEmailAndPassword(auth, $("adminEmail").value, $("adminPassword").value).catch(() => $("loginError").style.display = "block");
 });
 
-/* ---------- رفع الصور ---------- */
+/* ---------- رفع الصور عبر مسار Vercel (API) ---------- */
 const uploaded = new Map();
 async function uploadImage(file, label, onDone) {
   if (!file || !allowedImageTypes.has(file.type) || file.size > MAX_IMAGE_BYTES) throw new Error("invalid-image");
   const key = `${label}|${file.name}|${file.size}|${file.lastModified}`;
   if (uploaded.has(key)) { onDone(); return uploaded.get(key); }
-  let body = file;
-  try { body = await imageCompression(file, { maxSizeMB: 0.3, maxWidthOrHeight: 1200, useWebWorker: true }); }
+  let bodyFile = file;
+  
+  try { bodyFile = await imageCompression(file, { maxSizeMB: 0.3, maxWidthOrHeight: 1200, useWebWorker: true }); }
   catch { throw new Error("image-compression-failed"); }
-  const url = await retry(async () => {
-    const fd = new FormData(); fd.append("file", body); fd.append("upload_preset", PRESET);
-    const res = await fetch(CLOUDINARY_URL, { method: "POST", body: fd });
-    if (!res.ok) throw new Error("upload " + res.status);
-    return (await res.json()).secure_url;
+
+  // تحويل الصورة المضغوطة إلى Base64 لإرسالها للـ API
+  const base64Image = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(bodyFile);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
   });
+
+  const url = await retry(async () => {
+    // إرسال الصورة إلى الـ Serverless Function في Vercel
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image: base64Image })
+    });
+    
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || "upload " + res.status);
+    }
+    
+    const data = await res.json();
+    return data.secure_url;
+  });
+
   uploaded.set(key, url); onDone(); return url;
 }
 
 /* ---------- التسجيل ---------- */
 const form = $("regForm");
-function setInvalid(id, bad) { const field = $(id).closest(".fg") || $(id).parentElement; field?.classList.toggle("invalid", bad); return bad; }
+function setInvalid(id, bad) { const field = $(id).closest(".fg") \vert{}\vert{} $(id).parentElement; field?.classList.toggle("invalid", bad); return bad; }
 function validate() {
   const v = id => toLatin($(id).value);
   let bad = false;
@@ -498,7 +516,7 @@ $("statusForm").addEventListener("submit", async e => {
 
 /* ---------- لوحة الإدارة بالتحديث اللحظي (Real-time) ---------- */
 let cache = [];
-let unsubscribe = null; // متغير لحفظ الاتصال المباشر
+let unsubscribe = null; 
 
 const STAT = { pending: "مراجعة", accepted: "مقبول", rejected: "مرفوض" };
 const badge = s => `<span class="badge badge-${STAT[s] ? s : "pending"}">${STAT[s] || "مراجعة"}</span>`;
@@ -541,14 +559,11 @@ function filtered() {
   return !t ? cache : cache.filter(s => `${s.data.fullName} ${s.data.phone} ${s.data.nationalId}`.toLowerCase().includes(t));
 }
 
-// دالة الجلب بالتحديث اللحظي باستخدام onSnapshot
 function fetchStudents() {
   const load = $("dataLoading"); load.style.display = "block"; load.textContent = "جاري جلب البيانات...";
   
-  // غلق أي اتصال سابق لتجنب التكرار
   if (unsubscribe) unsubscribe();
 
-  // فتح الاتصال المباشر
   unsubscribe = onSnapshot(collection(db, "students"), (snap) => {
     cache = snap.docs.map(s => ({ id: s.id, data: s.data() }))
       .sort((a, b) => (b.data.timestamp?.seconds || 0) - (a.data.timestamp?.seconds || 0));
@@ -578,7 +593,7 @@ async function saveStatus(id, patch, statusPatch) {
   const b = writeBatch(db);
   b.update(doc(db, "students", id), patch);
   const student = cache.find(x => x.id === id)?.data;
-  const statusId = student?.trackingCode || id; // يظل متوافقاً مع الطلبات القديمة.
+  const statusId = student?.trackingCode || id; 
   if (statusPatch) b.set(doc(db, "status", statusId), statusPatch, { merge: true });
   await b.commit();
 }
@@ -601,7 +616,6 @@ document.addEventListener("click", async e => {
       row.querySelectorAll("[data-f]").forEach(i => p[i.dataset.f] = i.value.trim());
       await saveStatus(id, p, { status: p.status });
     }
-    // لم نعد بحاجة لكتابة fetchStudents() هنا، لأن onSnapshot ستقوم بتحديث الجدول لحظياً بمجرد إتمام الحفظ!
   } catch { alert("حدث خطأ أثناء الحفظ، حاول مرة أخرى."); }
 });
 
