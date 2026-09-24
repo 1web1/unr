@@ -3,15 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="referrer" content="strict-origin-when-cross-origin">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https://res.cloudinary.com https://*.cloudinary.com https://*.googleusercontent.com; connect-src 'self' https://api.cloudinary.com https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com; form-action 'self'; base-uri 'self'; object-src 'none'">
 <title>مبادرة رعاية الشباب - جامعة القاهرة</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.1/dist/browser-image-compression.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
 <style>
-/* ... (نفس أكواد الـ CSS السابقة بدون أي تغيير للحفاظ على التصميم الرائع) ... */
 :root{--primary:#8a1538;--gold:#d4af37;--muted:rgba(255,255,255,.72);--ok:#28a745;--bad:#dc3545;--warn:#ffc107;--nav-h:64px}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:var(--nav-h)}
@@ -271,10 +268,73 @@ a{color:var(--gold)}
   </div>
 </div>
 
+<!-- 1. سكربت واجهة المستخدم (يعمل دائماً ولا يتأثر باتصال قاعدة البيانات) -->
+<script>
+  // أدوات مساعدة بسيطة
+  const _$ = id => document.getElementById(id);
+  const _esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  // بناء معرض الصور
+  const GALLERY = [
+    ["Screenshot 2026-09-23 162915.png","تعريف المبادرة","مبادرة طلاب من أجل مصر هي حركة طلابية في الجامعات المصرية تهدف إلى تنمية الوعي الوطني والمساهمة في خطط التنمية المستدامة في مصر."],
+    ["Screenshot 2026-09-23 162941.png","أهداف المبادرة","تشمل أهدافها: إعداد قادة المستقبل، ودعم ريادة الأعمال لدى الشباب، وتعزيز العمل الجماعي، والمسؤولية المجتمعية، وإطلاق طاقات الطلاب الإبداعية."]
+  ];
+  if (_$("gallery")) {
+    _$("gallery").innerHTML = "<h3>معرض الصور والفعاليات</h3>" + GALLERY.map(([f,t,p]) =>
+      `<article class="g-item"><img src="${encodeURI(f)}" alt="${_esc(t)}" loading="lazy" decoding="async"><div class="g-cap"><h4>${_esc(t)}</h4><p>${_esc(p)}</p></div></article>`).join("");
+  }
+
+  // التحكم في التنقل والقوائم
+  const siteView = _$("siteView"), adminView = _$("adminView"), navButtons = _$("navButtons");
+  if (_$("menuBtn")) _$("menuBtn").onclick = () => navButtons?.classList.toggle("show");
+
+  // دالة إظهار الأقسام بمرونة (متاحة عالمياً ليستخدمها سكربت الـ Firebase أيضاً)
+  window.showSite = function(id) {
+    adminView?.classList.remove("show");
+    if(siteView) siteView.style.display = "";
+    setTimeout(() => {
+      if(id === "hero") { window.scrollTo({top:0,behavior:"smooth"}); }
+      else { const el = _$(id); if(el) el.scrollIntoView({behavior:"smooth"}); }
+    }, 30);
+  };
+
+  // أزرار التنقل
+  document.querySelectorAll("[data-go]").forEach(b => {
+    b.addEventListener("click", () => {
+      navButtons?.classList.remove("show");
+      window.showSite(b.dataset.go);
+    });
+  });
+
+  // تظليل الزر النشط في الشريط العلوي أثناء النزول
+  const navMap = {};
+  document.querySelectorAll(".nav-btn[data-go]").forEach(b => navMap[b.dataset.go] = b);
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting && navMap[e.target.id]) {
+      Object.values(navMap).forEach(x => x?.classList.remove("active"));
+      navMap[e.target.id]?.classList.add("active");
+    }
+  }), { rootMargin: "-45% 0px -50% 0px" });
+
+  ["about","activities","status","register"].forEach(id => { const el = _$(id); if (el) io.observe(el); });
+
+  // تبويبات الإدارة (مراجعة / تعديل)
+  if (_$("tabReview")) _$("tabReview").onclick = () => {
+    _$("tabReview").classList.add("active"); _$("tabEdit")?.classList.remove("active");
+    if(_$("reviewWrap")) _$("reviewWrap").style.display = "";
+    if(_$("editWrap")) _$("editWrap").style.display = "none";
+  };
+  if (_$("tabEdit")) _$("tabEdit").onclick = () => {
+    _$("tabEdit").classList.add("active"); _$("tabReview")?.classList.remove("active");
+    if(_$("reviewWrap")) _$("reviewWrap").style.display = "none";
+    if(_$("editWrap")) _$("editWrap").style.display = "";
+  };
+</script>
+
+<!-- 2. سكربت قواعد البيانات والرفع (Firebase + Cloudinary) -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-// تمت إضافة query, limit, orderBy لحل مشكلة تهنيج المتصفح
 import { getFirestore, collection, getDoc, doc, writeBatch, serverTimestamp, onSnapshot, query, limit, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const app = initializeApp({
@@ -290,7 +350,6 @@ const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/wbmanqyt/image/upload";
 const PRESET = "cairo_uni_preset";
 const $ = id => document.getElementById(id);
 
-/* ---------- أدوات أمان ---------- */
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const safeUrl = u => { try { const x = new URL(u); return x.protocol === "https:" ? x.href : "#"; } catch { return "#"; } };
 const safeFacebookUrl = u => { try { const x = new URL(u); return x.protocol === "https:" && ["facebook.com","www.facebook.com","m.facebook.com","fb.me"].includes(x.hostname.toLowerCase()) ? x.href : "#"; } catch { return "#"; } };
@@ -312,52 +371,44 @@ async function retry(fn, tries = 4) {
   throw last;
 }
 
-/* ---------- معرض الصور ---------- */
-// تنبيه: أسماء الصور هنا محلية (Screenshot...). يجب رفعها على Cloudinary ووضع الروابط (URL) المباشرة بدلاً من الأسماء ليراها الزوار.
-const GALLERY = [
-  ["Screenshot 2026-09-23 162915.png","تعريف المبادرة","مبادرة طلاب من أجل مصر هي حركة طلابية في الجامعات المصرية تهدف إلى تنمية الوعي الوطني والمساهمة في خطط التنمية المستدامة في مصر."],
-  ["Screenshot 2026-09-23 162941.png","أهداف المبادرة","تشمل أهدافها: إعداد قادة المستقبل، ودعم ريادة الأعمال لدى الشباب، وتعزيز العمل الجماعي، والمسؤولية المجتمعية، وإطلاق طاقات الطلاب الإبداعية."]
-];
-// يتم بناء المعرض هنا (تم تقليل المصفوفة لتوفير المساحة، يمكنك إضافة باقي الصور بنفس الطريقة)
-$("gallery").innerHTML = "<h3>معرض الصور والفعاليات</h3>" + GALLERY.map(([f,t,p]) =>
-  `<article class="g-item"><img src="${encodeURI(f)}" alt="${esc(t)}" loading="lazy" decoding="async"><div class="g-cap"><h4>${esc(t)}</h4><p>${esc(p)}</p></div></article>`).join("");
-
-/* ---------- التنقل ---------- */
-const siteView = $("siteView"), adminView = $("adminView");
-const navButtons = $("navButtons");
-$("menuBtn").onclick = () => navButtons.classList.toggle("show");
-
-function showSite(id) {
-  adminView.classList.remove("show"); siteView.style.display = "";
-  setTimeout(() => (id === "hero" ? window.scrollTo({top:0,behavior:"smooth"}) : $(id).scrollIntoView({behavior:"smooth"})), 30);
+// التحكم في ظهور زر لوحة الإدارة
+if ($("btnAdmin")) {
+  $("btnAdmin").onclick = () => {
+    $("navButtons")?.classList.remove("show");
+    if($("siteView")) $("siteView").style.display = "none"; 
+    $("adminView")?.classList.add("show"); 
+    window.scrollTo(0,0);
+    const logged = !!auth.currentUser;
+    if($("loginBox")) $("loginBox").style.display = logged ? "none" : ""; 
+    if($("dash")) $("dash").style.display = logged ? "" : "none";
+    if (logged) fetchStudents();
+  };
 }
-document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => { navButtons.classList.remove("show"); showSite(b.dataset.go); }));
 
-const navMap = {};
-document.querySelectorAll(".nav-btn[data-go]").forEach(b => navMap[b.dataset.go] = b);
-const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting && navMap[e.target.id]) { Object.values(navMap).forEach(x => x.classList.remove("active")); navMap[e.target.id].classList.add("active"); } }), { rootMargin: "-45% 0px -50% 0px" });
-["about","activities","status","register"].forEach(id => io.observe($(id)));
-
-$("btnAdmin").onclick = () => {
-  navButtons.classList.remove("show");
-  siteView.style.display = "none"; adminView.classList.add("show"); window.scrollTo(0,0);
-  const logged = !!auth.currentUser;
-  $("loginBox").style.display = logged ? "none" : ""; $("dash").style.display = logged ? "" : "none";
-  if (logged) fetchStudents();
-};
-
-$("btnLogout").onclick = () => signOut(auth).then(() => { 
-  if (unsubscribe) unsubscribe(); 
-  showSite("hero"); 
-});
+if ($("btnLogout")) {
+  $("btnLogout").onclick = () => signOut(auth).then(() => { 
+    if (unsubscribe) unsubscribe(); 
+    window.showSite("hero"); 
+  });
+}
 
 onAuthStateChanged(auth, user => {
-  $("btnLogout").style.display = user ? "" : "none";
-  if (user && adminView.classList.contains("show")) { $("loginBox").style.display = "none"; $("dash").style.display = ""; fetchStudents(); }
+  if($("btnLogout")) $("btnLogout").style.display = user ? "" : "none";
+  if (user && $("adminView")?.classList.contains("show")) { 
+    if($("loginBox")) $("loginBox").style.display = "none"; 
+    if($("dash")) $("dash").style.display = ""; 
+    fetchStudents(); 
+  }
 });
-$("loginForm").addEventListener("submit", e => {   e.preventDefault(); $("loginError").style.display = "none";
-  signInWithEmailAndPassword(auth, $("adminEmail").value, $("adminPassword").value).catch(() => $("loginError").style.display = "block");
-});
+
+if ($("loginForm")) {
+  $("loginForm").addEventListener("submit", e => {   
+    e.preventDefault(); 
+    if($("loginError")) $("loginError").style.display = "none";
+    signInWithEmailAndPassword(auth, $("adminEmail")?.value \vert{}\vert{} "", $("adminPassword")?.value || "")
+      .catch(() => { if($("loginError")) $("loginError").style.display = "block"; });
+  });
+}
 
 /* ---------- رفع الصور ---------- */
 const uploaded = new Map();
@@ -379,100 +430,115 @@ async function uploadImage(file, label, onDone) {
 
 /* ---------- التسجيل ---------- */
 const form = $("regForm");
-function setInvalid(id, bad) { const field = $(id).closest(".fg") \vert{}\vert{} $(id).parentElement; field?.classList.toggle("invalid", bad); return bad; }
+function setInvalid(id, bad) { 
+  const el = $(id);
+  if(el) { const field = el.closest(".fg") || el.parentElement; field?.classList.toggle("invalid", bad); }
+  return bad; 
+}
 function validate() {
-  const v = id => toLatin($(id).value);
+  const v = id => toLatin($(id)?.value || "");
   let bad = false;
   bad |= setInvalid("fullName", v("fullName").split(/\s+/).filter(Boolean).length < 4);
   bad |= setInvalid("phone", !/^01[0125]\d{8}$/.test(v("phone")));
   bad |= setInvalid("nationalId", !/^\d{14}$/.test(v("nationalId"))); 
-  bad |= setInvalid("college", !$("college").value);
-  bad |= setInvalid("level", !$("level").value);
-  let fb = v("facebookLink"); if (!/^https:\/\//i.test(fb)) fb = "https://" + fb;
+  bad |= setInvalid("college", !$("college")?.value);
+  bad |= setInvalid("level", !$("level")?.value);
+  let fb = v("facebookLink"); if (!/^https:\/\//i.test(fb) && fb) fb = "https://" + fb;
   bad |= setInvalid("facebookLink", safeFacebookUrl(fb) === "#");
   bad |= setInvalid("gmail", !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v("gmail")));
-  bad |= setInvalid("profileImage", !$("profileImage").files[0]);
-  bad |= setInvalid("idImage", !$("idImage").files[0]);
-  bad |= setInvalid("cardImage", !$("cardImage").files[0]); 
-  ["profileImage","idImage","cardImage"].forEach(id => { const f = $(id).files[0]; if (f && (!allowedImageTypes.has(f.type) || f.size > MAX_IMAGE_BYTES)) bad |= setInvalid(id, true); });
-  bad |= setInvalid("privacyConsent", !$("privacyConsent").checked);
+  bad |= setInvalid("profileImage", !$("profileImage")?.files[0]);
+  bad |= setInvalid("idImage", !$("idImage")?.files[0]);
+  bad |= setInvalid("cardImage", !$("cardImage")?.files[0]); 
+  ["profileImage","idImage","cardImage"].forEach(id => { const f = $(id)?.files[0]; if (f && (!allowedImageTypes.has(f.type) || f.size > MAX_IMAGE_BYTES)) bad |= setInvalid(id, true); });
+  bad |= setInvalid("privacyConsent", !$("privacyConsent")?.checked);
   return !bad;
 }
-function notice(el, cls, msg) { el.className = "notice " + cls; el.textContent = msg; }
+function notice(el, cls, msg) { if(el) { el.className = "notice " + cls; el.textContent = msg; } }
 
 let submitting = false;
-form.addEventListener("submit", async e => {
-  e.preventDefault();
-  if (submitting) return;
-  const box = $("regNotice"); box.className = "notice";
-  if (!validate()) { notice(box, "bad", "راجع الحقول المظللة بالأحمر ثم أعد الإرسال."); form.querySelector(".invalid")?.scrollIntoView({behavior:"smooth",block:"center"}); return; }
-  if (!navigator.onLine) { notice(box, "bad", "لا يوجد اتصال بالإنترنت. بياناتك ما زالت في الصفحة، أعد المحاولة عند عودة الاتصال."); return; }
-  if (!withinClientLimit("unr-registration", 3, 60 * 60 * 1000)) { notice(box, "bad", "تم تجاوز الحد المؤقت للإرسال من هذا المتصفح. حاول بعد ساعة أو تواصل مع الإدارة."); return; }
+if (form) {
+  form.addEventListener("submit", async e => {
+    e.preventDefault();
+    if (submitting) return;
+    const box = $("regNotice"); if(box) box.className = "notice";
+    if (!validate()) { notice(box, "bad", "راجع الحقول المظللة بالأحمر ثم أعد الإرسال."); form.querySelector(".invalid")?.scrollIntoView({behavior:"smooth",block:"center"}); return; }
+    if (!navigator.onLine) { notice(box, "bad", "لا يوجد اتصال بالإنترنت."); return; }
+    if (!withinClientLimit("unr-registration", 3, 60 * 60 * 1000)) { notice(box, "bad", "تم تجاوز الحد المؤقت للإرسال."); return; }
 
-  submitting = true; $("submitBtn").disabled = true; $("progress").style.display = "block";
-  const setP = (n, t) => { $("fill").style.width = n + "\%"; $("progressText").textContent = t; };
-  try {
-    setP(5, "جاري رفع الصور...");
-    let done = 0;
-    const tick = () => setP(5 + (++done) * 25, `تم رفع ${done} من 3 صور`); 
-    const [profileUrl, idUrl, cardUrl] = await Promise.all([
-      uploadImage($("profileImage").files[0], "p", tick),
-      uploadImage($("idImage").files[0], "i", tick),
-      uploadImage($("cardImage").files[0], "c", tick) 
-    ]);
+    submitting = true; 
+    if($("submitBtn")) $("submitBtn").disabled = true; 
+    if($("progress")) $("progress").style.display = "block";
+    const setP = (n, t) => { if($("fill")) $("fill").style.width = n + "%"; if($("progressText")) $("progressText").textContent = t; };
+    
+    try {
+      setP(5, "جاري رفع الصور...");
+      let done = 0;
+      const tick = () => setP(5 + (++done) * 25, `تم رفع ${done} من 3 صور`); 
+      const [profileUrl, idUrl, cardUrl] = await Promise.all([
+        uploadImage($("profileImage").files[0], "p", tick),
+        uploadImage($("idImage").files[0], "i", tick),
+        uploadImage($("cardImage").files[0], "c", tick) 
+      ]);
 
-    setP(90, "جاري حفظ البيانات...");
-    const nid = toLatin($("nationalId").value);
-    let fb = toLatin($("facebookLink").value); if (!/^https:\/\//i.test(fb)) fb = "https://" + fb;
-    fb = safeFacebookUrl(fb);
+      setP(90, "جاري حفظ البيانات...");
+      const nid = toLatin($("nationalId").value);
+      let fb = toLatin($("facebookLink").value); if (!/^https:\/\//i.test(fb)) fb = "https://" + fb;
+      fb = safeFacebookUrl(fb);
 
-    await retry(async () => {
-      const batch = writeBatch(db);
-      batch.set(doc(db, "students", nid), {
-        fullName: $("fullName").value.trim().replace(/\s+/g, " "), phone: toLatin($("phone").value), nationalId: nid,
-        college: $("college").value, level: $("level").value, facebook: fb, email: toLatin($("gmail").value),
-        profileImageUrl: profileUrl, idCardUrl: idUrl, studentCardUrl: cardUrl,
-        timestamp: serverTimestamp(), status: "pending", adminMessage: "طلبك قيد المراجعة حالياً."
-      });
-      batch.set(doc(db, "status", nid), { status: "pending", adminMessage: "طلبك قيد المراجعة حالياً." });
-      await batch.commit();
-    }, 3);
+      await retry(async () => {
+        const batch = writeBatch(db);
+        batch.set(doc(db, "students", nid), {
+          fullName: $("fullName").value.trim().replace(/\s+/g, " "), phone: toLatin($("phone").value), nationalId: nid,
+          college: $("college").value, level: $("level").value, facebook: fb, email: toLatin($("gmail").value),
+          profileImageUrl: profileUrl, idCardUrl: idUrl, studentCardUrl: cardUrl,
+          timestamp: serverTimestamp(), status: "pending", adminMessage: "طلبك قيد المراجعة حالياً."
+        });
+        batch.set(doc(db, "status", nid), { status: "pending", adminMessage: "طلبك قيد المراجعة حالياً." });
+        await batch.commit();
+      }, 3);
 
-    setP(100, "تم!");
-    notice(box, "ok", "تم التسجيل بنجاح ✅ يمكنك الاستعلام عن الحالة بالرقم القومي من قسم «حالة الطلب».");
-    form.reset(); uploaded.clear();
-  } catch (err) {
-    const dup = err && (err.code === "permission-denied");
-    notice(box, "bad", dup
-      ? "هذا الرقم القومي مسجل من قبل. استعلم عن حالة طلبك من قسم «حالة الطلب» أو تواصل معنا على واتساب."
-      : "تعذر إتمام الإرسال بسبب ضعف الاتصال. بياناتك وصورك ما زالت في الصفحة، اضغط «إرسال البيانات» مرة أخرى.");
-  } finally {
-    submitting = false; $("submitBtn").disabled = false; setTimeout(() => $("progress").style.display = "none", 800);
-  }
+      setP(100, "تم!");
+      notice(box, "ok", "تم التسجيل بنجاح ✅ يمكنك الاستعلام عن الحالة بالرقم القومي من قسم «حالة الطلب».");
+      form.reset(); uploaded.clear();
+    } catch (err) {
+      const dup = err && (err.code === "permission-denied");
+      notice(box, "bad", dup ? "هذا الرقم القومي مسجل من قبل." : "تعذر إتمام الإرسال بسبب ضعف الاتصال.");
+    } finally {
+      submitting = false; 
+      if($("submitBtn")) $("submitBtn").disabled = false; 
+      setTimeout(() => { if($("progress")) $("progress").style.display = "none"; }, 800);
+    }
+  });
+}
+["nationalId","phone","searchNid"].forEach(id => {
+  $(id)?.addEventListener("input", e => e.target.value = toLatin(e.target.value).replace(/\D/g, ""));
 });
-["nationalId","phone","searchNid"].forEach(id => $(id).addEventListener("input", e => e.target.value = toLatin(e.target.value).replace(/\D/g, "")));
 
 /* ---------- الاستعلام عن الحالة ---------- */
-$("statusForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  const nid = toLatin($("searchNid").value), err = $("statusErr"), res = $("statusResult");
-  err.className = "notice"; res.style.display = "none";
-  if (!/^\d{14}$/.test(nid)) return notice(err, "bad", "اكتب رقماً قومياً صحيحاً من 14 رقم.");
-  if (!withinClientLimit("unr-status-search", 6, 10 * 60 * 1000)) return notice(err, "bad", "تم تجاوز محاولات الاستعلام المؤقتة. حاول بعد 10 دقائق.");
-  $("statusBtn").disabled = true;
-  try {
-    const snap = await retry(() => getDoc(doc(db, "status", nid)), 2);
-    if (!snap.exists()) return notice(err, "bad", "بيانات الاستعلام غير صحيحة أو لا يوجد طلب مطابق.");
-    const d = snap.data(), b = $("statusBadge");
-    b.className = "badge badge-" + (["accepted","rejected"].includes(d.status) ? d.status : "pending");
-    b.textContent = d.status === "accepted" ? "مقبول" : d.status === "rejected" ? "مرفوض" : "مراجعة";
-    $("statusMsg").textContent = d.adminMessage || "لا توجد رسالة.";
-    res.style.display = "block";
-  } catch { notice(err, "bad", "تعذر البحث الآن، حاول مرة أخرى."); }
-  finally { $("statusBtn").disabled = false; }
-});
+if ($("statusForm")) {
+  $("statusForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const nid = toLatin($("searchNid")?.value || ""), err = $("statusErr"), res = $("statusResult");
+    if(err) err.className = "notice"; if(res) res.style.display = "none";
+    if (!/^\d{14}$/.test(nid)) return notice(err, "bad", "اكتب رقماً قومياً صحيحاً من 14 رقم.");
+    if (!withinClientLimit("unr-status-search", 6, 10 * 60 * 1000)) return notice(err, "bad", "تم تجاوز محاولات الاستعلام.");
+    if($("statusBtn")) $("statusBtn").disabled = true;
+    try {
+      const snap = await retry(() => getDoc(doc(db, "status", nid)), 2);
+      if (!snap.exists()) return notice(err, "bad", "البيانات غير صحيحة أو الطلب غير موجود.");
+      const d = snap.data(), b = $("statusBadge");
+      if(b) {
+        b.className = "badge badge-" + (["accepted","rejected"].includes(d.status) ? d.status : "pending");
+        b.textContent = d.status === "accepted" ? "مقبول" : d.status === "rejected" ? "مرفوض" : "مراجعة";
+      }
+      if($("statusMsg")) $("statusMsg").textContent = d.adminMessage || "لا توجد رسالة.";
+      if(res) res.style.display = "block";
+    } catch { notice(err, "bad", "تعذر البحث الآن، حاول مرة أخرى."); }
+    finally { if($("statusBtn")) $("statusBtn").disabled = false; }
+  });
+}
 
-/* ---------- لوحة الإدارة بالتحديث اللحظي (Real-time) ---------- */
+/* ---------- لوحة الإدارة بالتحديث اللحظي ---------- */
 let cache = [];
 let unsubscribe = null; 
 
@@ -481,15 +547,11 @@ const badge = s => `<span class="badge badge-${STAT[s] ? s : "pending"}">${STAT[
 const opt = (list, cur) => list.map(([v, t]) => `<option value="${esc(v)}" ${v === cur ? "selected" : ""}>${esc(t || v)}</option>`).join("");
 const COLLEGES = ["الآداب","الهندسة","التجارة","الحقوق","العلوم","أخرى"].map(x => [x]);
 const LEVELS = ["الأولى","الثانية","الثالثة","الرابعة"].map(x => [x]);
-
-// دالة لتحسين الصور داخل لوحة الإدارة لتقليل استهلاك الإنترنت
 const optImg = (url, width) => url ? safeUrl(url).replace('/upload/', `/upload/f_auto,q_auto,w_${width}/`) : "";
 
 function render(list) {
-  $("reviewBody").innerHTML = list.map(({ id, data: d }) => {
-    // استخدام الصورة المصغرة بحجم 100 بكسل في العرض لتوفير الباقة
-    const thumbUrl = optImg(d.profileImageUrl, 100);
-    const fullUrl = optImg(d.profileImageUrl, 1200);
+  if($("reviewBody")) $("reviewBody").innerHTML = list.map(({ id, data: d }) => {
+    const thumbUrl = optImg(d.profileImageUrl, 100), fullUrl = optImg(d.profileImageUrl, 1200);
     const img = d.profileImageUrl ? `<a href="${fullUrl}" target="_blank" rel="noopener"><img src="${thumbUrl}" class="thumb" alt=""></a>` : "-";
     return `<tr>
       <td>${img}</td><td>${esc(d.fullName)}</td><td>${esc(d.nationalId)}</td><td>${esc(d.college)}/${esc(d.level)}</td><td dir="ltr">${esc(d.phone)}</td>
@@ -502,7 +564,7 @@ function render(list) {
           <button class="btn-sm b-del" data-act="delete" data-id="${esc(id)}">🗑 مسح</button></td></tr>`;
   }).join("");
 
-  $("editBody").innerHTML = list.map(({ id, data: d }) => {
+  if($("editBody")) $("editBody").innerHTML = list.map(({ id, data: d }) => {
     const thumbUrl = optImg(d.profileImageUrl, 100);
     const img = d.profileImageUrl ? `<img src="${thumbUrl}" class="thumb" alt="">` : "-";
     return `<tr data-row="${esc(id)}">
@@ -520,47 +582,39 @@ function render(list) {
 }
 
 function filtered() {
-  const t = toLatin($("adminSearch").value).toLowerCase();
+  const t = toLatin($("adminSearch")?.value || "").toLowerCase();
   return !t ? cache : cache.filter(s => `${s.data.fullName} ${s.data.phone} ${s.data.nationalId}`.toLowerCase().includes(t));
 }
 
-// حل مشكلة التهنيج عن طريق إضافة limit(300) لجلب أحدث 300 طلب فقط
 function fetchStudents() {
-  const load = $("dataLoading"); load.style.display = "block"; load.textContent = "جاري جلب البيانات...";
+  const load = $("dataLoading"); 
+  if(load) { load.style.display = "block"; load.textContent = "جاري جلب البيانات..."; }
   if (unsubscribe) unsubscribe();
 
-  // تحديد العدد بـ 300 وترتيبهم من الأحدث للأقدم
   const q = query(collection(db, "students"), orderBy("timestamp", "desc"), limit(300));
-  
   unsubscribe = onSnapshot(q, (snap) => {
     cache = snap.docs.map(s => ({ id: s.id, data: s.data() }));
-    
     const c = s => cache.filter(x => (x.data.status || "pending") === s).length;
-    $("stTotal").textContent = cache.length; 
-    $("stPending").textContent = c("pending"); 
-    $("stAccepted").textContent = c("accepted"); 
-    $("stRejected").textContent = c("rejected");
-    
+    if($("stTotal")) $("stTotal").textContent = cache.length; 
+    if($("stPending")) $("stPending").textContent = c("pending"); 
+    if($("stAccepted")) $("stAccepted").textContent = c("accepted"); 
+    if($("stRejected")) $("stRejected").textContent = c("rejected");
     render(filtered()); 
-    load.style.display = "none";
+    if(load) load.style.display = "none";
   }, (error) => {
-    load.className = "notice bad";
-    load.textContent = "تعذر جلب البيانات. تأكد من امتلاكك صلاحية الإدارة.";
+    if(load) { load.className = "notice bad"; load.textContent = "تعذر جلب البيانات. تأكد من صلاحيتك كأدمن."; }
   });
 }
 
-// حل مشكلة التهنيج أثناء البحث (Debounce)
 let searchTimeout;
-$("adminSearch").addEventListener("input", () => {
-  clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(() => {
-    render(filtered());
-  }, 300); // الانتظار 300 مللي ثانية بعد توقف الكتابة
-});
+if ($("adminSearch")) {
+  $("adminSearch").addEventListener("input", () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => { render(filtered()); }, 300);
+  });
+}
 
-$("btnRefresh").onclick = fetchStudents;
-$("tabReview").onclick = () => { $("tabReview").classList.add("active"); $("tabEdit").classList.remove("active"); $("reviewWrap").style.display = ""; $("editWrap").style.display = "none"; };
-$("tabEdit").onclick = () => { $("tabEdit").classList.add("active"); $("tabReview").classList.remove("active"); $("reviewWrap").style.display = "none"; $("editWrap").style.display = ""; };
+if ($("btnRefresh")) $("btnRefresh").onclick = fetchStudents;
 
 async function saveStatus(id, patch, statusPatch) {
   const b = writeBatch(db);
@@ -588,17 +642,19 @@ document.addEventListener("click", async e => {
   } catch { alert("حدث خطأ أثناء الحفظ، حاول مرة أخرى."); }
 });
 
-$("btnExport").onclick = () => {
-  const data = filtered(); if (!data.length) return alert("لا توجد بيانات!");
-  const rows = data.map(({ data: d }) => ({
-    "الرقم القومي": excelSafe(d.nationalId), "الاسم": excelSafe(d.fullName), "الهاتف": excelSafe(d.phone), "الكلية": excelSafe(d.college), "الفرقة": excelSafe(d.level),
-    "فيسبوك": excelSafe(d.facebook), "إيميل": excelSafe(d.email), "الحالة": excelSafe(STAT[d.status] || "مراجعة"), "رسالة": excelSafe(d.adminMessage),
-    "التاريخ": d.timestamp?.toDate ? d.timestamp.toDate().toLocaleString("ar-EG") : "",
-    "صورة": excelSafe(d.profileImageUrl), "بطاقة": excelSafe(d.idCardUrl), "كارنيه": excelSafe(d.studentCardUrl)
-  }));
-  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "الطلاب");
-  XLSX.writeFile(wb, `الطلاب-${new Date().toISOString().slice(0,10)}.xlsx`);
-};
+if ($("btnExport")) {
+  $("btnExport").onclick = () => {
+    const data = filtered(); if (!data.length) return alert("لا توجد بيانات!");
+    const rows = data.map(({ data: d }) => ({
+      "الرقم القومي": excelSafe(d.nationalId), "الاسم": excelSafe(d.fullName), "الهاتف": excelSafe(d.phone), "الكلية": excelSafe(d.college), "الفرقة": excelSafe(d.level),
+      "فيسبوك": excelSafe(d.facebook), "إيميل": excelSafe(d.email), "الحالة": excelSafe(STAT[d.status] || "مراجعة"), "رسالة": excelSafe(d.adminMessage),
+      "التاريخ": d.timestamp?.toDate ? d.timestamp.toDate().toLocaleString("ar-EG") : "",
+      "صورة": excelSafe(d.profileImageUrl), "بطاقة": excelSafe(d.idCardUrl), "كارنيه": excelSafe(d.studentCardUrl)
+    }));
+    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "الطلاب");
+    XLSX.writeFile(wb, `الطلاب-${new Date().toISOString().slice(0,10)}.xlsx`);
+  };
+}
 </script>
 </body>
 </html>
