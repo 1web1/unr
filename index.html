@@ -89,7 +89,8 @@ option{background:#1a1a1a;color:#fff}
 .dash-head h2{margin:0}
 .actions{display:flex;gap:10px;flex-wrap:wrap;flex:1;justify-content:flex-end}
 .search{min-width:240px;flex:1;max-width:420px}
-.btn-export{background:var(--ok);color:#fff;border:0;padding:10px 18px;border-radius:10px;font-weight:800;font-family:inherit;cursor:pointer;font-size:13px}
+.btn-export{background:var(--ok);color:#fff;border:0;padding:10px 18px;border-radius:10px;font-weight:800;font-family:inherit;cursor:pointer;font-size:13px;transition:.25s}
+.btn-export:disabled{opacity:0.6;cursor:wait;}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:18px}
 .stat{background:rgba(255,255,255,.06);padding:12px;border-radius:12px;text-align:center;border:1px solid rgba(255,255,255,.1)}
 .stat h3{margin:0;color:var(--gold);font-size:13px}.stat p{margin:4px 0 0;font-size:22px;font-weight:800}
@@ -241,7 +242,7 @@ a{color:var(--gold)}
 
   <div id="dash" class="glass dash" style="display:none">
     <div class="dash-head">
-      <h2>لوحة الإدارة <span style="font-size:12px;color:var(--muted);font-weight:normal">(أحدث 300 طلب)</span></h2>
+      <h2>لوحة الإدارة <span id="limitIndicator" style="font-size:12px;color:var(--muted);font-weight:normal">(أحدث 300 طلب)</span></h2>
       <div class="actions">
         <input type="text" id="adminSearch" class="search" placeholder="🔍 بحث بالاسم أو الهاتف أو الرقم القومي...">
         <button class="btn-export" id="btnExport"><i class="fas fa-file-excel"></i> تصدير Excel</button>
@@ -265,16 +266,19 @@ a{color:var(--gold)}
     <div id="editWrap" class="tbl-wrap" style="display:none">
       <table><thead><tr><th>الصورة</th><th>الاسم</th><th>الهاتف</th><th>الكلية</th><th>الفرقة</th><th>فيسبوك</th><th>إيميل</th><th>الحالة</th><th>حفظ</th></tr></thead><tbody id="editBody"></tbody></table>
     </div>
+    
+    <!-- زر عرض المزيد الجديد -->
+    <div style="text-align:center; padding: 20px 0;">
+      <button id="btnLoadMore" class="btn-main" style="display:none; width: auto; padding: 10px 40px; background: var(--gold); color: #000;">⬇ عرض المزيد من الطلبات القديمة</button>
+    </div>
   </div>
 </div>
 
-<!-- 1. سكربت واجهة المستخدم (يعمل دائماً ولا يتأثر باتصال قاعدة البيانات) -->
+<!-- 1. سكربت واجهة المستخدم -->
 <script>
-  // أدوات مساعدة بسيطة
   const _$ = id => document.getElementById(id);
   const _esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-  // بناء معرض الصور
   const GALLERY = [
     ["Screenshot 2026-09-23 162915.png","تعريف المبادرة","مبادرة طلاب من أجل مصر هي حركة طلابية في الجامعات المصرية تهدف إلى تنمية الوعي الوطني والمساهمة في خطط التنمية المستدامة في مصر."],
     ["Screenshot 2026-09-23 162941.png","أهداف المبادرة","تشمل أهدافها: إعداد قادة المستقبل، ودعم ريادة الأعمال لدى الشباب، وتعزيز العمل الجماعي، والمسؤولية المجتمعية، وإطلاق طاقات الطلاب الإبداعية."]
@@ -284,11 +288,9 @@ a{color:var(--gold)}
       `<article class="g-item"><img src="${encodeURI(f)}" alt="${_esc(t)}" loading="lazy" decoding="async"><div class="g-cap"><h4>${_esc(t)}</h4><p>${_esc(p)}</p></div></article>`).join("");
   }
 
-  // التحكم في التنقل والقوائم
   const siteView = _$("siteView"), adminView = _$("adminView"), navButtons = _$("navButtons");
   if (_$("menuBtn")) _$("menuBtn").onclick = () => navButtons?.classList.toggle("show");
 
-  // دالة إظهار الأقسام بمرونة (متاحة عالمياً ليستخدمها سكربت الـ Firebase أيضاً)
   window.showSite = function(id) {
     adminView?.classList.remove("show");
     if(siteView) siteView.style.display = "";
@@ -298,7 +300,6 @@ a{color:var(--gold)}
     }, 30);
   };
 
-  // أزرار التنقل
   document.querySelectorAll("[data-go]").forEach(b => {
     b.addEventListener("click", () => {
       navButtons?.classList.remove("show");
@@ -306,7 +307,6 @@ a{color:var(--gold)}
     });
   });
 
-  // تظليل الزر النشط في الشريط العلوي أثناء النزول
   const navMap = {};
   document.querySelectorAll(".nav-btn[data-go]").forEach(b => navMap[b.dataset.go] = b);
   const io = new IntersectionObserver(es => es.forEach(e => {
@@ -318,7 +318,6 @@ a{color:var(--gold)}
 
   ["about","activities","status","register"].forEach(id => { const el = _$(id); if (el) io.observe(el); });
 
-  // تبويبات الإدارة (مراجعة / تعديل)
   if (_$("tabReview")) _$("tabReview").onclick = () => {
     _$("tabReview").classList.add("active"); _$("tabEdit")?.classList.remove("active");
     if(_$("reviewWrap")) _$("reviewWrap").style.display = "";
@@ -331,11 +330,12 @@ a{color:var(--gold)}
   };
 </script>
 
-<!-- 2. سكربت قواعد البيانات والرفع (Firebase + Cloudinary) -->
+<!-- 2. سكربت قواعد البيانات -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, collection, getDoc, doc, writeBatch, serverTimestamp, onSnapshot, query, limit, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+// تمت إضافة getDocs هنا لكي نستخدمها في زر الإكسيل
+import { getFirestore, collection, getDoc, getDocs, doc, writeBatch, serverTimestamp, onSnapshot, query, limit, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey: "AIzaSyCNDOwLJXeCCdlcW-ffxbggbiETS86r3mc",
@@ -371,7 +371,6 @@ async function retry(fn, tries = 4) {
   throw last;
 }
 
-// التحكم في ظهور زر لوحة الإدارة
 if ($("btnAdmin")) {
   $("btnAdmin").onclick = () => {
     $("navButtons")?.classList.remove("show");
@@ -381,7 +380,10 @@ if ($("btnAdmin")) {
     const logged = !!auth.currentUser;
     if($("loginBox")) $("loginBox").style.display = logged ? "none" : ""; 
     if($("dash")) $("dash").style.display = logged ? "" : "none";
-    if (logged) fetchStudents();
+    if (logged) {
+      currentLimit = 300; // إعادة ضبط الحد عند فتح الإدارة
+      fetchStudents();
+    }
   };
 }
 
@@ -410,7 +412,7 @@ if ($("loginForm")) {
   });
 }
 
-/* ---------- رفع الصور ---------- */
+/* ---------- رفع الصور والتسجيل ---------- */
 const uploaded = new Map();
 async function uploadImage(file, label, onDone) {
   if (!file || !allowedImageTypes.has(file.type) || file.size > MAX_IMAGE_BYTES) throw new Error("invalid-image");
@@ -428,7 +430,6 @@ async function uploadImage(file, label, onDone) {
   uploaded.set(key, url); onDone(); return url;
 }
 
-/* ---------- التسجيل ---------- */
 const form = $("regForm");
 function setInvalid(id, bad) { 
   const el = $(id);
@@ -538,9 +539,10 @@ if ($("statusForm")) {
   });
 }
 
-/* ---------- لوحة الإدارة بالتحديث اللحظي ---------- */
+/* ---------- لوحة الإدارة بالتحديث اللحظي ونظام الـ Pagination ---------- */
 let cache = [];
 let unsubscribe = null; 
+let currentLimit = 300; // المتغير المسؤول عن عدد الطلبات المعروضة
 
 const STAT = { pending: "مراجعة", accepted: "مقبول", rejected: "مرفوض" };
 const badge = s => `<span class="badge badge-${STAT[s] ? s : "pending"}">${STAT[s] || "مراجعة"}</span>`;
@@ -591,7 +593,8 @@ function fetchStudents() {
   if(load) { load.style.display = "block"; load.textContent = "جاري جلب البيانات..."; }
   if (unsubscribe) unsubscribe();
 
-  const q = query(collection(db, "students"), orderBy("timestamp", "desc"), limit(300));
+  // جلب الطلبات بناءً على الـ currentLimit الحالي
+  const q = query(collection(db, "students"), orderBy("timestamp", "desc"), limit(currentLimit));
   unsubscribe = onSnapshot(q, (snap) => {
     cache = snap.docs.map(s => ({ id: s.id, data: s.data() }));
     const c = s => cache.filter(x => (x.data.status || "pending") === s).length;
@@ -599,11 +602,28 @@ function fetchStudents() {
     if($("stPending")) $("stPending").textContent = c("pending"); 
     if($("stAccepted")) $("stAccepted").textContent = c("accepted"); 
     if($("stRejected")) $("stRejected").textContent = c("rejected");
+    if($("limitIndicator")) $("limitIndicator").textContent = `(أحدث ${cache.length} طلب)`;
+    
     render(filtered()); 
     if(load) load.style.display = "none";
+
+    // إظهار زر "عرض المزيد" إذا كان عدد المستندات المسترجعة يساوي الحد الأقصى (مما يعني أن هناك المزيد)
+    if (snap.docs.length >= currentLimit) {
+      if($("btnLoadMore")) $("btnLoadMore").style.display = "inline-block";
+    } else {
+      if($("btnLoadMore")) $("btnLoadMore").style.display = "none";
+    }
   }, (error) => {
     if(load) { load.className = "notice bad"; load.textContent = "تعذر جلب البيانات. تأكد من صلاحيتك كأدمن."; }
   });
+}
+
+// تشغيل زر عرض المزيد
+if ($("btnLoadMore")) {
+  $("btnLoadMore").onclick = () => {
+    currentLimit += 300; // يضيف 300 طلب جديد
+    fetchStudents();
+  };
 }
 
 let searchTimeout;
@@ -614,7 +634,10 @@ if ($("adminSearch")) {
   });
 }
 
-if ($("btnRefresh")) $("btnRefresh").onclick = fetchStudents;
+if ($("btnRefresh")) $("btnRefresh").onclick = () => {
+  currentLimit = 300; // يرجع للـ 300 الافتراضي عند التحديث
+  fetchStudents();
+};
 
 async function saveStatus(id, patch, statusPatch) {
   const b = writeBatch(db);
@@ -642,17 +665,40 @@ document.addEventListener("click", async e => {
   } catch { alert("حدث خطأ أثناء الحفظ، حاول مرة أخرى."); }
 });
 
+// تصدير الإكسيل المُحسّن (يسحب كل البيانات من قاعدة البيانات وليس المعروض فقط)
 if ($("btnExport")) {
-  $("btnExport").onclick = () => {
-    const data = filtered(); if (!data.length) return alert("لا توجد بيانات!");
-    const rows = data.map(({ data: d }) => ({
-      "الرقم القومي": excelSafe(d.nationalId), "الاسم": excelSafe(d.fullName), "الهاتف": excelSafe(d.phone), "الكلية": excelSafe(d.college), "الفرقة": excelSafe(d.level),
-      "فيسبوك": excelSafe(d.facebook), "إيميل": excelSafe(d.email), "الحالة": excelSafe(STAT[d.status] || "مراجعة"), "رسالة": excelSafe(d.adminMessage),
-      "التاريخ": d.timestamp?.toDate ? d.timestamp.toDate().toLocaleString("ar-EG") : "",
-      "صورة": excelSafe(d.profileImageUrl), "بطاقة": excelSafe(d.idCardUrl), "كارنيه": excelSafe(d.studentCardUrl)
-    }));
-    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "الطلاب");
-    XLSX.writeFile(wb, `الطلاب-${new Date().toISOString().slice(0,10)}.xlsx`);
+  $("btnExport").onclick = async () => {
+    const btn = $("btnExport");
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التجهيز...';
+    btn.disabled = true;
+
+    try {
+      // الاتصال المباشر بقاعدة البيانات لجلب كل المستندات دون التقييد بـ 300
+      const snap = await getDocs(collection(db, "students"));
+      const allData = snap.docs.map(s => s.data());
+
+      if (!allData.length) { 
+        alert("لا توجد بيانات لتصديرها!"); 
+        btn.innerHTML = originalHTML;
+        btn.disabled = false;
+        return; 
+      }
+
+      const rows = allData.map(d => ({
+        "الرقم القومي": excelSafe(d.nationalId), "الاسم": excelSafe(d.fullName), "الهاتف": excelSafe(d.phone), "الكلية": excelSafe(d.college), "الفرقة": excelSafe(d.level),
+        "فيسبوك": excelSafe(d.facebook), "إيميل": excelSafe(d.email), "الحالة": excelSafe(STAT[d.status] || "مراجعة"), "رسالة": excelSafe(d.adminMessage),
+        "التاريخ": d.timestamp?.toDate ? d.timestamp.toDate().toLocaleString("ar-EG") : "",
+        "صورة": excelSafe(d.profileImageUrl), "بطاقة": excelSafe(d.idCardUrl), "كارنيه": excelSafe(d.studentCardUrl)
+      }));
+      const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "الطلاب");
+      XLSX.writeFile(wb, `الطلاب-${new Date().toISOString().slice(0,10)}.xlsx`);
+    } catch (err) {
+      alert("حدث خطأ أثناء التصدير. تأكد من اتصال الإنترنت وحاول مرة أخرى.");
+    } finally {
+      btn.innerHTML = originalHTML;
+      btn.disabled = false;
+    }
   };
 }
 </script>
