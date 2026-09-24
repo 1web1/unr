@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>مبادرة رعاية الشباب - جامعة القاهرة</title>
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js">
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js">
+<link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.1/dist/browser-image-compression.js" defer></script>
@@ -147,9 +150,50 @@ a{color:var(--gold)}
   max-width: 800px;
   margin: 0 auto;
 }
+
+/* ===== Views / Router ===== */
+.view{display:none}.view.show{display:block}
+.svc-banner{position:fixed;top:calc(var(--nav-h) + 10px);left:50%;transform:translateX(-50%);z-index:1200;display:none;align-items:center;gap:12px;max-width:92vw;padding:10px 16px;border-radius:14px;background:rgba(220,53,69,.95);color:#fff;font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.svc-banner.show{display:flex}
+.svc-banner button{background:#fff;color:#8a1538;border:0;border-radius:8px;padding:5px 12px;font-family:inherit;font-weight:800;cursor:pointer}
+
+/* Nav + hero media buttons */
+.nav-media{background:transparent;color:var(--gold);border:1.5px solid var(--gold)}
+.nav-media:hover,.nav-media.active{background:var(--gold);color:#1a1a1a;border-color:var(--gold)}
+.hero-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.btn-hero-gold{background:rgba(212,175,55,.16);border:1.5px solid var(--gold)}
+.btn-hero-gold:hover{background:rgba(212,175,55,.3)}
+
+/* Activity cards as links */
+a.act{display:block;color:#fff;text-decoration:none;cursor:pointer;transition:transform .25s,border-color .25s}
+a.act:hover{transform:translateY(-4px);border-color:var(--gold)}
+.act .go{display:inline-block;margin-top:8px;color:var(--gold);font-size:12px;font-weight:800}
+
+/* Activity page */
+.act-hero{position:relative;min-height:340px;background-size:cover;background-position:center;display:flex;align-items:flex-end}
+.act-hero::before{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(4,13,20,.97) 8%,rgba(4,13,20,.6) 60%,rgba(4,13,20,.4))}
+.act-hero-in{position:relative;width:100%;max-width:820px;margin:0 auto;padding:34px 20px}
+.act-hero h1{margin:10px 0 8px;font-size:clamp(1.8rem,5vw,3rem);font-weight:800}
+.act-hero p{margin:0;color:var(--muted);line-height:1.9;max-width:600px}
+.tag-pill{display:inline-block;background:var(--gold);color:#000;font-size:12px;font-weight:800;padding:3px 12px;border-radius:15px}
+.back-link{background:none;border:0;color:var(--gold);font-family:inherit;font-weight:600;font-size:14px;cursor:pointer;padding:0 0 12px;display:inline-flex;gap:8px;align-items:center}
+.empty{padding:40px 24px;text-align:center}
+.empty i{font-size:34px;color:var(--gold);margin-bottom:12px}
+.empty h3{margin:0 0 8px}.empty p{margin:0 0 20px;color:var(--muted);line-height:1.9}
+.empty .btn-main{width:auto;padding:12px 32px}
+.act-body{line-height:2;color:rgba(255,255,255,.9)}
+.more-title{color:var(--gold);margin:44px 0 14px;font-size:1.15rem}
+.more-acts{display:flex;gap:10px;flex-wrap:wrap}
+.more-acts a{padding:8px 16px;border-radius:30px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:#fff;text-decoration:none;font-size:13px;font-weight:600}
+.more-acts a:hover{background:var(--primary);border-color:var(--primary)}
+.hint{display:block;margin-top:6px;color:var(--muted);font-size:12px;line-height:1.7}
+
+@media(max-width:768px){.hero-actions .btn-hero{width:100%;max-width:340px}}
 </style>
 </head>
 <body>
+
+<div class="svc-banner" id="svcBanner" role="alert"><span></span><button type="button" onclick="location.reload()">إعادة تحميل</button></div>
 
 <div class="floating">
   <a href="#" id="waLink" target="_blank" rel="noopener" class="fbtn wa" title="واتساب 1" aria-label="واتساب 1"><i class="fab fa-whatsapp"></i></a>
@@ -170,8 +214,9 @@ a{color:var(--gold)}
     <button class="nav-btn" data-go="about">عن المبادرة</button>
     <button class="nav-btn" data-go="activities">الأنشطة</button>
     <button class="nav-btn" data-go="status">حالة الطلب</button>
+    <button class="nav-btn nav-media" data-go="media">انضم للميديا</button>
     <button class="nav-btn nav-cta" data-go="register">التسجيل</button>
-    <button class="nav-btn" id="btnAdmin">الإدارة</button>
+    <button class="nav-btn" id="btnAdmin" data-go="admin">الإدارة</button>
     <button class="nav-btn btn-danger" id="btnLogout" style="display:none">خروج</button>
   </nav>
 </header>
@@ -181,7 +226,10 @@ a{color:var(--gold)}
   <section id="hero" class="section hero">
     <h1>حيث ترتقي <em>الأحلام</em> وتُصنع <em>القيادات.</em></h1>
     <p>نصمم مساحات رقمية للطلاب والمبدعين. وسط صخب الحياة الجامعية، نبني بيئة للتركيز العميق والعمل الملهم لدعم رحلتك.</p>
-    <button class="glass btn-hero" data-go="register">ابدأ التسجيل الآن</button>
+    <div class="hero-actions">
+      <button class="glass btn-hero" data-go="register">ابدأ التسجيل للطلاب</button>
+      <button class="glass btn-hero btn-hero-gold" data-go="media">التقديم لفريق الميديا</button>
+    </div>
     <button class="hero-arrow" data-go="about" aria-label="انزل للأسفل"><i class="fas fa-chevron-down"></i></button>
   </section>
 
@@ -205,10 +253,10 @@ a{color:var(--gold)}
     <h2>الأنشطة الطلابية</h2>
     <p class="sub">برامج وفعاليات متنوعة على مدار العام.</p>
     <div class="acts">
-      <div class="act" style="background-image:url('https://res.cloudinary.com/demo/image/upload/w_500,q_auto,f_auto/samples/people/kitchen-bar.jpg')"><span class="tag">قيادة</span><div class="info"><h4>ورش تنمية المهارات</h4><p>تطوير مهارات التواصل والعمل الجماعي</p></div></div>
-      <div class="act" style="background-image:url('https://res.cloudinary.com/demo/image/upload/w_500,q_auto,f_auto/samples/people/boy-snow-hoodie.jpg')"><span class="tag">تطوع</span><div class="info"><h4>القوافل التطوعية</h4><p>مبادرات خدمية داخل وخارج الجامعة</p></div></div>
-      <div class="act" style="background-image:url('https://res.cloudinary.com/demo/image/upload/w_500,q_auto,f_auto/samples/people/smiling-man.jpg')"><span class="tag">ثقافة</span><div class="info"><h4>الأمسيات الثقافية</h4><p>فعاليات ومسابقات فنية وثقافية</p></div></div>
-      <div class="act" style="background-image:url('https://res.cloudinary.com/demo/image/upload/w_500,q_auto,f_auto/samples/landscapes/nature-mountains.jpg')"><span class="tag">رحلات</span><div class="info"><h4>المعسكرات</h4><p>رحلات ترفيهية وتدريبية للطلاب</p></div></div>
+      <a class="act" href="#activity/skills" data-go="activity/skills" style="background-image:url('https://res.cloudinary.com/demo/image/upload/w_500,q_auto,f_auto/samples/people/kitchen-bar.jpg')"><span class="tag">قيادة</span><div class="info"><h4>ورش تنمية المهارات</h4><p>تطوير مهارات التواصل والعمل الجماعي</p><span class="go">عرض التفاصيل</span></div></a>
+      <a class="act" href="#activity/volunteer" data-go="activity/volunteer" style="background-image:url('https://res.cloudinary.com/demo/image/upload/w_500,q_auto,f_auto/samples/people/boy-snow-hoodie.jpg')"><span class="tag">تطوع</span><div class="info"><h4>القوافل التطوعية</h4><p>مبادرات خدمية داخل وخارج الجامعة</p><span class="go">عرض التفاصيل</span></div></a>
+      <a class="act" href="#activity/culture" data-go="activity/culture" style="background-image:url('https://res.cloudinary.com/demo/image/upload/w_500,q_auto,f_auto/samples/people/smiling-man.jpg')"><span class="tag">ثقافة</span><div class="info"><h4>الأمسيات الثقافية</h4><p>فعاليات ومسابقات فنية وثقافية</p><span class="go">عرض التفاصيل</span></div></a>
+      <a class="act" href="#activity/camps" data-go="activity/camps" style="background-image:url('https://res.cloudinary.com/demo/image/upload/w_500,q_auto,f_auto/samples/landscapes/nature-mountains.jpg')"><span class="tag">رحلات</span><div class="info"><h4>المعسكرات</h4><p>رحلات ترفيهية وتدريبية للطلاب</p><span class="go">عرض التفاصيل</span></div></a>
     </div>
   </section>
 
@@ -258,6 +306,50 @@ a{color:var(--gold)}
   </section>
 </main>
 
+
+<!-- ============ صفحة النشاط ============ -->
+<main id="activityView" class="view">
+  <section class="act-hero" id="actBanner">
+    <div class="act-hero-in">
+      <button class="back-link" data-go="activities"><i class="fas fa-arrow-right"></i> كل الأنشطة</button><br>
+      <span class="tag-pill" id="actTag"></span>
+      <h1 id="actTitle"></h1>
+      <p id="actDesc"></p>
+    </div>
+  </section>
+  <section class="section" style="padding-top:36px">
+    <div class="wrap">
+      <div id="actContent"></div>
+      <h3 class="more-title">أنشطة أخرى</h3>
+      <div class="more-acts" id="actMore"></div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ التقديم لفريق الميديا ============ -->
+<main id="mediaView" class="view">
+  <section class="section">
+    <div class="wrap">
+      <button class="back-link" data-go="hero"><i class="fas fa-arrow-right"></i> الرئيسية</button>
+      <div class="glass form-box">
+        <h2>التقديم لفريق الميديا</h2>
+        <p class="sub">للمصورين والمصممين ومحرري الفيديو وصنّاع المحتوى. سجّل بياناتك وأرفق رابط أعمالك لنراجع طلبك.</p>
+        <form id="mediaForm" novalidate>
+          <div class="fg"><label for="mName">الاسم <small>(ثلاثي على الأقل)</small></label><input type="text" id="mName" autocomplete="name" required><div class="err">اكتب اسمك ثلاثياً على الأقل</div></div>
+          <div class="fg"><label for="mPhone">رقم الهاتف (واتساب)</label><input type="tel" id="mPhone" inputmode="numeric" maxlength="11" placeholder="01xxxxxxxxx" dir="ltr" required><div class="err">رقم موبايل مصري صحيح (11 رقم يبدأ بـ 01)</div></div>
+          <div class="fg"><label for="mProfile">الصورة الشخصية</label><input type="file" id="mProfile" accept="image/*" required><div class="err">ارفع صورة شخصية</div></div>
+          <div class="fg"><label for="mCard">صورة الكارنيه</label><input type="file" id="mCard" accept="image/*" required><div class="err">ارفع صورة الكارنيه</div></div>
+          <div class="fg"><label for="mId">صورة البطاقة</label><input type="file" id="mId" accept="image/*" required><div class="err">ارفع صورة البطاقة</div></div>
+          <div class="fg"><label for="mDrive">رابط Google Drive لأعمالك</label><input type="text" id="mDrive" placeholder="https://drive.google.com/..." dir="ltr" required><small class="hint">تأكد أن الرابط متاح لأي شخص لديه الرابط (Anyone with the link).</small><div class="err">اكتب رابط Google Drive صحيح</div></div>
+          <button type="submit" class="btn-main" id="mSubmitBtn">إرسال طلب الانضمام</button>
+          <div class="progress" id="mProgress"><div class="bar"><div class="fill" id="mFill"></div></div><p id="mProgressText"></p></div>
+          <div id="mNotice" class="notice" role="status"></div>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
 <!-- ============ الإدارة ============ -->
 <div id="adminView">
   <div id="loginBox" class="glass login-box">
@@ -279,16 +371,23 @@ a{color:var(--gold)}
         <button class="btn-export" id="btnRefresh" style="background:#555"><i class="fas fa-rotate"></i> تحديث</button>
       </div>
     </div>
-    <div class="stats">
+    <div class="stats" id="studentStats">
       <div class="stat"><h3>الإجمالي</h3><p id="stTotal">0</p></div>
       <div class="stat"><h3>مراجعة</h3><p id="stPending">0</p></div>
       <div class="stat"><h3>مقبول</h3><p id="stAccepted">0</p></div>
       <div class="stat"><h3>مرفوض</h3><p id="stRejected">0</p></div>
     </div>
+    <div class="stats" id="mediaStats" style="display:none">
+      <div class="stat"><h3>إجمالي الميديا</h3><p id="mdTotal">0</p></div>
+      <div class="stat"><h3>مراجعة</h3><p id="mdPending">0</p></div>
+      <div class="stat"><h3>مقبول</h3><p id="mdAccepted">0</p></div>
+      <div class="stat"><h3>مرفوض</h3><p id="mdRejected">0</p></div>
+    </div>
     <div class="tabs">
-      <button class="tab active" id="tabReview">مراجعة الطلبات</button>
-      <button class="tab" id="tabEdit">تعديل البيانات</button>
-      <button class="tab" id="tabSettings">الإعدادات</button> 
+      <button class="tab active" id="tabReview" data-tab="review">مراجعة الطلبات</button>
+      <button class="tab" id="tabEdit" data-tab="edit">تعديل البيانات</button>
+      <button class="tab" id="tabMedia" data-tab="media"><i class="fas fa-camera"></i> فريق الميديا</button>
+      <button class="tab" id="tabSettings" data-tab="settings">الإعدادات</button> 
     </div>
     
     <!-- قسم المراجعة -->
@@ -300,6 +399,12 @@ a{color:var(--gold)}
     <!-- قسم التعديل -->
     <div id="editWrap" class="tbl-wrap" style="display:none">
       <table><thead><tr><th>الصورة</th><th>الاسم</th><th>الهاتف</th><th>الكلية</th><th>الفرقة</th><th>فيسبوك</th><th>إيميل</th><th>الحالة</th><th>حفظ</th></tr></thead><tbody id="editBody"></tbody></table>
+    </div>
+
+    <!-- قسم الميديا -->
+    <div id="mediaWrap" class="tbl-wrap" style="display:none">
+      <div id="mediaLoading" class="notice ok" style="display:none"></div>
+      <table><thead><tr><th>الصورة</th><th>الاسم</th><th>الهاتف</th><th>المرفقات</th><th>الأعمال</th><th>الحالة</th><th>التاريخ</th><th>الإجراء</th></tr></thead><tbody id="mediaBody"></tbody></table>
     </div>
 
     <!-- قسم الإعدادات -->
@@ -342,10 +447,131 @@ a{color:var(--gold)}
   </div>
 </div>
 
+<!-- ====== التنقل: سكريبت عادي مستقل عن Firebase (يشتغل فوراً حتى لو النت بطيء) ====== -->
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var B = "https://res.cloudinary.com/demo/image/upload/w_1200,q_auto,f_auto/samples/";
+
+  /* محتوى صفحات الأنشطة — حط المحتوى لاحقاً في حقل content (HTML) */
+  var ACTS = {
+    skills:    { title: "ورش تنمية المهارات", tag: "قيادة", img: B + "people/kitchen-bar.jpg",       desc: "برامج تدريبية لتطوير مهارات التواصل والعمل الجماعي والقيادة.", content: "" },
+    volunteer: { title: "القوافل التطوعية",   tag: "تطوع", img: B + "people/boy-snow-hoodie.jpg",   desc: "مبادرات خدمية ومجتمعية داخل الجامعة وخارجها.",                 content: "" },
+    culture:   { title: "الأمسيات الثقافية",  tag: "ثقافة", img: B + "people/smiling-man.jpg",      desc: "أمسيات وفعاليات ومسابقات فنية وثقافية.",                      content: "" },
+    camps:     { title: "المعسكرات",          tag: "رحلات", img: B + "landscapes/nature-mountains.jpg", desc: "رحلات ومعسكرات ترفيهية وتدريبية للطلاب.",                 content: "" }
+  };
+
+  var SECTIONS = ["hero", "about", "activities", "status", "register"];
+  var VIEWS = { activity: "activityView", media: "mediaView", admin: "adminView" };
+  var current = null, view = "site";
+
+  function setView(name) {
+    view = name;
+    $("siteView").style.display = name === "site" ? "" : "none";
+    Object.keys(VIEWS).forEach(function (k) { $(VIEWS[k]).classList.toggle("show", k === name); });
+  }
+  function setActive(key) {
+    document.querySelectorAll(".nav-btn[data-go]").forEach(function (b) { b.classList.remove("active"); });
+    var b = key && document.querySelector('.nav-btn[data-go="' + key + '"]');
+    if (b) b.classList.add("active");
+  }
+
+  function renderActivity(key) {
+    var a = ACTS[key];
+    if (!a) return false;
+    $("actBanner").style.backgroundImage = "url('" + a.img + "')";
+    $("actTag").textContent = a.tag;
+    $("actTitle").textContent = a.title;
+    $("actDesc").textContent = a.desc;
+    $("actContent").innerHTML = a.content
+      ? '<div class="glass about-box act-body">' + a.content + "</div>"
+      : '<div class="glass empty"><i class="fas fa-hourglass-half"></i><h3>المحتوى قريباً</h3>' +
+        "<p>سيتم إضافة تفاصيل «" + a.title + "» هنا قريباً.</p>" +
+        '<button class="btn-main" data-go="register">سجّل في المبادرة</button></div>';
+    $("actMore").innerHTML = Object.keys(ACTS).filter(function (k) { return k !== key; }).map(function (k) {
+      return '<a href="#activity/' + k + '" data-go="activity/' + k + '">' + ACTS[k].title + "</a>";
+    }).join("");
+    return true;
+  }
+
+  function render(route) {
+    route = String(route || "").replace(/^#/, "") || "hero";
+    var parts = route.split("/");
+    $("navButtons").classList.remove("show");
+    if (parts[0] === "activity" && ACTS[parts[1]]) {
+      current = route; renderActivity(parts[1]); setView("activity"); setActive("activities"); window.scrollTo(0, 0);
+    } else if (route === "media") {
+      current = route; setView("media"); setActive("media"); window.scrollTo(0, 0);
+    } else if (route === "admin") {
+      current = route; setView("admin"); setActive("admin"); window.scrollTo(0, 0);
+      document.dispatchEvent(new Event("app:admin"));
+    } else {
+      if (SECTIONS.indexOf(route) < 0) route = "hero";
+      current = route; setView("site"); setActive(route === "hero" ? "" : route);
+      setTimeout(function () {
+        if (route === "hero") window.scrollTo({ top: 0, behavior: "smooth" });
+        else $(route).scrollIntoView({ behavior: "smooth" });
+      }, 30);
+    }
+  }
+
+  /* التنقل يشتغل دايماً حتى لو الرابط هو نفسه (كان ده سبب "الزر مبيعملش حاجة") */
+  function navigate(route) {
+    if (location.hash.replace(/^#/, "") !== route) {
+      try { history.pushState(null, "", "#" + route); } catch (e) { location.hash = route; }
+    }
+    render(route);
+  }
+  window.Router = { go: navigate, current: function () { return current; } };
+
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest && e.target.closest("[data-go]");
+    if (!t) return;
+    e.preventDefault();
+    navigate(t.getAttribute("data-go"));
+  });
+  $("menuBtn").addEventListener("click", function () { $("navButtons").classList.toggle("show"); });
+  window.addEventListener("popstate", function () { render(location.hash); });
+  window.addEventListener("hashchange", function () { var r = location.hash.replace(/^#/, ""); if (r !== current) render(r); });
+
+  /* تمييز القسم الحالي في القائمة أثناء التمرير */
+  var io = new IntersectionObserver(function (es) {
+    if (view !== "site") return;
+    es.forEach(function (e) { if (e.isIntersecting) setActive(e.target.id); });
+  }, { rootMargin: "-45% 0px -50% 0px" });
+  ["about", "activities", "status", "register"].forEach(function (id) { io.observe($(id)); });
+
+  /* حماية: منع إعادة تحميل الصفحة عند الإرسال قبل جاهزية الخدمة + رسالة واضحة */
+  var banner = $("svcBanner");
+  function showBanner(msg) { banner.firstElementChild.textContent = msg; banner.classList.add("show"); }
+  window.__svcFail = function () { showBanner("تعذر الاتصال بالخدمة. تأكد من الإنترنت ثم أعد التحميل."); };
+  window.__svcReady = function () { window.__appReady = true; banner.classList.remove("show"); };
+  document.addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (!window.__appReady) showBanner("الخدمة لسه بتتحمل، استنى ثواني وجرب تاني.");
+  }, true);
+  setTimeout(function () { if (!window.__appReady) showBanner("الاتصال بالخدمة بطيء… تأكد من الإنترنت."); }, 8000);
+
+  if (location.hash.length > 1) render(location.hash); else current = "hero";
+})();
+</script>
+
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, getDoc, doc, writeBatch, serverTimestamp, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+const FB_BASE = "https://www.gstatic.com/firebasejs/10.8.0/";
+async function loadFirebase() {
+  let last;
+  for (let i = 0; i < 3; i++) {
+    try { return await Promise.all([import(FB_BASE + "firebase-app.js"), import(FB_BASE + "firebase-auth.js"), import(FB_BASE + "firebase-firestore.js")]); }
+    catch (e) { last = e; await new Promise(r => setTimeout(r, 1200 * (i + 1))); }
+  }
+  throw last;
+}
+let FB;
+try { FB = await loadFirebase(); } catch (e) { console.error("Firebase load failed", e); window.__svcFail(); throw e; }
+const { initializeApp } = FB[0];
+const { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } = FB[1];
+const { getFirestore, collection, getDocs, getDoc, doc, writeBatch, serverTimestamp, onSnapshot, setDoc, updateDoc, deleteDoc } = FB[2];
 
 const app = initializeApp({
   apiKey: "AIzaSyCNDOwLJXeCCdlcW-ffxbggbiETS86r3mc",
@@ -368,7 +594,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function retry(fn, tries = 4) {
   let last;
   for (let i = 0; i < tries; i++) {
-    try { return await fn(i); } catch (e) { last = e; await sleep(800 * 2 ** i + Math.random() * 700); }
+    try { return await fn(i); } catch (e) { last = e; if (e && e.code === "permission-denied") throw e; if (i < tries - 1) await sleep(800 * 2 ** i + Math.random() * 700); }
   }
   throw last;
 }
@@ -425,40 +651,22 @@ const GALLERY = [
 $("gallery").innerHTML = "<h3>معرض الصور والفعاليات</h3>" + GALLERY.map(([f,t,p]) =>
   `<article class="g-item"><img src="${encodeURI(f)}" alt="${esc(t)}" loading="lazy" decoding="async"><div class="g-cap"><h4>${esc(t)}</h4><p>${esc(p)}</p></div></article>`).join("");
 
-/* ---------- التنقل ---------- */
-const siteView = $("siteView"), adminView = $("adminView");
-const navButtons = $("navButtons");
-$("menuBtn").onclick = () => navButtons.classList.toggle("show");
-
-function showSite(id) {
-  adminView.classList.remove("show"); siteView.style.display = "";
-  setTimeout(() => (id === "hero" ? window.scrollTo({top:0,behavior:"smooth"}) : $(id).scrollIntoView({behavior:"smooth"})), 30);
-}
-document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => { navButtons.classList.remove("show"); showSite(b.dataset.go); }));
-
-const navMap = {};
-document.querySelectorAll(".nav-btn[data-go]").forEach(b => navMap[b.dataset.go] = b);
-const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting && navMap[e.target.id]) { Object.values(navMap).forEach(x => x.classList.remove("active")); navMap[e.target.id].classList.add("active"); } }), { rootMargin: "-45% 0px -50% 0px" });
-["about","activities","status","register"].forEach(id => io.observe($(id)));
-
-$("btnAdmin").onclick = () => {
-  navButtons.classList.remove("show");
-  siteView.style.display = "none"; adminView.classList.add("show"); window.scrollTo(0,0);
+/* ---------- الإدارة: الدخول والخروج (التنقل نفسه في السكريبت العادي فوق) ---------- */
+const adminView = $("adminView");
+function enterAdmin() {
   const logged = !!auth.currentUser;
   $("loginBox").style.display = logged ? "none" : ""; $("dash").style.display = logged ? "" : "none";
   if (logged) fetchStudents();
-};
-
-$("btnLogout").onclick = () => signOut(auth).then(() => { 
-  if (unsubscribe) unsubscribe(); 
-  showSite("hero"); 
-});
-
+}
+document.addEventListener("app:admin", enterAdmin);
+function stopListeners() { if (unsubscribe) unsubscribe(); if (unsubMedia) unsubMedia(); }
+$("btnLogout").onclick = () => signOut(auth).then(() => { stopListeners(); Router.go("hero"); });
 onAuthStateChanged(auth, user => {
   $("btnLogout").style.display = user ? "" : "none";
   if (user && adminView.classList.contains("show")) { $("loginBox").style.display = "none"; $("dash").style.display = ""; fetchStudents(); }
 });
-$("loginForm").addEventListener("submit", e => {   e.preventDefault(); $("loginError").style.display = "none";
+$("loginForm").addEventListener("submit", e => {
+  e.preventDefault(); $("loginError").style.display = "none";
   signInWithEmailAndPassword(auth, $("adminEmail").value, $("adminPassword").value).catch(() => $("loginError").style.display = "block");
 });
 
@@ -617,6 +825,7 @@ function filtered() {
 function fetchStudents() {
   const load = $("dataLoading"); load.style.display = "block"; load.textContent = "جاري جلب البيانات...";
   if (unsubscribe) unsubscribe();
+  fetchMedia();
 
   unsubscribe = onSnapshot(collection(db, "students"), (snap) => {
     cache = snap.docs.map(s => ({ id: s.id, data: s.data() }))
@@ -635,29 +844,32 @@ function fetchStudents() {
   });
 }
 
-$("adminSearch").addEventListener("input", () => render(filtered()));
+$("adminSearch").addEventListener("input", () => { render(filtered()); renderMedia(filteredMedia()); });
 $("btnRefresh").onclick = fetchStudents;
 
-/* ---------- التنقل بين تابات الإدارة ---------- */
-$("tabReview").onclick = () => { $("tabReview").classList.add("active"); $("tabEdit").classList.remove("active"); $("tabSettings").classList.remove("active"); $("reviewWrap").style.display = ""; $("editWrap").style.display = "none"; $("settingsWrap").style.display = "none"; };
-$("tabEdit").onclick = () => { $("tabEdit").classList.add("active"); $("tabReview").classList.remove("active"); $("tabSettings").classList.remove("active"); $("reviewWrap").style.display = "none"; $("editWrap").style.display = ""; $("settingsWrap").style.display = "none"; };
-
-// إعدادات السوشيال ميديا
-$("tabSettings").onclick = async () => { 
-  $("tabSettings").classList.add("active"); $("tabReview").classList.remove("active"); $("tabEdit").classList.remove("active"); 
-  $("reviewWrap").style.display = "none"; $("editWrap").style.display = "none"; $("settingsWrap").style.display = "block";
-  
-  const snap = await getDoc(doc(db, "settings", "social_links"));
-  if (snap.exists()) {
+/* ---------- تابات الإدارة ---------- */
+const PANEL = { review: "reviewWrap", edit: "editWrap", media: "mediaWrap", settings: "settingsWrap" };
+let activeTab = "review";
+async function loadSettingsForm() {
+  try {
+    const snap = await getDoc(doc(db, "settings", "social_links"));
+    if (!snap.exists()) return;
     const data = snap.data();
-    $("adminWa").value = data.whatsapp || "";
-    $("adminWa2").value = data.whatsapp2 || "";
-    $("adminFb").value = data.facebook || "";
-    $("adminFb2").value = data.facebook2 || "";
-    $("adminInsta").value = data.instagram || "";
-    $("adminTiktok").value = data.tiktok || "";
-  }
-};
+    $("adminWa").value = data.whatsapp || ""; $("adminWa2").value = data.whatsapp2 || "";
+    $("adminFb").value = data.facebook || ""; $("adminFb2").value = data.facebook2 || "";
+    $("adminInsta").value = data.instagram || ""; $("adminTiktok").value = data.tiktok || "";
+  } catch (e) { console.error(e); }
+}
+function setTab(name) {
+  activeTab = name;
+  document.querySelectorAll(".tabs .tab").forEach(t => t.classList.toggle("active", t.dataset.tab === name));
+  Object.values(PANEL).forEach(id => $(id).style.display = "none");
+  $(PANEL[name]).style.display = "";
+  $("studentStats").style.display = name === "media" ? "none" : "";
+  $("mediaStats").style.display = name === "media" ? "" : "none";
+  if (name === "settings") loadSettingsForm();
+}
+document.querySelectorAll(".tabs .tab").forEach(t => t.addEventListener("click", () => setTab(t.dataset.tab)));
 
 /* ---------- حفظ إعدادات السوشيال ميديا ---------- */
 $("btnSaveSettings").onclick = async () => {
@@ -707,7 +919,8 @@ document.addEventListener("click", async e => {
   } catch { alert("حدث خطأ أثناء الحفظ، حاول مرة أخرى."); }
 });
 
-$("btnExport").onclick = () => {
+function exportStudents() {
+  if (typeof XLSX === "undefined") return alert("مكتبة Excel لم تُحمَّل بعد، أعد المحاولة بعد ثواني.");
   const data = filtered(); if (!data.length) return alert("لا توجد بيانات!");
   const rows = data.map(({ data: d }) => ({
     "الرقم القومي": d.nationalId, "الاسم": d.fullName, "الهاتف": d.phone, "الكلية": d.college, "الفرقة": d.level,
@@ -717,7 +930,129 @@ $("btnExport").onclick = () => {
   }));
   const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "الطلاب");
   XLSX.writeFile(wb, `الطلاب-${new Date().toISOString().slice(0,10)}.xlsx`);
-};
+}
+
+/* ---------- التقديم لفريق الميديا (صفحة الزوار) ---------- */
+const mForm = $("mediaForm");
+const DRIVE_RE = /^(https?:\/\/)?(drive\.google\.com|docs\.google\.com|drive\.app\.goo\.gl)\//i;
+function validateMedia() {
+  const v = id => toLatin($(id).value);
+  let bad = false;
+  bad |= setInvalid("mName", v("mName").split(/\s+/).filter(Boolean).length < 3);
+  bad |= setInvalid("mPhone", !/^01[0125]\d{8}$/.test(v("mPhone")));
+  bad |= setInvalid("mDrive", !DRIVE_RE.test(v("mDrive")));
+  ["mProfile", "mCard", "mId"].forEach(id => { const f = $(id).files[0]; bad |= setInvalid(id, !f || !f.type.startsWith("image/")); });
+  return !bad;
+}
+$("mPhone").addEventListener("input", e => e.target.value = toLatin(e.target.value).replace(/\D/g, ""));
+
+let mSubmitting = false;
+mForm.addEventListener("submit", async e => {
+  e.preventDefault();
+  if (mSubmitting) return;
+  const box = $("mNotice"); box.className = "notice";
+  if (!validateMedia()) { notice(box, "bad", "راجع الحقول المظللة بالأحمر ثم أعد الإرسال."); mForm.querySelector(".invalid")?.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
+  if (!navigator.onLine) { notice(box, "bad", "لا يوجد اتصال بالإنترنت. بياناتك ما زالت في الصفحة، أعد المحاولة عند عودة الاتصال."); return; }
+
+  mSubmitting = true; $("mSubmitBtn").disabled = true; $("mProgress").style.display = "block";
+  const setP = (n, t) => { $("mFill").style.width = n + "%"; $("mProgressText").textContent = t; };
+  try {
+    setP(5, "جاري رفع الصور...");
+    let done = 0;
+    const tick = () => setP(5 + (++done) * 25, `تم رفع ${done} من 3 صور`);
+    const [profileUrl, cardUrl, idUrl] = await Promise.all([
+      uploadImage($("mProfile").files[0], "mp", tick),
+      uploadImage($("mCard").files[0], "mc", tick),
+      uploadImage($("mId").files[0], "mi", tick)
+    ]);
+    setP(90, "جاري حفظ البيانات...");
+    const phone = toLatin($("mPhone").value);
+    let drive = toLatin($("mDrive").value); if (!/^https?:\/\//i.test(drive)) drive = "https://" + drive;
+    await retry(() => setDoc(doc(db, "media_applicants", phone), {
+      fullName: $("mName").value.trim().replace(/\s+/g, " "), phone, driveLink: drive,
+      profileImageUrl: profileUrl, studentCardUrl: cardUrl, idCardUrl: idUrl,
+      status: "pending", timestamp: serverTimestamp()
+    }), 3);
+    setP(100, "تم!");
+    notice(box, "ok", "تم إرسال طلبك بنجاح ✅ سنراجع أعمالك ونتواصل معك على واتساب.");
+    mForm.reset(); uploaded.clear();
+  } catch (err) {
+    const denied = err && err.code === "permission-denied";
+    notice(box, "bad", denied
+      ? "هذا الرقم مسجل من قبل، أو لا توجد صلاحية للإرسال. تواصل معنا على واتساب."
+      : "تعذر إتمام الإرسال بسبب ضعف الاتصال. بياناتك وصورك ما زالت في الصفحة، اضغط «إرسال طلب الانضمام» مرة أخرى.");
+  } finally {
+    mSubmitting = false; $("mSubmitBtn").disabled = false; setTimeout(() => $("mProgress").style.display = "none", 800);
+  }
+});
+
+/* ---------- لوحة الإدارة: فريق الميديا ---------- */
+let mediaCache = [];
+let unsubMedia = null;
+const waHref = p => `https://wa.me/20${String(p || "").replace(/\D/g, "").replace(/^0/, "")}`;
+
+function filteredMedia() {
+  const t = toLatin($("adminSearch").value).toLowerCase();
+  return !t ? mediaCache : mediaCache.filter(s => `${s.data.fullName} ${s.data.phone}`.toLowerCase().includes(t));
+}
+function renderMedia(list) {
+  $("mediaBody").innerHTML = list.length ? list.map(({ id, data: d }) => {
+    const img = d.profileImageUrl ? `<a href="${safeUrl(d.profileImageUrl)}" target="_blank" rel="noopener"><img src="${safeUrl(d.profileImageUrl)}" class="thumb" alt=""></a>` : "-";
+    const date = d.timestamp?.toDate ? d.timestamp.toDate().toLocaleDateString("ar-EG") : "-";
+    return `<tr>
+      <td>${img}</td><td>${esc(d.fullName)}</td>
+      <td dir="ltr">${esc(d.phone)} <a href="${waHref(d.phone)}" target="_blank" rel="noopener" aria-label="واتساب"><i class="fab fa-whatsapp" style="color:#25D366;font-size:18px"></i></a></td>
+      <td><a href="${safeUrl(d.idCardUrl)}" target="_blank" rel="noopener">بطاقة</a> | <a href="${safeUrl(d.studentCardUrl)}" target="_blank" rel="noopener">كارنيه</a></td>
+      <td><a href="${safeUrl(d.driveLink)}" target="_blank" rel="noopener"><i class="fab fa-google-drive"></i> الأعمال</a></td>
+      <td>${badge(d.status)}</td><td>${date}</td>
+      <td><button class="btn-sm b-ok" data-mact="accepted" data-id="${esc(id)}">✔ قبول</button>
+          <button class="btn-sm b-bad" data-mact="rejected" data-id="${esc(id)}">✖ رفض</button>
+          <button class="btn-sm b-del" data-mact="delete" data-id="${esc(id)}">🗑 مسح</button></td></tr>`;
+  }).join("") : `<tr><td colspan="8" style="padding:24px;color:var(--muted)">لا توجد طلبات ميديا حتى الآن.</td></tr>`;
+}
+function fetchMedia() {
+  const load = $("mediaLoading");
+  if (unsubMedia) unsubMedia();
+  unsubMedia = onSnapshot(collection(db, "media_applicants"), snap => {
+    mediaCache = snap.docs.map(s => ({ id: s.id, data: s.data() }))
+      .sort((a, b) => (b.data.timestamp?.seconds || 0) - (a.data.timestamp?.seconds || 0));
+    const c = st => mediaCache.filter(x => (x.data.status || "pending") === st).length;
+    $("mdTotal").textContent = mediaCache.length; $("mdPending").textContent = c("pending");
+    $("mdAccepted").textContent = c("accepted"); $("mdRejected").textContent = c("rejected");
+    renderMedia(filteredMedia()); load.style.display = "none";
+  }, () => {
+    load.className = "notice bad"; load.style.display = "block";
+    load.textContent = "خطأ في جلب طلبات الميديا. تأكد من إضافة صلاحيات media_applicants في Firestore Rules.";
+  });
+}
+document.addEventListener("click", async e => {
+  const btn = e.target.closest("[data-mact]"); if (!btn) return;
+  const id = btn.dataset.id, act = btn.dataset.mact;
+  try {
+    if (act === "delete") {
+      if (!confirm("هل أنت متأكد من مسح هذا الطلب؟ لا يمكن التراجع.")) return;
+      await deleteDoc(doc(db, "media_applicants", id));
+    } else {
+      await updateDoc(doc(db, "media_applicants", id), { status: act });
+    }
+  } catch { alert("حدث خطأ أثناء الحفظ، حاول مرة أخرى."); }
+});
+function exportMedia() {
+  if (typeof XLSX === "undefined") return alert("مكتبة Excel لم تُحمَّل بعد، أعد المحاولة بعد ثواني.");
+  const data = filteredMedia(); if (!data.length) return alert("لا توجد بيانات!");
+  const rows = data.map(({ data: d }) => ({
+    "الاسم": d.fullName, "الهاتف": d.phone, "رابط الأعمال": d.driveLink, "الحالة": STAT[d.status] || "مراجعة",
+    "التاريخ": d.timestamp?.toDate ? d.timestamp.toDate().toLocaleString("ar-EG") : "",
+    "صورة": d.profileImageUrl, "بطاقة": d.idCardUrl, "كارنيه": d.studentCardUrl
+  }));
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "الميديا");
+  XLSX.writeFile(wb, `الميديا-${new Date().toISOString().slice(0,10)}.xlsx`);
+}
+$("btnExport").onclick = () => activeTab === "media" ? exportMedia() : exportStudents();
+
+/* ---------- جاهزية التطبيق ---------- */
+window.__svcReady();
+if (Router.current() === "admin") enterAdmin();
 </script>
 </body>
 </html>
