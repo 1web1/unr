@@ -95,6 +95,14 @@ option{background:#1a1a1a;color:#fff}
 .badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:800;color:#fff;white-space:nowrap}
 .badge-pending{background:var(--warn);color:#000}.badge-accepted{background:var(--ok)}.badge-rejected{background:var(--bad)}
 
+/* Role Select Buttons */
+.role-options { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 5px; }
+.role-btn { background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.2); color: #fff; padding: 8px 16px; border-radius: 30px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-family: inherit; font-size: 13px; transition: .25s; }
+.role-btn:hover { background: rgba(255,255,255,.1); }
+.role-btn .circle { width: 14px; height: 14px; border-radius: 50%; border: 2px solid rgba(255,255,255,.4); display: inline-block; transition: .25s; }
+.role-btn.selected { border-color: var(--bad); background: rgba(220,53,69,.1); }
+.role-btn.selected .circle { border-color: var(--bad); background: var(--bad); box-shadow: 0 0 8px rgba(220,53,69,.6); }
+
 /* Admin */
 #adminView{display:none;padding:24px 14px;min-height:calc(100vh - var(--nav-h))}
 #adminView.show{display:block}
@@ -123,7 +131,7 @@ a{color:var(--gold)}
 
 /* Floating Social Media Buttons */
 .floating{position:fixed;bottom:18px;left:18px;display:flex;flex-direction:column;gap:10px;z-index:999}
-.fbtn{width:50px;height:50px;border-radius:50%;justify-content:center;align-items:center;color:#fff;font-size:24px;text-decoration:none;box-shadow:0 4px 15px rgba(0,0,0,.35);transition:.25s; display:none; /* مخفية افتراضياً لحين سحب الروابط */}
+.fbtn{width:50px;height:50px;border-radius:50%;justify-content:center;align-items:center;color:#fff;font-size:24px;text-decoration:none;box-shadow:0 4px 15px rgba(0,0,0,.35);transition:.25s; display:none;}
 .fbtn:hover{transform:translateY(-4px) scale(1.08);color:#fff}
 .wa{background:linear-gradient(135deg,#25D366,#128C7E)}
 .fb{background:linear-gradient(135deg,#1877F2,#0b4fb3)}
@@ -221,7 +229,6 @@ a.act:hover{transform:translateY(-4px);border-color:var(--gold)}
   </nav>
 </header>
 
-<!-- ============ الموقع العام (صفحة واحدة) ============ -->
 <main id="siteView">
   <section id="hero" class="section hero">
     <h1>حيث ترتقي <em>الأحلام</em> وتُصنع <em>القيادات.</em></h1>
@@ -294,7 +301,7 @@ a.act:hover{transform:translateY(-4px);border-color:var(--gold)}
               <option value="الأولى">الفرقة الأولى</option><option value="الثانية">الفرقة الثانية</option><option value="الثالثة">الفرقة الثالثة</option><option value="الرابعة">الفرقة الرابعة</option></select><div class="err">اختر الفرقة</div></div>
           <div class="fg"><label for="facebookLink">رابط حساب الفيسبوك</label><input type="text" id="facebookLink" placeholder="facebook.com/username" dir="ltr" required><div class="err">اكتب رابط فيسبوك صحيح</div></div>
           <div class="fg"><label for="gmail">البريد الإلكتروني (Gmail)</label><input type="email" id="gmail" placeholder="example@gmail.com" dir="ltr" required><div class="err">بريد إلكتروني غير صحيح</div></div>
-          <div class="fg"><label for="profileImage">الصورة الشخصية</label><input type="file" id="profileImage" accept="image/*" required><div class="err">ارفع صورة شخصية</div></div>
+          <div class="fg"><label for="profileImage">الصورة الشخصية <small style="color:var(--warn); font-weight:800; font-size:12px; margin-right:5px;">(يجب أن تكون صورة شخصية لائقة وليس سيلفي)</small></label><input type="file" id="profileImage" accept="image/*" required><div class="err">ارفع صورة شخصية</div></div>
           <div class="fg"><label for="idImage">صورة البطاقة</label><input type="file" id="idImage" accept="image/*" required><div class="err">ارفع صورة البطاقة</div></div>
           <div class="fg"><label for="cardImage">صورة الكارنيه أو بطاقة الترشيح</label><input type="file" id="cardImage" accept="image/*" required><div class="err">ارفع صورة الكارنيه أو بطاقة الترشيح</div></div>
           <button type="submit" class="btn-main" id="submitBtn">إرسال البيانات</button>
@@ -337,10 +344,23 @@ a.act:hover{transform:translateY(-4px);border-color:var(--gold)}
         <form id="mediaForm" novalidate>
           <div class="fg"><label for="mName">الاسم <small>(ثلاثي على الأقل)</small></label><input type="text" id="mName" autocomplete="name" required><div class="err">اكتب اسمك ثلاثياً على الأقل</div></div>
           <div class="fg"><label for="mPhone">رقم الهاتف (واتساب)</label><input type="tel" id="mPhone" inputmode="numeric" maxlength="11" placeholder="01xxxxxxxxx" dir="ltr" required><div class="err">رقم موبايل مصري صحيح (11 رقم يبدأ بـ 01)</div></div>
-          <div class="fg"><label for="mProfile">الصورة الشخصية</label><input type="file" id="mProfile" accept="image/*" required><div class="err">ارفع صورة شخصية</div></div>
+          
+          <div class="fg">
+            <label>التخصص <small>(يمكنك اختيار أكثر من تخصص)</small></label>
+            <div class="role-options" id="mRoles">
+              <button type="button" class="role-btn" data-role="مصور فيديو"><span class="circle"></span>مصور فيديو</button>
+              <button type="button" class="role-btn" data-role="مصور صور"><span class="circle"></span>مصور صور</button>
+              <button type="button" class="role-btn" data-role="مونتير"><span class="circle"></span>مونتير</button>
+              <button type="button" class="role-btn" data-role="جرافيك ديزاينر"><span class="circle"></span>جرافيك ديزاينر</button>
+            </div>
+            <div class="err">الرجاء اختيار تخصص واحد على الأقل</div>
+          </div>
+
+          <div class="fg"><label for="mProfile">الصورة الشخصية <small style="color:var(--warn); font-weight:800; font-size:12px; margin-right:5px;">(يجب أن تكون صورة شخصية لائقة وليس سيلفي)</small></label><input type="file" id="mProfile" accept="image/*" required><div class="err">ارفع صورة شخصية</div></div>
           <div class="fg"><label for="mCard">صورة الكارنيه</label><input type="file" id="mCard" accept="image/*" required><div class="err">ارفع صورة الكارنيه</div></div>
           <div class="fg"><label for="mId">صورة البطاقة</label><input type="file" id="mId" accept="image/*" required><div class="err">ارفع صورة البطاقة</div></div>
           <div class="fg"><label for="mDrive">رابط Google Drive لأعمالك</label><input type="text" id="mDrive" placeholder="https://drive.google.com/..." dir="ltr" required><small class="hint">تأكد أن الرابط متاح لأي شخص لديه الرابط (Anyone with the link).</small><div class="err">اكتب رابط Google Drive صحيح</div></div>
+          
           <button type="submit" class="btn-main" id="mSubmitBtn">إرسال طلب الانضمام</button>
           <div class="progress" id="mProgress"><div class="bar"><div class="fill" id="mFill"></div></div><p id="mProgressText"></p></div>
           <div id="mNotice" class="notice" role="status"></div>
@@ -404,7 +424,7 @@ a.act:hover{transform:translateY(-4px);border-color:var(--gold)}
     <!-- قسم الميديا -->
     <div id="mediaWrap" class="tbl-wrap" style="display:none">
       <div id="mediaLoading" class="notice ok" style="display:none"></div>
-      <table><thead><tr><th>الصورة</th><th>الاسم</th><th>الهاتف</th><th>المرفقات</th><th>الأعمال</th><th>الحالة</th><th>التاريخ</th><th>الإجراء</th></tr></thead><tbody id="mediaBody"></tbody></table>
+      <table><thead><tr><th>الصورة</th><th>الاسم</th><th>التخصص</th><th>الهاتف</th><th>المرفقات</th><th>الأعمال</th><th>الحالة</th><th>التاريخ</th><th>الإجراء</th></tr></thead><tbody id="mediaBody"></tbody></table>
     </div>
 
     <!-- قسم الإعدادات -->
@@ -454,7 +474,6 @@ a.act:hover{transform:translateY(-4px);border-color:var(--gold)}
   var $ = function (id) { return document.getElementById(id); };
   var B = "https://res.cloudinary.com/demo/image/upload/w_1200,q_auto,f_auto/samples/";
 
-  /* محتوى صفحات الأنشطة — حط المحتوى لاحقاً في حقل content (HTML) */
   var ACTS = {
     skills:    { title: "ورش تنمية المهارات", tag: "قيادة", img: B + "people/kitchen-bar.jpg",       desc: "برامج تدريبية لتطوير مهارات التواصل والعمل الجماعي والقيادة.", content: "" },
     volunteer: { title: "القوافل التطوعية",   tag: "تطوع", img: B + "people/boy-snow-hoodie.jpg",   desc: "مبادرات خدمية ومجتمعية داخل الجامعة وخارجها.",                 content: "" },
@@ -516,7 +535,6 @@ a.act:hover{transform:translateY(-4px);border-color:var(--gold)}
     }
   }
 
-  /* التنقل يشتغل دايماً حتى لو الرابط هو نفسه (كان ده سبب "الزر مبيعملش حاجة") */
   function navigate(route) {
     if (location.hash.replace(/^#/, "") !== route) {
       try { history.pushState(null, "", "#" + route); } catch (e) { location.hash = route; }
@@ -535,14 +553,12 @@ a.act:hover{transform:translateY(-4px);border-color:var(--gold)}
   window.addEventListener("popstate", function () { render(location.hash); });
   window.addEventListener("hashchange", function () { var r = location.hash.replace(/^#/, ""); if (r !== current) render(r); });
 
-  /* تمييز القسم الحالي في القائمة أثناء التمرير */
   var io = new IntersectionObserver(function (es) {
     if (view !== "site") return;
     es.forEach(function (e) { if (e.isIntersecting) setActive(e.target.id); });
   }, { rootMargin: "-45% 0px -50% 0px" });
   ["about", "activities", "status", "register"].forEach(function (id) { io.observe($(id)); });
 
-  /* حماية: منع إعادة تحميل الصفحة عند الإرسال قبل جاهزية الخدمة + رسالة واضحة */
   var banner = $("svcBanner");
   function showBanner(msg) { banner.firstElementChild.textContent = msg; banner.classList.add("show"); }
   window.__svcFail = function () { showBanner("تعذر الاتصال بالخدمة. تأكد من الإنترنت ثم أعد التحميل."); };
@@ -586,7 +602,6 @@ const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/wbmanqyt/image/upload";
 const PRESET = "cairo_uni_preset";
 const $ = id => document.getElementById(id);
 
-/* ---------- أدوات أمان ---------- */
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const safeUrl = u => { try { const x = new URL(u); return (x.protocol === "https:" || x.protocol === "http:") ? x.href : "#"; } catch { return "#"; } };
 const toLatin = s => String(s).replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[۰-۹]/g, d => "۰۱۲۳۴۵۶۷۸۹".indexOf(d)).trim();
@@ -599,19 +614,16 @@ async function retry(fn, tries = 4) {
   throw last;
 }
 
-/* ---------- جلب وتطبيق روابط السوشيال ميديا ---------- */
 async function loadSocialLinks() {
   try {
     const snap = await getDoc(doc(db, "settings", "social_links"));
-    
-    // دالة مساعدة لتطبيق الرابط وإظهار/إخفاء الزر
     const applyLink = (elementId, url, isWhatsapp = false) => {
       const el = $(elementId);
       if (url && url.trim() !== "") {
         el.href = isWhatsapp ? `https://wa.me/${url}` : url;
-        el.style.display = "flex"; // إظهار الزر
+        el.style.display = "flex"; 
       } else {
-        el.style.display = "none"; // إخفاء الزر إذا لم يوجد رابط
+        el.style.display = "none"; 
       }
     };
 
@@ -624,10 +636,8 @@ async function loadSocialLinks() {
       applyLink("instaLink", data.instagram);
       applyLink("tiktokLink", data.tiktok);
     } else {
-      // الروابط الافتراضية إذا لم تكن الإعدادات محفوظة بعد
       applyLink("waLink", "201099583667", true);
       applyLink("fbLink", "https://www.facebook.com/share/19PMpQ3kAy/?mibextid=wwXIfr");
-      // الباقي سيكون مخفي تلقائياً
     }
   } catch (e) {
     console.error("خطأ في جلب الروابط:", e);
@@ -635,7 +645,6 @@ async function loadSocialLinks() {
 }
 loadSocialLinks();
 
-/* ---------- معرض الصور ---------- */
 const GALLERY = [
   ["Screenshot 2026-09-23 162915.png","تعريف المبادرة","مبادرة طلاب من أجل مصر هي حركة طلابية في الجامعات المصرية تهدف إلى تنمية الوعي الوطني والمساهمة في خطط التنمية المستدامة في مصر."],
   ["Screenshot 2026-09-23 162941.png","أهداف المبادرة","تشمل أهدافها: إعداد قادة المستقبل، ودعم ريادة الأعمال لدى الشباب، وتعزيز العمل الجماعي، والمسؤولية المجتمعية، وإطلاق طاقات الطلاب الإبداعية."],
@@ -651,7 +660,6 @@ const GALLERY = [
 $("gallery").innerHTML = "<h3>معرض الصور والفعاليات</h3>" + GALLERY.map(([f,t,p]) =>
   `<article class="g-item"><img src="${encodeURI(f)}" alt="${esc(t)}" loading="lazy" decoding="async"><div class="g-cap"><h4>${esc(t)}</h4><p>${esc(p)}</p></div></article>`).join("");
 
-/* ---------- الإدارة: الدخول والخروج (التنقل نفسه في السكريبت العادي فوق) ---------- */
 const adminView = $("adminView");
 function enterAdmin() {
   const logged = !!auth.currentUser;
@@ -665,12 +673,10 @@ onAuthStateChanged(auth, user => {
   $("btnLogout").style.display = user ? "" : "none";
   if (user && adminView.classList.contains("show")) { $("loginBox").style.display = "none"; $("dash").style.display = ""; fetchStudents(); }
 });
-$("loginForm").addEventListener("submit", e => {
-  e.preventDefault(); $("loginError").style.display = "none";
+$("loginForm").addEventListener("submit", e => {   e.preventDefault(); $("loginError").style.display = "none";
   signInWithEmailAndPassword(auth, $("adminEmail").value, $("adminPassword").value).catch(() => $("loginError").style.display = "block");
 });
 
-/* ---------- رفع الصور ---------- */
 const uploaded = new Map();
 async function uploadImage(file, label, onDone) {
   const key = `${label}|${file.name}|${file.size}|${file.lastModified}`;
@@ -687,7 +693,6 @@ async function uploadImage(file, label, onDone) {
   uploaded.set(key, url); onDone(); return url;
 }
 
-/* ---------- التسجيل ---------- */
 const form = $("regForm");
 function setInvalid(id, bad) { $(id).closest(".fg").classList.toggle("invalid", bad); return bad; }
 function validate() {
@@ -758,7 +763,6 @@ form.addEventListener("submit", async e => {
 });
 ["nationalId","phone","searchNid"].forEach(id => $(id).addEventListener("input", e => e.target.value = toLatin(e.target.value).replace(/\D/g, "")));
 
-/* ---------- الاستعلام عن الحالة ---------- */
 $("statusForm").addEventListener("submit", async e => {
   e.preventDefault();
   const nid = toLatin($("searchNid").value), err = $("statusErr"), res = $("statusResult");
@@ -777,7 +781,6 @@ $("statusForm").addEventListener("submit", async e => {
   finally { $("statusBtn").disabled = false; }
 });
 
-/* ---------- لوحة الإدارة ---------- */
 let cache = [];
 let unsubscribe = null; 
 
@@ -847,7 +850,6 @@ function fetchStudents() {
 $("adminSearch").addEventListener("input", () => { render(filtered()); renderMedia(filteredMedia()); });
 $("btnRefresh").onclick = fetchStudents;
 
-/* ---------- تابات الإدارة ---------- */
 const PANEL = { review: "reviewWrap", edit: "editWrap", media: "mediaWrap", settings: "settingsWrap" };
 let activeTab = "review";
 async function loadSettingsForm() {
@@ -855,9 +857,9 @@ async function loadSettingsForm() {
     const snap = await getDoc(doc(db, "settings", "social_links"));
     if (!snap.exists()) return;
     const data = snap.data();
-    $("adminWa").value = data.whatsapp || ""; $("adminWa2").value = data.whatsapp2 || "";
-    $("adminFb").value = data.facebook || ""; $("adminFb2").value = data.facebook2 || "";
-    $("adminInsta").value = data.instagram || ""; $("adminTiktok").value = data.tiktok || "";
+    $("adminWa").value = data.whatsapp \vert{}\vert{} ""; $("adminWa2").value = data.whatsapp2 || "";
+    $("adminFb").value = data.facebook \vert{}\vert{} ""; $("adminFb2").value = data.facebook2 || "";
+    $("adminInsta").value = data.instagram \vert{}\vert{} ""; $("adminTiktok").value = data.tiktok || "";
   } catch (e) { console.error(e); }
 }
 function setTab(name) {
@@ -871,7 +873,6 @@ function setTab(name) {
 }
 document.querySelectorAll(".tabs .tab").forEach(t => t.addEventListener("click", () => setTab(t.dataset.tab)));
 
-/* ---------- حفظ إعدادات السوشيال ميديا ---------- */
 $("btnSaveSettings").onclick = async () => {
   const btn = $("btnSaveSettings");
   const noticeBox = $("settingsNotice");
@@ -932,9 +933,20 @@ function exportStudents() {
   XLSX.writeFile(wb, `الطلاب-${new Date().toISOString().slice(0,10)}.xlsx`);
 }
 
-/* ---------- التقديم لفريق الميديا (صفحة الزوار) ---------- */
+/* ---------- التقديم لفريق الميديا ---------- */
 const mForm = $("mediaForm");
 const DRIVE_RE = /^(https?:\/\/)?(drive\.google\.com|docs\.google\.com|drive\.app\.goo\.gl)\//i;
+
+// تشغيل اختيار الأزرار لتخصصات الميديا
+document.querySelectorAll(".role-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    btn.classList.toggle("selected");
+    if(document.querySelectorAll("#mRoles .role-btn.selected").length > 0) {
+      $("mRoles").closest(".fg").classList.remove("invalid");
+    }
+  });
+});
+
 function validateMedia() {
   const v = id => toLatin($(id).value);
   let bad = false;
@@ -942,6 +954,16 @@ function validateMedia() {
   bad |= setInvalid("mPhone", !/^01[0125]\d{8}$/.test(v("mPhone")));
   bad |= setInvalid("mDrive", !DRIVE_RE.test(v("mDrive")));
   ["mProfile", "mCard", "mId"].forEach(id => { const f = $(id).files[0]; bad |= setInvalid(id, !f || !f.type.startsWith("image/")); });
+  
+  // التحقق من تحديد تخصص واحد على الأقل
+  const selectedRoles = document.querySelectorAll("#mRoles .role-btn.selected");
+  if (selectedRoles.length === 0) {
+    bad = true;
+    $("mRoles").closest(".fg").classList.add("invalid");
+  } else {
+    $("mRoles").closest(".fg").classList.remove("invalid");
+  }
+
   return !bad;
 }
 $("mPhone").addEventListener("input", e => e.target.value = toLatin(e.target.value).replace(/\D/g, ""));
@@ -955,7 +977,7 @@ mForm.addEventListener("submit", async e => {
   if (!navigator.onLine) { notice(box, "bad", "لا يوجد اتصال بالإنترنت. بياناتك ما زالت في الصفحة، أعد المحاولة عند عودة الاتصال."); return; }
 
   mSubmitting = true; $("mSubmitBtn").disabled = true; $("mProgress").style.display = "block";
-  const setP = (n, t) => { $("mFill").style.width = n + "%"; $("mProgressText").textContent = t; };
+  const setP = (n, t) => { $("mFill").style.width = n + "\%"; $("mProgressText").textContent = t; };
   try {
     setP(5, "جاري رفع الصور...");
     let done = 0;
@@ -968,14 +990,23 @@ mForm.addEventListener("submit", async e => {
     setP(90, "جاري حفظ البيانات...");
     const phone = toLatin($("mPhone").value);
     let drive = toLatin($("mDrive").value); if (!/^https?:\/\//i.test(drive)) drive = "https://" + drive;
+    
+    // جلب التخصصات المحددة
+    const roles = Array.from(document.querySelectorAll("#mRoles .role-btn.selected")).map(b => b.dataset.role);
+
     await retry(() => setDoc(doc(db, "media_applicants", phone), {
       fullName: $("mName").value.trim().replace(/\s+/g, " "), phone, driveLink: drive,
+      roles: roles,
       profileImageUrl: profileUrl, studentCardUrl: cardUrl, idCardUrl: idUrl,
       status: "pending", timestamp: serverTimestamp()
     }), 3);
     setP(100, "تم!");
     notice(box, "ok", "تم إرسال طلبك بنجاح ✅ سنراجع أعمالك ونتواصل معك على واتساب.");
+    
+    // إعادة تعيين الفورم ومسح الاختيارات
     mForm.reset(); uploaded.clear();
+    document.querySelectorAll("#mRoles .role-btn").forEach(b => b.classList.remove("selected"));
+
   } catch (err) {
     const denied = err && err.code === "permission-denied";
     notice(box, "bad", denied
@@ -999,8 +1030,10 @@ function renderMedia(list) {
   $("mediaBody").innerHTML = list.length ? list.map(({ id, data: d }) => {
     const img = d.profileImageUrl ? `<a href="${safeUrl(d.profileImageUrl)}" target="_blank" rel="noopener"><img src="${safeUrl(d.profileImageUrl)}" class="thumb" alt=""></a>` : "-";
     const date = d.timestamp?.toDate ? d.timestamp.toDate().toLocaleDateString("ar-EG") : "-";
+    const rolesHtml = d.roles ? d.roles.map(r => `<span class="badge" style="background:var(--primary);margin:2px;display:inline-block">${esc(r)}</span>`).join("") : "-";
+    
     return `<tr>
-      <td>${img}</td><td>${esc(d.fullName)}</td>
+      <td>${img}</td><td>${esc(d.fullName)}</td><td>${rolesHtml}</td>
       <td dir="ltr">${esc(d.phone)} <a href="${waHref(d.phone)}" target="_blank" rel="noopener" aria-label="واتساب"><i class="fab fa-whatsapp" style="color:#25D366;font-size:18px"></i></a></td>
       <td><a href="${safeUrl(d.idCardUrl)}" target="_blank" rel="noopener">بطاقة</a> | <a href="${safeUrl(d.studentCardUrl)}" target="_blank" rel="noopener">كارنيه</a></td>
       <td><a href="${safeUrl(d.driveLink)}" target="_blank" rel="noopener"><i class="fab fa-google-drive"></i> الأعمال</a></td>
@@ -1008,7 +1041,7 @@ function renderMedia(list) {
       <td><button class="btn-sm b-ok" data-mact="accepted" data-id="${esc(id)}">✔ قبول</button>
           <button class="btn-sm b-bad" data-mact="rejected" data-id="${esc(id)}">✖ رفض</button>
           <button class="btn-sm b-del" data-mact="delete" data-id="${esc(id)}">🗑 مسح</button></td></tr>`;
-  }).join("") : `<tr><td colspan="8" style="padding:24px;color:var(--muted)">لا توجد طلبات ميديا حتى الآن.</td></tr>`;
+  }).join("") : `<tr><td colspan="9" style="padding:24px;color:var(--muted)">لا توجد طلبات ميديا حتى الآن.</td></tr>`;
 }
 function fetchMedia() {
   const load = $("mediaLoading");
@@ -1037,11 +1070,13 @@ document.addEventListener("click", async e => {
     }
   } catch { alert("حدث خطأ أثناء الحفظ، حاول مرة أخرى."); }
 });
+
 function exportMedia() {
   if (typeof XLSX === "undefined") return alert("مكتبة Excel لم تُحمَّل بعد، أعد المحاولة بعد ثواني.");
   const data = filteredMedia(); if (!data.length) return alert("لا توجد بيانات!");
   const rows = data.map(({ data: d }) => ({
-    "الاسم": d.fullName, "الهاتف": d.phone, "رابط الأعمال": d.driveLink, "الحالة": STAT[d.status] || "مراجعة",
+    "الاسم": d.fullName, "الهاتف": d.phone, "التخصصات": d.roles ? d.roles.join("، ") : "",
+    "رابط الأعمال": d.driveLink, "الحالة": STAT[d.status] || "مراجعة",
     "التاريخ": d.timestamp?.toDate ? d.timestamp.toDate().toLocaleString("ar-EG") : "",
     "صورة": d.profileImageUrl, "بطاقة": d.idCardUrl, "كارنيه": d.studentCardUrl
   }));
@@ -1050,7 +1085,6 @@ function exportMedia() {
 }
 $("btnExport").onclick = () => activeTab === "media" ? exportMedia() : exportStudents();
 
-/* ---------- جاهزية التطبيق ---------- */
 window.__svcReady();
 if (Router.current() === "admin") enterAdmin();
 </script>
