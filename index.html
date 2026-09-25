@@ -323,10 +323,10 @@ label.ck input[type=checkbox]{width:18px;height:18px;flex:none;margin:4px 0 0;pa
           <div class="fg"><label for="nationalId">الرقم القومي (14 رقم)</label><input type="text" id="nationalId" inputmode="numeric" maxlength="14" dir="ltr" required><div class="err">الرقم القومي يجب أن يكون 14 رقم</div></div>
           <div class="fg"><label for="college">الكلية</label>
             <select id="college" required><option value="" disabled selected>اختر كليتك</option>
-              <option>الآداب</option><option>الهندسة</option><option>التجارة</option><option>الحقوق</option><option>العلوم</option><option>أخرى</option></select><div class="err">اختر الكلية</div></div>
+              <option>الآداب</option><option>الحقوق</option><option>التجارة</option><option>الاقتصاد والعلوم السياسية</option><option>الإعلام</option><option>دار العلوم</option><option>الخدمة الاجتماعية</option><option>رياض الأطفال</option><option>الآثار</option><option>العلوم</option><option>الهندسة</option><option>الحاسبات والذكاء الاصطناعي</option><option>الطب البشري</option><option>طب الأسنان</option><option>الصيدلة</option><option>العلاج الطبيعي</option><option>التمريض</option><option>الطب البيطري</option><option>الزراعة</option><option>التربية البدنية</option><option>أخرى</option></select><div class="err">اختر الكلية</div></div>
           <div class="fg"><label for="level">الفرقة</label>
             <select id="level" required><option value="" disabled selected>اختر الفرقة</option>
-              <option value="الأولى">الفرقة الأولى</option><option value="الثانية">الفرقة الثانية</option><option value="الثالثة">الفرقة الثالثة</option><option value="الرابعة">الفرقة الرابعة</option></select><div class="err">اختر الفرقة</div></div>
+              <option value="الأولى">الفرقة الأولى</option><option value="الثانية">الفرقة الثانية</option><option value="الثالثة">الفرقة الثالثة</option><option value="الرابعة">الفرقة الرابعة</option><option value="الخامسة">الفرقة الخامسة</option><option value="السادسة">الفرقة السادسة</option><option value="السابعة">الفرقة السابعة</option></select><div class="err">اختر الفرقة</div></div>
           <div class="fg"><label for="facebookLink">رابط حساب الفيسبوك</label><input type="text" id="facebookLink" placeholder="facebook.com/username" dir="ltr" required><div class="err">اكتب رابط فيسبوك صحيح</div></div>
           <div class="fg"><label for="gmail">البريد الإلكتروني (Gmail)</label><input type="email" id="gmail" placeholder="example@gmail.com" dir="ltr" required><div class="err">بريد إلكتروني غير صحيح</div></div>
           <div class="fg"><label for="profileImage">الصورة الشخصية <small>(JPG أو PNG أو WebP، حتى 8 ميجا)</small></label><input type="file" id="profileImage" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required><div class="photo-rule"><i class="fas fa-circle-info"></i> <b>شروط الصورة الشخصية:</b> صورة رسمية لائقة، الوجه واضح والخلفية بسيطة، <b>وليست سيلفي</b>، بدون فلاتر أو نظارة شمس أو صور جماعية. الصور غير المطابقة يتم رفض الطلب بسببها.</div><div class="err">ارفع صورة شخصية بصيغة JPG أو PNG أو WebP وحجمها أقل من 8 ميجا</div></div>
@@ -962,8 +962,8 @@ let unsubscribe = null;
 const STAT = { pending: "مراجعة", accepted: "مقبول", rejected: "مرفوض" };
 const badge = s => `<span class="badge badge-${STAT[s] ? s : "pending"}">${STAT[s] || "مراجعة"}</span>`;
 const opt = (list, cur) => list.map(([v, t]) => `<option value="${esc(v)}" ${v === cur ? "selected" : ""}>${esc(t || v)}</option>`).join("");
-const COLLEGES = ["الآداب","الهندسة","التجارة","الحقوق","العلوم","أخرى"].map(x => [x]);
-const LEVELS = ["الأولى","الثانية","الثالثة","الرابعة"].map(x => [x]);
+const COLLEGES = ["الآداب","الحقوق","التجارة","الاقتصاد والعلوم السياسية","الإعلام","دار العلوم","الخدمة الاجتماعية","رياض الأطفال","الآثار","العلوم","الهندسة","الحاسبات والذكاء الاصطناعي","الطب البشري","طب الأسنان","الصيدلة","العلاج الطبيعي","التمريض","الطب البيطري","الزراعة","التربية البدنية","أخرى"].map(x => [x]);
+const LEVELS = ["الأولى","الثانية","الثالثة","الرابعة","الخامسة","السادسة","السابعة"].map(x => [x]);
 
 function render(list) {
   $("reviewBody").innerHTML = list.map(({ id, data: d }) => {
