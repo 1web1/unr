@@ -380,7 +380,6 @@ label.ck input[type=checkbox]{width:18px;height:18px;flex:none;margin:4px 0 0;pa
               <button type="button" class="role-chip" data-role="مونتير" aria-pressed="false"><i class="fas fa-scissors"></i> مونتير <span class="dot"></span></button>
               <button type="button" class="role-chip" data-role="جرافيك ديزاينر" aria-pressed="false"><i class="fas fa-pen-ruler"></i> جرافيك ديزاينر <span class="dot"></span></button>
             </div><div class="photo-rule"><i class="fas fa-circle-info"></i> <b>شرط التخصص:</b> اختر فقط التخصص الذي <b>تعلّمته وتتقنه فعلاً</b>، وسيتم مراجعة أعمالك في رابط Google Drive للتأكد من مستواك في كل تخصص اخترته.</div><div class="err">اختر تخصصاً واحداً على الأقل</div></div>
-          <div class="fg"><label class="ck"><input type="checkbox" id="mrOk"><span>أتعهد أنني متعلّم وعندي خبرة كافية في كل تخصص اخترته، وأن الأعمال المرفقة من تنفيذي.</span></label><div class="err">لازم توافق على شرط التخصص</div></div>
           <div class="fg"><label for="mProfile">الصورة الشخصية</label><input type="file" id="mProfile" accept="image/*" required><div class="photo-rule"><i class="fas fa-circle-info"></i> <b>شروط الصورة الشخصية:</b> صورة رسمية لائقة، الوجه واضح والخلفية بسيطة، <b>وليست سيلفي</b>، بدون فلاتر أو نظارة شمس أو صور جماعية. الصور غير المطابقة يتم رفض الطلب بسببها.</div><div class="err">ارفع صورة شخصية</div></div>
           <div class="fg"><label for="mCard">صورة الكارنيه</label><input type="file" id="mCard" accept="image/*" required><div class="err">ارفع صورة الكارنيه</div></div>
           <div class="fg"><label for="mId">صورة البطاقة</label><input type="file" id="mId" accept="image/*" required><div class="err">ارفع صورة البطاقة</div></div>
@@ -1195,7 +1194,6 @@ function validateMedia() {
   bad |= setInvalid("mPhone", !/^01[0125]\d{8}$/.test(v("mPhone")));
   bad |= setInvalid("mDrive", !DRIVE_RE.test(v("mDrive")));
   bad |= setInvalid("mRoles", getRoles().length === 0);
-  bad |= setInvalid("mrOk", !$("mrOk").checked);
   ["mProfile", "mCard", "mId"].forEach(id => { bad |= validateImageField(id); });
   return !bad;
 }
