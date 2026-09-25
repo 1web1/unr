@@ -412,6 +412,7 @@ label.ck input[type=checkbox]{width:18px;height:18px;flex:none;margin:4px 0 0;pa
         <input type="text" id="adminSearch" class="search" placeholder="🔍 بحث بالاسم أو الهاتف أو الرقم القومي...">
         <button class="btn-export" id="btnExport"><i class="fas fa-file-excel"></i> تصدير Excel</button>
         <button class="btn-export" id="btnRefresh" style="background:#555"><i class="fas fa-rotate"></i> تحديث</button>
+        <button class="btn-export" id="btnDeleteAll" style="background:#b02a37"><i class="fas fa-trash"></i> مسح الكل</button>
       </div>
     </div>
     <div class="stats" id="studentStats">
@@ -896,9 +897,21 @@ form.addEventListener("submit", async e => {
   submitting = true; $("submitBtn").disabled = true; $("progress").style.display = "block";
   const setP = (n, t) => { $("fill").style.width = n + "\%"; $("progressText").textContent = t; };
   try {
-    setP(5, "جاري رفع الصور...");
+    const nid = toLatin($("nationalId").value);
+
+    setP(5, "جاري التحقق من الرقم القومي...");
+    const existingSnap = await getDoc(doc(db, "students", nid));
+    if (existingSnap.exists() && existingSnap.data().status !== "rejected") {
+      const st = existingSnap.data().status;
+      notice(box, "bad", st === "accepted"
+        ? "هذا الرقم القومي مسجل بالفعل وتم قبول طلبه من قبل، لا يمكن التسجيل مرة أخرى."
+        : "هذا الرقم القومي مسجل بالفعل وطلبه قيد المراجعة حالياً. استعلم عن حالة طلبك من قسم «حالة الطلب» أو انتظر الرد.");
+      return;
+    }
+
+    setP(10, "جاري رفع الصور...");
     let done = 0;
-    const tick = () => setP(5 + (++done) * 25, `تم رفع ${done} من 3 صور`); 
+    const tick = () => setP(10 + (++done) * 25, `تم رفع ${done} من 3 صور`); 
     const [profileUrl, idUrl, cardUrl] = await Promise.all([
       uploadImage($("profileImage").files[0], "p", tick),
       uploadImage($("idImage").files[0], "i", tick),
@@ -906,7 +919,6 @@ form.addEventListener("submit", async e => {
     ]);
 
     setP(90, "جاري حفظ البيانات...");
-    const nid = toLatin($("nationalId").value);
     let fb = toLatin($("facebookLink").value); if (!/^https?:\/\//i.test(fb)) fb = "https://" + fb;
 
     await retry(async () => {
@@ -1345,6 +1357,120 @@ async function exportMedia() {
   finally { btn.disabled = false; }
 }
 $("btnExport").onclick = () => activeTab === "media" ? exportMedia() : exportStudents();
+
+/* ---------- مسح كل البيانات (بعد أخذ نسخة إكسل احتياطية كاملة) ---------- */
+async function fetchAllDocs(colName) {
+  const snap = await getDocs(collection(db, colName));
+  return snap.docs.map(d => ({ id: d.id, data: d.data() }));
+}
+
+async function backupAllToExcel(allStudents, allMedia) {
+  const wb = new ExcelJS.Workbook();
+  wb.creator = "مبادرة رعاية الشباب - جامعة القاهرة"; wb.created = new Date();
+
+  const ws1 = wb.addWorksheet("الطلاب");
+  ws1.columns = [
+    { header: "الرقم القومي", key: "nationalId", width: 18 },
+    { header: "الاسم", key: "fullName", width: 26 },
+    { header: "الهاتف", key: "phone", width: 14 },
+    { header: "الكلية", key: "college", width: 14 },
+    { header: "الفرقة", key: "level", width: 12 },
+    { header: "فيسبوك", key: "facebook", width: 32 },
+    { header: "إيميل", key: "email", width: 26 },
+    { header: "الحالة", key: "status", width: 12 },
+    { header: "رسالة الإدارة", key: "adminMessage", width: 32 },
+    { header: "تاريخ التسجيل", key: "date", width: 20 },
+    { header: "الصورة الشخصية", key: "profileImageUrl", width: 34 },
+    { header: "صورة البطاقة", key: "idCardUrl", width: 34 },
+    { header: "صورة الكارنيه", key: "studentCardUrl", width: 34 }
+  ];
+  styleHeaderRow(ws1);
+  allStudents.forEach(({ data: d }, i) => {
+    const status = ["accepted", "rejected"].includes(d.status) ? d.status : "pending";
+    const row = ws1.addRow({
+      nationalId: d.nationalId || "", fullName: d.fullName || "", phone: d.phone || "",
+      college: d.college || "", level: d.level || "", facebook: d.facebook || "", email: d.email || "",
+      status: STAT[status], adminMessage: d.adminMessage || "",
+      date: d.timestamp?.toDate ? d.timestamp.toDate().toLocaleString("ar-EG") : "",
+      profileImageUrl: d.profileImageUrl || "", idCardUrl: d.idCardUrl || "", studentCardUrl: d.studentCardUrl || ""
+    });
+    styleDataRow(row, i % 2 === 1);
+    styleStatusCell(row, status);
+  });
+
+  const ws2 = wb.addWorksheet("الميديا");
+  ws2.columns = [
+    { header: "الاسم", key: "fullName", width: 26 },
+    { header: "الهاتف", key: "phone", width: 14 },
+    { header: "التخصص", key: "roles", width: 26 },
+    { header: "رابط الأعمال", key: "driveLink", width: 34 },
+    { header: "الحالة", key: "status", width: 12 },
+    { header: "التاريخ", key: "date", width: 20 },
+    { header: "الصورة الشخصية", key: "profileImageUrl", width: 34 },
+    { header: "صورة البطاقة", key: "idCardUrl", width: 34 },
+    { header: "صورة الكارنيه", key: "studentCardUrl", width: 34 }
+  ];
+  styleHeaderRow(ws2);
+  allMedia.forEach(({ data: d }, i) => {
+    const status = ["accepted", "rejected"].includes(d.status) ? d.status : "pending";
+    const row = ws2.addRow({
+      fullName: d.fullName || "", phone: d.phone || "", roles: (d.roles || []).join("، "), driveLink: d.driveLink || "",
+      status: STAT[status], date: d.timestamp?.toDate ? d.timestamp.toDate().toLocaleString("ar-EG") : "",
+      profileImageUrl: d.profileImageUrl || "", idCardUrl: d.idCardUrl || "", studentCardUrl: d.studentCardUrl || ""
+    });
+    styleDataRow(row, i % 2 === 1);
+    styleStatusCell(row, status);
+  });
+
+  const buf = await wb.xlsx.writeBuffer();
+  downloadWorkbookBuffer(buf, `نسخة-احتياطية-كاملة-${new Date().toISOString().slice(0, 10)}.xlsx`);
+}
+
+async function deleteAllDocsInCollection(colName, idsToSkip) {
+  const skip = idsToSkip || new Set();
+  const snap = await getDocs(collection(db, colName));
+  const ids = snap.docs.map(d => d.id).filter(id => !skip.has(id));
+  const CHUNK = 400;
+  for (let i = 0; i < ids.length; i += CHUNK) {
+    const b = writeBatch(db);
+    ids.slice(i, i + CHUNK).forEach(id => b.delete(doc(db, colName, id)));
+    await b.commit();
+  }
+}
+
+$("btnDeleteAll").onclick = async () => {
+  if (typeof ExcelJS === "undefined") return alert("مكتبة Excel لم تُحمَّل بعد، أعد المحاولة بعد ثواني.");
+  const first = confirm("سيتم مسح كل بيانات الطلاب وطلبات الميديا (النصوص والصور) نهائياً من الموقع، بعد أخذ نسخة إكسل احتياطية كاملة أولاً. هل تريد المتابعة؟");
+  if (!first) return;
+  const typed = prompt('هذا الإجراء لا يمكن التراجع عنه. للتأكيد اكتب كلمة "مسح" بالضبط:');
+  if (typed !== "مسح") { alert("تم الإلغاء."); return; }
+
+  const btn = $("btnDeleteAll"); btn.disabled = true;
+  const oldLabel = btn.innerHTML; btn.innerHTML = "جاري أخذ نسخة احتياطية...";
+  try {
+    const [allStudents, allMedia] = await Promise.all([
+      fetchAllDocs("students"),
+      fetchAllDocs("media_applicants")
+    ]);
+
+    if (!allStudents.length && !allMedia.length) { alert("لا توجد بيانات لمسحها."); return; }
+
+    await backupAllToExcel(allStudents, allMedia);
+
+    btn.innerHTML = "جاري المسح...";
+    await deleteAllDocsInCollection("students");
+    await deleteAllDocsInCollection("status");
+    await deleteAllDocsInCollection("media_applicants");
+
+    alert("تم أخذ نسخة احتياطية بالإكسل، وتم مسح كل البيانات بنجاح.");
+    fetchStudents();
+  } catch (e) {
+    console.error(e);
+    alert("حدث خطأ أثناء عملية المسح الشامل. لم يتم حذف أي بيانات بدون التأكد من أخذ النسخة الاحتياطية أولاً — راجع الاتصال وحاول مرة أخرى.");
+  } finally {
+    btn.disabled = false; btn.innerHTML = oldLabel;
+  }
+};
 
 /* ---------- جاهزية التطبيق ---------- */
 window.__svcReady();
