@@ -1311,16 +1311,40 @@ document.addEventListener("click", async e => {
     }
   } catch { alert("حدث خطأ أثناء الحفظ، حاول مرة أخرى."); }
 });
-function exportMedia() {
-  if (typeof XLSX === "undefined") return alert("مكتبة Excel لم تُحمَّل بعد، أعد المحاولة بعد ثواني.");
+async function exportMedia() {
+  if (typeof ExcelJS === "undefined") return alert("مكتبة Excel لم تُحمَّل بعد، أعد المحاولة بعد ثواني.");
   const data = filteredMedia(); if (!data.length) return alert("لا توجد بيانات!");
-  const rows = data.map(({ data: d }) => ({
-    "الاسم": excelSafe(d.fullName), "الهاتف": excelSafe(d.phone), "التخصص": excelSafe((d.roles || []).join("، ")), "رابط الأعمال": excelSafe(d.driveLink), "الحالة": STAT[d.status] || "مراجعة",
-    "التاريخ": d.timestamp?.toDate ? d.timestamp.toDate().toLocaleString("ar-EG") : "",
-    "صورة": excelSafe(d.profileImageUrl), "بطاقة": excelSafe(d.idCardUrl), "كارنيه": excelSafe(d.studentCardUrl)
-  }));
-  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "الميديا");
-  XLSX.writeFile(wb, `الميديا-${new Date().toISOString().slice(0,10)}.xlsx`);
+  const btn = $("btnExport"); btn.disabled = true;
+  try {
+    const wb = new ExcelJS.Workbook();
+    wb.creator = "مبادرة رعاية الشباب - جامعة القاهرة"; wb.created = new Date();
+    const ws = wb.addWorksheet("الميديا");
+    ws.columns = [
+      { header: "الاسم", key: "fullName", width: 26 },
+      { header: "الهاتف", key: "phone", width: 14 },
+      { header: "التخصص", key: "roles", width: 26 },
+      { header: "رابط الأعمال", key: "driveLink", width: 34 },
+      { header: "الحالة", key: "status", width: 12 },
+      { header: "التاريخ", key: "date", width: 20 },
+      { header: "الصورة الشخصية", key: "profileImageUrl", width: 34 },
+      { header: "صورة البطاقة", key: "idCardUrl", width: 34 },
+      { header: "صورة الكارنيه", key: "studentCardUrl", width: 34 }
+    ];
+    styleHeaderRow(ws);
+    data.forEach(({ data: d }, i) => {
+      const status = ["accepted", "rejected"].includes(d.status) ? d.status : "pending";
+      const row = ws.addRow({
+        fullName: d.fullName || "", phone: d.phone || "", roles: (d.roles || []).join("، "), driveLink: d.driveLink || "",
+        status: STAT[status], date: d.timestamp?.toDate ? d.timestamp.toDate().toLocaleString("ar-EG") : "",
+        profileImageUrl: d.profileImageUrl || "", idCardUrl: d.idCardUrl || "", studentCardUrl: d.studentCardUrl || ""
+      });
+      styleDataRow(row, i % 2 === 1);
+      styleStatusCell(row, status);
+    });
+    const buf = await wb.xlsx.writeBuffer();
+    downloadWorkbookBuffer(buf, `الميديا-${new Date().toISOString().slice(0, 10)}.xlsx`);
+  } catch (e) { console.error(e); alert("تعذر إنشاء ملف الإكسل، حاول مرة أخرى."); }
+  finally { btn.disabled = false; }
 }
 $("btnExport").onclick = () => activeTab === "media" ? exportMedia() : exportStudents();
 
