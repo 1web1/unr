@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https://res.cloudinary.com https://*.googleusercontent.com; connect-src 'self' https://www.gstatic.com https://*.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://api.cloudinary.com https://*.firebasestorage.app; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https://res.cloudinary.com https://*.googleusercontent.com; connect-src 'self' https://www.gstatic.com https://*.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://api.cloudinary.com https://*.firebasestorage.app; object-src 'none'; base-uri 'none'; frame-ancestors 'self'">
 <title>مبادرة رعاية الشباب - جامعة القاهرة</title>
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js">
@@ -726,8 +726,8 @@ const app = initializeApp({
   appId: "1:968782552349:web:f51d53d0fdf5e9396dd5f4"
 });
 const auth = getAuth(app), db = getFirestore(app);
-// لا تُضمّن upload preset في المتصفح. الخادم هو الوحيد الذي يملك سر Cloudinary.
-const UPLOAD_SIGN_ENDPOINT = "/api/sign-upload";
+const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/wbmanqyt/image/upload";
+const PRESET = "cairo_uni_preset";
 const $ = id => document.getElementById(id);
 
 /* ---------- أدوات أمان ---------- */
@@ -845,22 +845,12 @@ const uploaded = new Map();
 async function uploadImage(file, label, onDone) {
   const key = `${label}|${file.name}|${file.size}|${file.lastModified}`;
   if (uploaded.has(key)) { onDone(); return uploaded.get(key); }
-  let body;
+  let body = file;
   try { body = await imageCompression(file, { maxSizeMB: 0.3, maxWidthOrHeight: 1200, useWebWorker: true }); }
-  catch { throw new Error("تعذر ضغط الصورة. أعد اختيار صورة أصغر."); }
-  // لا نرفع النسخة الأصلية عند فشل الضغط: ذلك يحمي زمن التسجيل وتكلفة النطاق.
-  if (body.size > 512 * 1024) throw new Error("الصورة المضغوطة ما زالت كبيرة؛ اختر صورة أوضح بحجم أصغر.");
+  catch { if (file.size > 8 * 1024 * 1024) throw new Error("حجم الصورة كبير جداً"); }
   const url = await retry(async () => {
-    const ticket = await fetch(UPLOAD_SIGN_ENDPOINT, {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ label, mimeType: body.type, size: body.size })
-    });
-    if (!ticket.ok) throw new Error("sign " + ticket.status);
-    const signed = await ticket.json();
-    const fd = new FormData();
-    fd.append("file", body); fd.append("api_key", signed.apiKey); fd.append("timestamp", String(signed.timestamp));
-    fd.append("signature", signed.signature); fd.append("folder", signed.folder);
-    const res = await fetch(signed.uploadUrl, { method: "POST", body: fd });
+    const fd = new FormData(); fd.append("file", body); fd.append("upload_preset", PRESET);
+    const res = await fetch(CLOUDINARY_URL, { method: "POST", body: fd });
     if (!res.ok) throw new Error("upload " + res.status);
     return (await res.json()).secure_url;
   });
