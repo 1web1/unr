@@ -2,9 +2,122 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
+<script>document.documentElement.classList.add("js")</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https://res.cloudinary.com https://*.googleusercontent.com; connect-src 'self' https://www.gstatic.com https://*.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://api.cloudinary.com https://*.firebasestorage.app; object-src 'none'; base-uri 'none'; frame-ancestors 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https://www.google-analytics.com https://www.googletagmanager.com https://res.cloudinary.com https://*.googleusercontent.com; connect-src 'self' https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.gstatic.com https://*.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://api.cloudinary.com https://*.firebasestorage.app; object-src 'none'; base-uri 'none'; frame-ancestors 'self'">
 <title>مبادرة رعاية الشباب - جامعة القاهرة</title>
+<meta name="description" content="مبادرة رعاية الشباب بجامعة القاهرة: مساحة طلابية لاكتشاف المواهب وبناء القيادات عبر المعايشات والمعسكرات والأنشطة والزيارات. سجّل الآن وتابع حالة طلبك.">
+<meta name="theme-color" content="#040d14">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="48x48" href="data:image/png;base64,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">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="canonical" href="https://mobadara.vercel.app/">
+<meta property="og:url" content="https://mobadara.vercel.app/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ar_EG">
+<meta property="og:site_name" content="مبادرة رعاية الشباب - جامعة القاهرة">
+<meta property="og:title" content="مبادرة رعاية الشباب - جامعة القاهرة">
+<meta property="og:description" content="مبادرة رعاية الشباب بجامعة القاهرة: مساحة طلابية لاكتشاف المواهب وبناء القيادات عبر المعايشات والمعسكرات والأنشطة والزيارات. سجّل الآن وتابع حالة طلبك.">
+<meta property="og:image" content="https://res.cloudinary.com/wbmanqyt/image/upload/f_auto/q_auto/logo.png.png">
+<meta property="og:image:alt" content="لوجو مبادرة رعاية الشباب">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="مبادرة رعاية الشباب - جامعة القاهرة">
+<meta name="twitter:description" content="مبادرة رعاية الشباب بجامعة القاهرة: مساحة طلابية لاكتشاف المواهب وبناء القيادات عبر المعايشات والمعسكرات والأنشطة والزيارات. سجّل الآن وتابع حالة طلبك.">
+<meta name="twitter:image" content="https://res.cloudinary.com/wbmanqyt/image/upload/f_auto/q_auto/logo.png.png">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "EducationalOrganization",
+   "@id": "https://mobadara.vercel.app/#org",
+   "name": "مبادرة رعاية الشباب - جامعة القاهرة",
+   "alternateName": "Youth Care Initiative - Cairo University",
+   "url": "https://mobadara.vercel.app/",
+   "logo": "https://res.cloudinary.com/wbmanqyt/image/upload/f_auto/q_auto/logo.png.png",
+   "description": "مبادرة طلابية بجامعة القاهرة تهدف إلى اكتشاف المواهب وتنمية المهارات القيادية والمجتمعية عبر المعايشات والمعسكرات والأنشطة والزيارات.",
+   "parentOrganization": {
+    "@type": "CollegeOrUniversity",
+    "name": "جامعة القاهرة",
+    "alternateName": "Cairo University"
+   },
+   "areaServed": "EG",
+   "inLanguage": "ar"
+  },
+  {
+   "@type": "WebSite",
+   "@id": "https://mobadara.vercel.app/#website",
+   "url": "https://mobadara.vercel.app/",
+   "name": "مبادرة رعاية الشباب - جامعة القاهرة",
+   "inLanguage": "ar",
+   "publisher": {
+    "@id": "https://mobadara.vercel.app/#org"
+   }
+  },
+  {
+   "@type": "FAQPage",
+   "mainEntity": [
+    {
+     "@type": "Question",
+     "name": "مين يقدر يسجل في المبادرة؟",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "التسجيل متاح لطلاب جامعة القاهرة. اضغط على «التسجيل» واملأ بياناتك (الاسم رباعي، الرقم القومي، الكلية، الفرقة، وبيانات التواصل)."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "إيه المطلوب عشان أكمل التسجيل؟",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "هتحتاج صورة شخصية، وصورة البطاقة، وصورة الكارنيه أو بطاقة الترشيح (JPG أو PNG أو WebP، حتى 8 ميجا لكل صورة)، مع الموافقة على سياسة الخصوصية."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "إزاي أعرف حالة طلبي؟",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "من قسم «حالة الطلب» اكتب رقمك القومي (14 رقم) واضغط بحث، وهتظهرلك حالة طلبك فوراً. اذهب للاستعلام"
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "إيه الأنشطة اللي بتقدمها المبادرة؟",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "المعايشات الميدانية، والمعسكرات وورش العمل، والأنشطة داخل الجامعة، وأهم الزيارات. شوف الأنشطة"
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "إزاي أنضم لفريق الميديا؟",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "اضغط على «انضم للميديا» في القائمة أو زر «التقديم لفريق الميديا» في الصفحة الرئيسية واملأ نموذج التقديم. قدّم الآن"
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "بياناتي وصوري بتتستخدم في إيه؟",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "بياناتك وصورك بتُستخدم في إجراءات القبول والمتابعة داخل المبادرة فقط، وتقدر تقرأ سياسة الخصوصية قبل الموافقة أثناء التسجيل."
+     }
+    },
+    {
+     "@type": "Question",
+     "name": "لو عندي مشكلة أو استفسار أتواصل مع مين؟",
+     "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "تقدر تتواصل معانا مباشرة من أيقونات واتساب وفيسبوك وإنستجرام وتيك توك الموجودة على جانب الصفحة."
+     }
+    }
+   ]
+  }
+ ]
+}
+</script>
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js">
 <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js">
@@ -225,6 +338,31 @@ label.ck input[type=checkbox]{width:18px;height:18px;flex:none;margin:4px 0 0;pa
 .glass.btn-hero:hover{background:rgba(138,21,56,.92);border-color:rgba(255,255,255,.6)}
 .glass.btn-hero.btn-hero-gold{background:rgba(22,15,3,.9);border-color:var(--gold);color:var(--gold)}
 .glass.btn-hero.btn-hero-gold:hover{background:var(--gold);color:#1a1a1a;text-shadow:none}
+
+/* FAQ */
+.faq-list{display:flex;flex-direction:column;gap:12px}
+.faq-item{padding:0;overflow:hidden}
+.faq-item summary{list-style:none;cursor:pointer;padding:18px 22px;font-weight:800;font-size:1.02rem;display:flex;justify-content:space-between;align-items:center;gap:14px}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary::after{content:"+";color:var(--gold);font-size:1.6rem;line-height:1;transition:transform .25s}
+.faq-item[open] summary::after{transform:rotate(45deg)}
+.faq-item .faq-a{padding:0 22px 20px;color:var(--muted);line-height:2}
+.faq-item .faq-a a{color:var(--gold);cursor:pointer;font-weight:700}
+/* Scroll reveal (يشتغل فقط لو الجافاسكربت شغال) */
+.js .reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease;transition-delay:var(--d,0s)}
+.js .reveal.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.js .reveal{opacity:1;transform:none;transition:none}}
+
+/* Admin filters + bulk */
+.adm-filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 12px}
+.adm-filters select{padding:9px 12px;border-radius:10px;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.2);font-family:inherit;min-width:150px}
+.adm-filters select option{color:#111}
+.adm-filters .cnt{color:var(--muted);font-size:13px;margin-inline-start:auto}
+.bulk-bar{display:none;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 12px;padding:10px 14px;border-radius:12px;background:rgba(201,162,39,.14);border:1px solid var(--gold)}
+.bulk-bar.show{display:flex}
+.bulk-bar b{color:var(--gold)}
+.sel-ck{width:18px;height:18px;accent-color:var(--gold);cursor:pointer}
+.b-wa{background:#25d366;text-decoration:none;display:inline-block}
 </style>
 </head>
 <body>
@@ -251,6 +389,7 @@ label.ck input[type=checkbox]{width:18px;height:18px;flex:none;margin:4px 0 0;pa
     <button class="nav-btn" data-go="about">عن المبادرة</button>
     <button class="nav-btn" data-go="activities">الأنشطة</button>
     <button class="nav-btn" data-go="status">حالة الطلب</button>
+    <button class="nav-btn" data-go="faq">أسئلة شائعة</button>
     <button class="nav-btn nav-media" data-go="media">انضم للميديا</button>
     <button class="nav-btn nav-cta" data-go="register">التسجيل</button>
     <button class="nav-btn" id="btnAdmin" data-go="admin">الإدارة</button>
@@ -340,6 +479,22 @@ label.ck input[type=checkbox]{width:18px;height:18px;flex:none;margin:4px 0 0;pa
           <div class="progress" id="progress"><div class="bar"><div class="fill" id="fill"></div></div><p id="progressText"></p></div>
           <div id="regNotice" class="notice" role="status"></div>
         </form>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq" class="section">
+    <div class="wrap">
+      <h2 class="reveal">الأسئلة الشائعة</h2>
+      <p class="sub reveal">إجابات سريعة على أكتر الأسئلة اللي بتوصلنا.</p>
+      <div class="faq-list">
+      <details class="glass faq-item reveal"><summary>مين يقدر يسجل في المبادرة؟</summary><div class="faq-a">التسجيل متاح لطلاب جامعة القاهرة. اضغط على «التسجيل» واملأ بياناتك (الاسم رباعي، الرقم القومي، الكلية، الفرقة، وبيانات التواصل).</div></details>
+      <details class="glass faq-item reveal"><summary>إيه المطلوب عشان أكمل التسجيل؟</summary><div class="faq-a">هتحتاج صورة شخصية، وصورة البطاقة، وصورة الكارنيه أو بطاقة الترشيح (JPG أو PNG أو WebP، حتى 8 ميجا لكل صورة)، مع الموافقة على سياسة الخصوصية.</div></details>
+      <details class="glass faq-item reveal"><summary>إزاي أعرف حالة طلبي؟</summary><div class="faq-a">من قسم «حالة الطلب» اكتب رقمك القومي (14 رقم) واضغط بحث، وهتظهرلك حالة طلبك فوراً. <a data-go="status">اذهب للاستعلام</a></div></details>
+      <details class="glass faq-item reveal"><summary>إيه الأنشطة اللي بتقدمها المبادرة؟</summary><div class="faq-a">المعايشات الميدانية، والمعسكرات وورش العمل، والأنشطة داخل الجامعة، وأهم الزيارات. <a data-go="activities">شوف الأنشطة</a></div></details>
+      <details class="glass faq-item reveal"><summary>إزاي أنضم لفريق الميديا؟</summary><div class="faq-a">اضغط على «انضم للميديا» في القائمة أو زر «التقديم لفريق الميديا» في الصفحة الرئيسية واملأ نموذج التقديم. <a data-go="media">قدّم الآن</a></div></details>
+      <details class="glass faq-item reveal"><summary>بياناتي وصوري بتتستخدم في إيه؟</summary><div class="faq-a">بياناتك وصورك بتُستخدم في إجراءات القبول والمتابعة داخل المبادرة فقط، وتقدر تقرأ سياسة الخصوصية قبل الموافقة أثناء التسجيل.</div></details>
+      <details class="glass faq-item reveal"><summary>لو عندي مشكلة أو استفسار أتواصل مع مين؟</summary><div class="faq-a">تقدر تتواصل معانا مباشرة من أيقونات واتساب وفيسبوك وإنستجرام وتيك توك الموجودة على جانب الصفحة.</div></details>
       </div>
     </div>
   </section>
@@ -437,10 +592,26 @@ label.ck input[type=checkbox]{width:18px;height:18px;flex:none;margin:4px 0 0;pa
       <button class="tab" id="tabSettings" data-tab="settings">الإعدادات</button> 
     </div>
     
+    <!-- فلاتر وإجراءات جماعية -->
+    <div id="stuTools">
+      <div class="adm-filters">
+        <select id="fCollege" aria-label="فلترة بالكلية"><option value="">كل الكليات</option></select>
+        <select id="fLevel" aria-label="فلترة بالفرقة"><option value="">كل الفرق</option></select>
+        <select id="fStatus" aria-label="فلترة بالحالة"><option value="">كل الحالات</option><option value="pending">مراجعة</option><option value="accepted">مقبول</option><option value="rejected">مرفوض</option></select>
+        <button class="btn-sm b-del" id="fReset" type="button">إعادة ضبط</button>
+        <span class="cnt" id="fCount"></span>
+      </div>
+      <div class="bulk-bar" id="bulkBar">
+        <span>تم تحديد <b id="bulkN">0</b> طالب</span>
+        <button class="btn-sm b-ok" data-bulk="accepted" type="button">✔ قبول المحدد</button>
+        <button class="btn-sm b-bad" data-bulk="rejected" type="button">✖ رفض المحدد</button>
+        <button class="btn-sm b-del" data-bulk="clear" type="button">إلغاء التحديد</button>
+      </div>
+    </div>
     <!-- قسم المراجعة -->
     <div id="dataLoading" class="notice ok" style="display:block">جاري جلب البيانات...</div>
     <div id="reviewWrap" class="tbl-wrap">
-      <table><thead><tr><th>الصورة</th><th>الاسم</th><th>الرقم القومي</th><th>الكلية/الفرقة</th><th>الهاتف</th><th>روابط</th><th>المرفقات</th><th>الحالة</th><th>الإجراء</th></tr></thead><tbody id="reviewBody"></tbody></table>
+      <table><thead><tr><th><input type="checkbox" class="sel-ck" id="selAll" aria-label="تحديد الكل"></th><th>الصورة</th><th>الاسم</th><th>الرقم القومي</th><th>الكلية/الفرقة</th><th>الهاتف</th><th>روابط</th><th>المرفقات</th><th>الحالة</th><th>الإجراء</th></tr></thead><tbody id="reviewBody"></tbody></table>
     </div>
     
     <!-- قسم التعديل -->
@@ -628,7 +799,7 @@ label.ck input[type=checkbox]{width:18px;height:18px;flex:none;margin:4px 0 0;pa
     }
   };
 
-  var SECTIONS = ["hero", "about", "activities", "status", "register"];
+  var SECTIONS = ["hero", "about", "activities", "status", "register", "faq"];
   var VIEWS = { activity: "activityView", media: "mediaView", admin: "adminView" };
   var current = null, view = "site";
 
@@ -706,7 +877,7 @@ label.ck input[type=checkbox]{width:18px;height:18px;flex:none;margin:4px 0 0;pa
     if (view !== "site") return;
     es.forEach(function (e) { if (e.isIntersecting) setActive(e.target.id); });
   }, { rootMargin: "-45% 0px -50% 0px" });
-  ["about", "activities", "status", "register"].forEach(function (id) { io.observe($(id)); });
+  ["about", "activities", "status", "register", "faq"].forEach(function (id) { io.observe($(id)); });
 
   /* حماية: منع إعادة تحميل الصفحة عند الإرسال قبل جاهزية الخدمة + رسالة واضحة */
   var banner = $("svcBanner");
@@ -1002,7 +1173,8 @@ function render(list) {
   $("reviewBody").innerHTML = list.map(({ id, data: d }) => {
     const img = d.profileImageUrl ? `<a href="${safeUrl(d.profileImageUrl)}" target="_blank" rel="noopener"><img src="${optImg(safeUrl(d.profileImageUrl))}" class="thumb" alt="" loading="lazy"></a>` : "-";
     return `<tr>
-      <td>${img}</td><td>${esc(d.fullName)}</td><td>${esc(d.nationalId)}</td><td>${esc(d.college)}/${esc(d.level)}</td><td dir="ltr">${esc(d.phone)}</td>
+      <td><input type="checkbox" class="sel-ck" data-sel="${esc(id)}" ${selected.has(id) ? "checked" : ""} aria-label="تحديد"></td>
+      <td>${img}</td><td>${esc(d.fullName)}</td><td>${esc(d.nationalId)}</td><td>${esc(d.college)}/${esc(d.level)}</td><td dir="ltr">${esc(d.phone)}<br><a class="btn-sm b-wa" href="${stuWaLink(d)}" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> واتساب</a></td>
       <td><a href="${safeUrl(d.facebook)}" target="_blank" rel="noopener"><i class="fab fa-facebook" style="color:#1877F2;font-size:18px"></i></a>
           <a href="mailto:${esc(d.email)}"><i class="fas fa-envelope" style="font-size:18px;margin-right:8px"></i></a></td>
       <td><a href="${safeUrl(d.idCardUrl)}" target="_blank" rel="noopener">بطاقة</a>${d.studentCardUrl ? ` | <a href="${safeUrl(d.studentCardUrl)}" target="_blank" rel="noopener">كارنيه</a>` : ""}</td>
@@ -1028,10 +1200,77 @@ function render(list) {
   }).join("");
 }
 
+const selected = new Set();
+function stuWaLink(d) {
+  const name = d.fullName || "";
+  const msg = d.status === "accepted" ? `أهلاً ${name}، تم قبول طلبك في مبادرة رعاية الشباب - جامعة القاهرة. ${d.adminMessage || ""}`
+    : d.status === "rejected" ? `أهلاً ${name}، بخصوص طلبك في مبادرة رعاية الشباب - جامعة القاهرة: ${d.adminMessage || "للأسف لم يتم قبول الطلب."}`
+    : `أهلاً ${name}، بخصوص طلبك في مبادرة رعاية الشباب - جامعة القاهرة.`;
+  return `${waHref(d.phone)}?text=${encodeURIComponent(msg.trim())}`;
+}
 function filtered() {
   const t = toLatin($("adminSearch").value).toLowerCase();
-  return !t ? cache : cache.filter(s => `${s.data.fullName} ${s.data.phone} ${s.data.nationalId}`.toLowerCase().includes(t));
+  const c = $("fCollege").value, l = $("fLevel").value, s = $("fStatus").value;
+  return cache.filter(x => {
+    const d = x.data;
+    if (c && d.college !== c) return false;
+    if (l && d.level !== l) return false;
+    if (s && (["accepted", "rejected"].includes(d.status) ? d.status : "pending") !== s) return false;
+    return !t || `${d.fullName} ${d.phone} ${d.nationalId}`.toLowerCase().includes(t);
+  });
 }
+function refreshStudents() {
+  const list = filtered();
+  render(list);
+  $("fCount").textContent = `عرض ${list.length} من ${cache.length}`;
+  updateBulk(list);
+}
+function updateBulk(list) {
+  list = list || filtered();
+  const ids = new Set(cache.map(x => x.id));
+  [...selected].forEach(i => { if (!ids.has(i)) selected.delete(i); });
+  $("bulkN").textContent = selected.size;
+  $("bulkBar").classList.toggle("show", selected.size > 0);
+  const all = $("selAll");
+  all.checked = list.length > 0 && list.every(x => selected.has(x.id));
+  all.indeterminate = !all.checked && list.some(x => selected.has(x.id));
+}
+COLLEGES.forEach(([c]) => $("fCollege").insertAdjacentHTML("beforeend", `<option>${esc(c)}</option>`));
+LEVELS.forEach(([l]) => $("fLevel").insertAdjacentHTML("beforeend", `<option>${esc(l)}</option>`));
+["fCollege", "fLevel", "fStatus"].forEach(id => $(id).addEventListener("change", refreshStudents));
+$("fReset").onclick = () => { ["fCollege", "fLevel", "fStatus"].forEach(id => $(id).value = ""); $("adminSearch").value = ""; refreshStudents(); renderMedia(filteredMedia()); };
+$("reviewBody").addEventListener("change", e => {
+  const ck = e.target.closest("[data-sel]"); if (!ck) return;
+  ck.checked ? selected.add(ck.dataset.sel) : selected.delete(ck.dataset.sel);
+  updateBulk();
+});
+$("selAll").addEventListener("change", e => {
+  filtered().forEach(x => e.target.checked ? selected.add(x.id) : selected.delete(x.id));
+  refreshStudents();
+});
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-bulk]"); if (!b) return;
+  const act = b.dataset.bulk;
+  if (act === "clear") { selected.clear(); refreshStudents(); return; }
+  const ids = [...selected]; if (!ids.length) return;
+  const label = act === "accepted" ? "قبول" : "رفض";
+  const msg = prompt(`رسالة تُرسل لـ ${ids.length} طالب (${label}):`, act === "accepted" ? "تم قبول طلبك بنجاح." : "مرفوض لوجود خطأ في البيانات.");
+  if (msg === null) return;
+  if (!confirm(`تأكيد ${label} ${ids.length} طالب؟`)) return;
+  b.disabled = true;
+  try {
+    for (let i = 0; i < ids.length; i += 200) {
+      const wb = writeBatch(db);
+      ids.slice(i, i + 200).forEach(id => {
+        wb.update(doc(db, "students", id), { status: act, adminMessage: msg });
+        wb.set(doc(db, "status", id), { status: act, adminMessage: msg }, { merge: true });
+      });
+      await wb.commit();
+    }
+    selected.clear(); fetchStudentStats();
+  } catch { alert("حدث خطأ أثناء التنفيذ الجماعي، بعض الطلاب ممكن يكونوا اتحدّثوا. اضغط تحديث وراجع."); }
+  b.disabled = false;
+});
 
 // إحصائيات دقيقة من السيرفر (Count Aggregation) بغض النظر عن عدد السجلات المحمّلة فعلياً في الجدول
 async function fetchStudentStats() {
@@ -1057,7 +1296,7 @@ function fetchStudents() {
 
   unsubscribe = onSnapshot(query(collection(db, "students"), orderBy("timestamp", "desc"), limit(ADMIN_ROWS_LIMIT)), (snap) => {
     cache = snap.docs.map(s => ({ id: s.id, data: s.data() }));
-    render(filtered());
+    refreshStudents();
     load.style.display = "none";
   }, (error) => {
     load.className = "notice bad"; load.textContent = "خطأ في الجلب. تأكد من صلاحيات الحساب.";
@@ -1066,7 +1305,7 @@ function fetchStudents() {
 }
 
 
-$("adminSearch").addEventListener("input", debounce(() => { render(filtered()); renderMedia(filteredMedia()); }, 300));
+$("adminSearch").addEventListener("input", debounce(() => { refreshStudents(); renderMedia(filteredMedia()); }, 300));
 $("btnRefresh").onclick = fetchStudents;
 
 /* ---------- تابات الإدارة ---------- */
@@ -1088,6 +1327,8 @@ function setTab(name) {
   Object.values(PANEL).forEach(id => $(id).style.display = "none");
   $(PANEL[name]).style.display = "";
   $("studentStats").style.display = name === "media" ? "none" : "";
+  $("stuTools").style.display = (name === "review" || name === "edit") ? "" : "none";
+  $("bulkBar").style.display = name === "review" ? "" : "none";
   $("mediaStats").style.display = name === "media" ? "" : "none";
   if (name === "settings") loadSettingsForm();
 }
@@ -1497,6 +1738,58 @@ $("btnDeleteAll").onclick = async () => {
 /* ---------- جاهزية التطبيق ---------- */
 window.__svcReady();
 if (Router.current() === "admin") enterAdmin();
+</script>
+
+<script>
+/* ظهور تدريجي للأقسام أثناء التمرير */
+(function () {
+  function setup() {
+    var sel = ".about-box,.goal,.gallery h3,.gallery>*,.act,.status-box,.form-box,#activities h2,#activities .sub";
+    var els = document.querySelectorAll(sel);
+    if (!("IntersectionObserver" in window)) { document.querySelectorAll(".reveal").forEach(function (e) { e.classList.add("in"); }); return; }
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (en) { if (en.isIntersecting) { var el = en.target; el.classList.add("in"); io.unobserve(el); setTimeout(function () { el.classList.remove("reveal", "in"); el.style.removeProperty("--d"); }, 1200); } });
+    }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+    els.forEach(function (e, i) {
+      e.classList.add("reveal"); e.style.setProperty("--d", ((i % 4) * 0.08) + "s"); io.observe(e);
+    });
+    document.querySelectorAll("#faq .reveal").forEach(function (e, i) { e.style.setProperty("--d", ((i % 4) * 0.08) + "s"); io.observe(e); });
+  }
+  if (document.readyState === "complete") setup(); else window.addEventListener("load", setup);
+})();
+</script>
+
+<script>
+/* ===== إحصائيات الزيارات (Google Analytics 4) =====
+   حط الـ Measurement ID بتاعك هنا (شكله G-XXXXXXXXXX). لو فاضي: التتبع مقفول تماماً. */
+(function () {
+  var GA_ID = "";
+  if (!GA_ID || navigator.doNotTrack === "1") return;
+  window.dataLayer = window.dataLayer || [];
+  function gtag() { dataLayer.push(arguments); }
+  window.gtag = gtag;
+  var s = document.createElement("script");
+  s.async = true; s.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(GA_ID);
+  document.head.appendChild(s);
+  gtag("js", new Date());
+  gtag("config", GA_ID, { send_page_view: false, anonymize_ip: true });
+  var last = null;
+  function track() {
+    var r = (location.hash || "#hero").replace(/^#/, "") || "hero";
+    if (r === last || r === "admin") return;   /* صفحة الإدارة مش بتتتبع */
+    last = r;
+    gtag("event", "page_view", { page_title: document.title + " | " + r, page_location: location.origin + location.pathname + "#" + r, page_path: "/#" + r });
+  }
+  window.addEventListener("load", function () { setTimeout(track, 300); });
+  window.addEventListener("hashchange", track);
+  document.addEventListener("click", function (e) {
+    var el = e.target.closest && e.target.closest("[data-go],.fbtn,.btn-hero");
+    if (!el) return;
+    if (el.matches("[data-go]")) setTimeout(track, 120);
+    if (el.classList.contains("fbtn")) gtag("event", "social_click", { network: el.getAttribute("aria-label") || "social" });
+    if (el.classList.contains("btn-hero")) gtag("event", "hero_cta_click", { target: el.getAttribute("data-go") || "" });
+  });
+})();
 </script>
 </body>
 </html>
