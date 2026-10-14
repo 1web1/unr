@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <script>document.documentElement.classList.add("js");try{if(localStorage.getItem("theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https://www.google-analytics.com https://www.googletagmanager.com https://res.cloudinary.com https://*.googleusercontent.com; connect-src 'self' https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.gstatic.com https://*.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://api.cloudinary.com https://*.firebasestorage.app; object-src 'none'; base-uri 'none'; frame-ancestors 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https://graph.facebook.com https://*.fbcdn.net https://www.google-analytics.com https://www.googletagmanager.com https://res.cloudinary.com https://*.googleusercontent.com; connect-src 'self' https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.gstatic.com https://*.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://api.cloudinary.com https://*.firebasestorage.app; object-src 'none'; base-uri 'none'; frame-ancestors 'self'">
 <title>مبادرة رعاية الشباب - جامعة القاهرة</title>
 <meta name="description" content="مبادرة رعاية الشباب بجامعة القاهرة: مساحة طلابية لاكتشاف المواهب وبناء القيادات عبر المعايشات والمعسكرات والأنشطة والزيارات. سجّل الآن وتابع حالة طلبك.">
 <meta name="theme-color" content="#040d14">
@@ -252,8 +252,9 @@ a{color:var(--gold)}
 .fbtn:hover .f-tip,.fbtn:focus-visible .f-tip{opacity:1;transform:translateX(0)}
 .wa{background:linear-gradient(135deg,#25D366,#128C7E)}
 .wa2{background:linear-gradient(135deg,#128C7E,#075E54);border:2px solid var(--gold)}
-.fb{background:linear-gradient(135deg,#1877F2,#0b4fb3)}
-.fb2{background:linear-gradient(135deg,#0d3b66,#8a1538);border:2px solid var(--gold)}
+.fb,.fb2{background:linear-gradient(135deg,#0d3b66,#8a1538);border:2px solid var(--gold)}
+.fbtn .f-fallback{display:none;position:absolute;inset:0;align-items:center;justify-content:center;background:#1877F2;border-radius:50%}
+.fbtn.noimg .f-fallback{display:flex}
 .insta{background:linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)}
 .tiktok{background:#000000;border:1px solid rgba(255,255,255,.2)}
 
@@ -458,14 +459,15 @@ html[data-theme="light"] .bulk-bar{background:rgba(143,111,0,.1)}
   <a href="#" id="waLink" target="_blank" rel="noopener" class="fbtn wa" title="واتساب المبادرة" aria-label="واتساب المبادرة"><i class="fab fa-whatsapp"></i><span class="f-badge">1</span><span class="f-tip" id="waLabel">واتساب المبادرة</span></a>
   <a href="#" id="wa2Link" target="_blank" rel="noopener" class="fbtn wa2" title="واتساب الاستفسارات" aria-label="واتساب الاستفسارات"><i class="fab fa-whatsapp"></i><span class="f-badge">2</span><span class="f-tip" id="wa2Label">واتساب الاستفسارات</span></a>
   <a href="https://www.facebook.com/share/19PMpQ3kAy/?mibextid=wwXIfr" id="fbLink" target="_blank" rel="noopener" class="fbtn fb" title="الصفحة الرسمية الأولى" aria-label="الصفحة الرسمية الأولى">
-    <img src="images/uni-logo.png" class="f-avatar" alt="صورة الصفحة 1" onerror="this.style.display='none'">
-    <i class="fab fa-facebook-f" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(24,119,242,0.85);border-radius:50%" id="fbFallbackIcon"></i>
+    <img src="images/uni-logo.png" id="fbImg" data-default="images/uni-logo.png" class="f-avatar" alt="صورة الصفحة 1">
+    <i class="fab fa-facebook-f f-fallback"></i>
     <span class="f-fb-badge"><i class="fab fa-facebook-f" style="font-size:10px"></i></span>
     <span class="f-badge">1</span>
     <span class="f-tip" id="fbLabel">الصفحة الرسمية الأولى</span>
   </a>
   <a href="https://www.facebook.com/CairoUniversitySU?rdid=fSzKvdoxYF0C8MQL&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1EzYzcPPJk%2F#" id="fb2Link" target="_blank" rel="noopener" class="fbtn fb2" title="اتحاد طلاب جامعة القاهرة" aria-label="اتحاد طلاب جامعة القاهرة">
-    <img src="images/hero-logo.png" class="f-avatar" alt="صورة الصفحة 2" onerror="this.style.display='none'">
+    <img src="images/hero-logo.png" id="fb2Img" data-default="images/hero-logo.png" class="f-avatar" alt="صورة الصفحة 2">
+    <i class="fab fa-facebook-f f-fallback"></i>
     <span class="f-fb-badge"><i class="fab fa-facebook-f" style="font-size:10px"></i></span>
     <span class="f-badge">2</span>
     <span class="f-tip" id="fb2Label">اتحاد طلاب جامعة القاهرة</span>
@@ -774,12 +776,20 @@ html[data-theme="light"] .bulk-bar{background:rgba(143,111,0,.1)}
            <input type="text" id="adminFbLabel" placeholder="مثال: الصفحة الرسمية للمبادرة">
         </div>
         <div class="fg">
+           <label>صورة فيسبوك 1 (اختياري - رابط صورة، وإلا تُجلب تلقائياً من الرابط)</label>
+           <input type="text" id="adminFbImg" dir="ltr" placeholder="https://res.cloudinary.com/...">
+        </div>
+        <div class="fg">
            <label>فيسبوك 2 (رابط الجروب أو الصفحة الثانية)</label>
            <input type="text" id="adminFb2" dir="ltr" placeholder="رابط فيسبوك إضافي">
         </div>
         <div class="fg">
            <label>اسم زر فيسبوك 2 (لتمييزه عن الأول)</label>
            <input type="text" id="adminFb2Label" placeholder="مثال: جروب ومجتمع الطلاب">
+        </div>
+        <div class="fg">
+           <label>صورة فيسبوك 2 (اختياري - رابط صورة، وإلا تُجلب تلقائياً من الرابط)</label>
+           <input type="text" id="adminFb2Img" dir="ltr" placeholder="https://res.cloudinary.com/...">
         </div>
         <div class="fg">
            <label>انستجرام (رابط)</label>
@@ -1138,10 +1148,42 @@ async function loadSocialLinks() {
       applyLink("fbLink", "https://www.facebook.com/share/19PMpQ3kAy/?mibextid=wwXIfr", false, "fbLabel", "الصفحة الرسمية الأولى");
       applyLink("fb2Link", "https://www.facebook.com/CairoUniversitySU?rdid=fSzKvdoxYF0C8MQL&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1EzYzcPPJk%2F#", false, "fb2Label", "اتحاد طلاب جامعة القاهرة");
     }
+    const d = snap.exists() ? snap.data() : {};
+    setFbAvatar("fbImg", d.fbImg, d.facebook || $("fbLink").href);
+    setFbAvatar("fb2Img", d.fb2Img, d.facebook2 || $("fb2Link").href);
   } catch (e) {
     console.error("خطأ في جلب الروابط:", e);
   }
 }
+
+/* ---------- صورة زر الفيسبوك بتتغير حسب الرابط ---------- */
+function fbUsername(url) {
+  try {
+    const u = new URL(url);
+    if (!/(^|\.)facebook\.com$|(^|\.)fb\.com$/i.test(u.hostname)) return "";
+    if (/^\/profile\.php/i.test(u.pathname)) return u.searchParams.get("id") || "";
+    const seg = u.pathname.split("/").filter(Boolean)[0] || "";
+    return /^(share|groups|pages|p|people|watch|events|story\.php|permalink\.php|photo|photos|reel|login|sharer)$/i.test(seg) ? "" : seg;
+  } catch (e) { return ""; }
+}
+function setFbAvatar(imgId, customImg, pageUrl) {
+  const img = $(imgId); if (!img) return;
+  const btn = img.closest(".fbtn");
+  const def = img.dataset.default;
+  const user = fbUsername(pageUrl);
+  const chain = [];
+  if (customImg && customImg.trim()) chain.push(safeUrl(customImg.trim()));
+  if (user) chain.push(`https://graph.facebook.com/${encodeURIComponent(user)}/picture?type=large&width=200&height=200`);
+  if (def) chain.push(def);
+  let i = 0;
+  const next = () => {
+    if (i >= chain.length) { img.style.display = "none"; btn.classList.add("noimg"); return; }
+    img.style.display = ""; btn.classList.remove("noimg"); img.src = chain[i++];
+  };
+  img.onerror = next;
+  next();
+}
+
 loadSocialLinks();
 
 /* ---------- معرض الصور ---------- */
@@ -1491,6 +1533,7 @@ async function loadSettingsForm() {
     $("adminWaLabel").value = data.waLabel || ""; $("adminWa2Label").value = data.wa2Label || "";
     $("adminFb").value = data.facebook || ""; $("adminFb2").value = data.facebook2 || "";
     $("adminFbLabel").value = data.fbLabel || ""; $("adminFb2Label").value = data.fb2Label || "";
+    $("adminFbImg").value = data.fbImg || ""; $("adminFb2Img").value = data.fb2Img || "";
     $("adminInsta").value = data.instagram || ""; $("adminTiktok").value = data.tiktok || "";
     $("adminRegOpen").value = data.regOpen === false ? "false" : "true";
     $("adminRegClosedMsg").value = data.regClosedMsg || "";
@@ -1524,6 +1567,8 @@ $("btnSaveSettings").onclick = async () => {
       facebook2: $("adminFb2").value.trim(),
       fbLabel: $("adminFbLabel").value.trim(),
       fb2Label: $("adminFb2Label").value.trim(),
+      fbImg: $("adminFbImg").value.trim(),
+      fb2Img: $("adminFb2Img").value.trim(),
       instagram: $("adminInsta").value.trim(),
       tiktok: $("adminTiktok").value.trim(),
       regOpen: $("adminRegOpen").value !== "false",
