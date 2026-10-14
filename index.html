@@ -242,13 +242,32 @@ tr:hover td{background:rgba(255,255,255,.04)}
 a{color:var(--gold)}
 
 /* Floating Social Media Buttons */
-.floating{position:fixed;bottom:18px;left:18px;display:flex;flex-direction:column;gap:10px;z-index:999}
-.fbtn{width:50px;height:50px;border-radius:50%;justify-content:center;align-items:center;color:#fff;font-size:24px;text-decoration:none;box-shadow:0 4px 15px rgba(0,0,0,.35);transition:.25s; display:none; /* مخفية افتراضياً لحين سحب الروابط */}
+.floating{position:fixed;bottom:18px;left:18px;display:flex;flex-direction:column;gap:12px;z-index:999}
+.fbtn{width:50px;height:50px;border-radius:50%;justify-content:center;align-items:center;color:#fff;font-size:23px;text-decoration:none;box-shadow:0 4px 15px rgba(0,0,0,.35);transition:.25s;display:none;position:relative;overflow:visible}
 .fbtn:hover{transform:translateY(-4px) scale(1.08);color:#fff}
+.fbtn img.f-avatar{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;border:2px solid #1877F2}
+.fbtn .f-fb-badge{position:absolute;bottom:-2px;right:-2px;background:#1877F2;color:#fff;font-size:11px;width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:2px solid #040d14;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.fbtn .f-badge{position:absolute;top:-4px;right:-4px;background:var(--gold);color:#000;font-size:10px;font-weight:800;padding:1px 5px;border-radius:10px;line-height:1.2;border:1.5px solid #040d14;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.fbtn .f-tip{position:absolute;left:60px;white-space:nowrap;background:rgba(4,13,20,.92);color:#fff;border:1px solid rgba(212,175,55,.45);padding:5px 12px;border-radius:8px;font-size:12px;font-weight:700;opacity:0;pointer-events:none;transform:translateX(-8px);transition:.22s;box-shadow:0 4px 14px rgba(0,0,0,.4)}
+.fbtn:hover .f-tip,.fbtn:focus-visible .f-tip{opacity:1;transform:translateX(0)}
 .wa{background:linear-gradient(135deg,#25D366,#128C7E)}
+.wa2{background:linear-gradient(135deg,#128C7E,#075E54);border:2px solid var(--gold)}
 .fb{background:linear-gradient(135deg,#1877F2,#0b4fb3)}
+.fb2{background:linear-gradient(135deg,#0d3b66,#8a1538);border:2px solid var(--gold)}
 .insta{background:linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)}
-.tiktok{background:#000000}
+.tiktok{background:#000000;border:1px solid rgba(255,255,255,.2)}
+
+/* Modal (Privacy Policy & Dialogs) */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:2000;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-backdrop.show{display:flex}
+.modal-box{max-width:580px;width:100%;max-height:85vh;overflow-y:auto;padding:28px;position:relative;text-align:right;line-height:1.9}
+.modal-box h3{color:var(--gold);margin:0 0 12px;font-size:1.3rem}
+.modal-box ul{padding-right:20px;margin:10px 0;color:rgba(255,255,255,.88)}
+.modal-close{position:absolute;top:16px;left:16px;background:rgba(255,255,255,.1);border:0;color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:16px}
+html[data-theme="light"] .modal-box ul{color:rgba(20,20,30,.88)}
+html[data-theme="light"] .modal-close{background:rgba(0,0,0,.1);color:#1a1a1a}
+.closed-box{padding:44px 24px;text-align:center;display:none}
+.closed-box i{font-size:44px;color:var(--gold);margin-bottom:12px}
 
 @media(max-width:768px){
  .navbar{padding:0 14px}.brand h3{font-size:.95rem}
@@ -436,12 +455,23 @@ html[data-theme="light"] .bulk-bar{background:rgba(143,111,0,.1)}
 <div class="svc-banner" id="svcBanner" role="alert"><span></span><button type="button" onclick="location.reload()">إعادة تحميل</button></div>
 
 <div class="floating">
-  <a href="#" id="waLink" target="_blank" rel="noopener" class="fbtn wa" title="واتساب 1" aria-label="واتساب 1"><i class="fab fa-whatsapp"></i></a>
-  <a href="#" id="wa2Link" target="_blank" rel="noopener" class="fbtn wa" title="واتساب 2" aria-label="واتساب 2"><i class="fab fa-whatsapp"></i></a>
-  <a href="#" id="fbLink" target="_blank" rel="noopener" class="fbtn fb" title="فيسبوك 1" aria-label="فيسبوك 1"><i class="fab fa-facebook-f"></i></a>
-  <a href="#" id="fb2Link" target="_blank" rel="noopener" class="fbtn fb" title="فيسبوك 2" aria-label="فيسبوك 2"><i class="fab fa-facebook-f"></i></a>
-  <a href="#" id="instaLink" target="_blank" rel="noopener" class="fbtn insta" title="انستجرام" aria-label="انستجرام"><i class="fab fa-instagram"></i></a>
-  <a href="#" id="tiktokLink" target="_blank" rel="noopener" class="fbtn tiktok" title="تيك توك" aria-label="تيك توك"><i class="fab fa-tiktok"></i></a>
+  <a href="#" id="waLink" target="_blank" rel="noopener" class="fbtn wa" title="واتساب المبادرة" aria-label="واتساب المبادرة"><i class="fab fa-whatsapp"></i><span class="f-badge">1</span><span class="f-tip" id="waLabel">واتساب المبادرة</span></a>
+  <a href="#" id="wa2Link" target="_blank" rel="noopener" class="fbtn wa2" title="واتساب الاستفسارات" aria-label="واتساب الاستفسارات"><i class="fab fa-whatsapp"></i><span class="f-badge">2</span><span class="f-tip" id="wa2Label">واتساب الاستفسارات</span></a>
+  <a href="https://www.facebook.com/share/19PMpQ3kAy/?mibextid=wwXIfr" id="fbLink" target="_blank" rel="noopener" class="fbtn fb" title="الصفحة الرسمية الأولى" aria-label="الصفحة الرسمية الأولى">
+    <img src="images/uni-logo.png" class="f-avatar" alt="صورة الصفحة 1" onerror="this.style.display='none'">
+    <i class="fab fa-facebook-f" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(24,119,242,0.85);border-radius:50%" id="fbFallbackIcon"></i>
+    <span class="f-fb-badge"><i class="fab fa-facebook-f" style="font-size:10px"></i></span>
+    <span class="f-badge">1</span>
+    <span class="f-tip" id="fbLabel">الصفحة الرسمية الأولى</span>
+  </a>
+  <a href="https://www.facebook.com/CairoUniversitySU?rdid=fSzKvdoxYF0C8MQL&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1EzYzcPPJk%2F#" id="fb2Link" target="_blank" rel="noopener" class="fbtn fb2" title="اتحاد طلاب جامعة القاهرة" aria-label="اتحاد طلاب جامعة القاهرة">
+    <img src="images/hero-logo.png" class="f-avatar" alt="صورة الصفحة 2" onerror="this.style.display='none'">
+    <span class="f-fb-badge"><i class="fab fa-facebook-f" style="font-size:10px"></i></span>
+    <span class="f-badge">2</span>
+    <span class="f-tip" id="fb2Label">اتحاد طلاب جامعة القاهرة</span>
+  </a>
+  <a href="#" id="instaLink" target="_blank" rel="noopener" class="fbtn insta" title="انستجرام" aria-label="انستجرام"><i class="fab fa-instagram"></i><span class="f-tip">انستجرام</span></a>
+  <a href="#" id="tiktokLink" target="_blank" rel="noopener" class="fbtn tiktok" title="تيك توك" aria-label="تيك توك"><i class="fab fa-tiktok"></i><span class="f-tip">تيك توك</span></a>
 </div>
 
 <header class="navbar">
@@ -524,7 +554,12 @@ html[data-theme="light"] .bulk-bar{background:rgba(143,111,0,.1)}
 
   <section id="register" class="section">
     <div class="wrap">
-      <div class="glass form-box">
+      <div class="glass closed-box" id="regClosedBox">
+        <i class="fas fa-lock"></i>
+        <h3>التسجيل مغلق حالياً</h3>
+        <p id="regClosedMsg" style="color:var(--muted)">تم إغلاق باب التسجيل في الوقت الحالي. تابع صفحاتنا الرسمية لمعرفة موعد فتح التسجيل القادم.</p>
+      </div>
+      <div class="glass form-box" id="regFormBox">
         <h2>تسجيل بيانات الطالب</h2>
         <form id="regForm" novalidate>
           <div class="fg"><label for="fullName">الاسم رباعي</label><input type="text" id="fullName" autocomplete="name" required><div class="err">اكتب الاسم رباعي (4 كلمات على الأقل)</div></div>
@@ -618,6 +653,22 @@ html[data-theme="light"] .bulk-bar{background:rgba(143,111,0,.1)}
   </section>
 </main>
 
+<!-- ============ نافذة سياسة الخصوصية ============ -->
+<div class="modal-backdrop" id="privacyModal" role="dialog" aria-modal="true" aria-labelledby="privacyTitle">
+  <div class="glass modal-box">
+    <button type="button" class="modal-close" id="closePrivacy" aria-label="إغلاق"><i class="fas fa-times"></i></button>
+    <h3 id="privacyTitle"><i class="fas fa-shield-halved"></i> سياسة الخصوصية واستخدام البيانات</h3>
+    <p>نحن في <b>مبادرة رعاية الشباب - جامعة القاهرة</b> نلتزم بحماية خصوصية بيانات الطلاب المتقدمين وفقاً للقواعد التالية:</p>
+    <ul>
+      <li><b>الغرض من جمع البيانات:</b> تُستخدم البيانات الشخصية (الاسم، الرقم القومي، رقم الهاتف، الكلية، والصور المرفقة) حصرياً لمراجعة طلبات الانضمام والتحقق من الهوية الجامعية والتواصل مع المقبولين.</li>
+      <li><b>سرية المرفقات:</b> لا يمكن لأي زائر الاطلاع على بياناتك أو صورك؛ يقتصر الوصول إليها على مسؤولي الإدارة المختصين فقط.</li>
+      <li><b>الاستعلام الآمن:</b> يتيح قسم «حالة الطلب» عرض حالة القبول ورسالة الإدارة فقط دون كشف أي بيانات شخصية أو مرفقات.</li>
+      <li><b>حق التعديل والحذف:</b> يحق للطالب طلب تعديل بياناته أو حذفها بالتواصل المباشر مع إدارة المبادرة عبر القنوات الرسمية.</li>
+    </ul>
+    <button type="button" class="btn-main" id="acceptPrivacyBtn" style="margin-top:14px">قرأت وأوافق على السياسة</button>
+  </div>
+</div>
+
 <!-- ============ الإدارة ============ -->
 <div id="adminView">
   <div id="loginBox" class="glass login-box">
@@ -694,8 +745,8 @@ html[data-theme="light"] .bulk-bar{background:rgba(143,111,0,.1)}
 
     <!-- قسم الإعدادات -->
     <div id="settingsWrap" class="tbl-wrap" style="display:none; padding: 24px; background: rgba(0,0,0,.25);">
-      <h3 style="color: var(--gold); margin-top: 0; text-align: center; margin-bottom: 24px;">إعدادات روابط السوشيال ميديا</h3>
-      <p style="text-align: center; color: var(--muted); margin-bottom: 20px; font-size: 13px;">ملاحظة: اترك الحقل فارغاً إذا كنت لا تريد عرض الزر الخاص به في الموقع.</p>
+      <h3 style="color: var(--gold); margin-top: 0; text-align: center; margin-bottom: 20px;">إعدادات الروابط والتحكم في التسجيل</h3>
+      <p style="text-align: center; color: var(--muted); margin-bottom: 20px; font-size: 13px;">ملاحظة: اترك حقل الرابط فارغاً إذا كنت لا تريد عرض الزر الخاص به، ويمكنك تخصيص الاسم الذي يظهر بجانب كل زر لتمييزه.</p>
       
       <div class="settings-grid">
         <div class="fg">
@@ -703,16 +754,32 @@ html[data-theme="light"] .bulk-bar{background:rgba(143,111,0,.1)}
            <input type="text" id="adminWa" dir="ltr" placeholder="مثال: 201099583667">
         </div>
         <div class="fg">
+           <label>اسم زر واتساب 1 (يظهر للتوضيح)</label>
+           <input type="text" id="adminWaLabel" placeholder="مثال: واتساب المبادرة">
+        </div>
+        <div class="fg">
            <label>واتساب 2 (رقم فقط)</label>
            <input type="text" id="adminWa2" dir="ltr" placeholder="رقم واتساب إضافي">
         </div>
         <div class="fg">
-           <label>فيسبوك 1 (رابط)</label>
+           <label>اسم زر واتساب 2 (يظهر للتوضيح)</label>
+           <input type="text" id="adminWa2Label" placeholder="مثال: واتساب الاستفسارات">
+        </div>
+        <div class="fg">
+           <label>فيسبوك 1 (رابط الصفحة الرئيسية)</label>
            <input type="text" id="adminFb" dir="ltr" placeholder="https://www.facebook.com/...">
         </div>
         <div class="fg">
-           <label>فيسبوك 2 (رابط)</label>
+           <label>اسم زر فيسبوك 1 (لتمييزه عن الثاني)</label>
+           <input type="text" id="adminFbLabel" placeholder="مثال: الصفحة الرسمية للمبادرة">
+        </div>
+        <div class="fg">
+           <label>فيسبوك 2 (رابط الجروب أو الصفحة الثانية)</label>
            <input type="text" id="adminFb2" dir="ltr" placeholder="رابط فيسبوك إضافي">
+        </div>
+        <div class="fg">
+           <label>اسم زر فيسبوك 2 (لتمييزه عن الأول)</label>
+           <input type="text" id="adminFb2Label" placeholder="مثال: جروب ومجتمع الطلاب">
         </div>
         <div class="fg">
            <label>انستجرام (رابط)</label>
@@ -721,6 +788,17 @@ html[data-theme="light"] .bulk-bar{background:rgba(143,111,0,.1)}
         <div class="fg">
            <label>تيك توك (رابط)</label>
            <input type="text" id="adminTiktok" dir="ltr" placeholder="https://tiktok.com/@...">
+        </div>
+        <div class="fg">
+           <label>حالة التسجيل للطلاب</label>
+           <select id="adminRegOpen">
+             <option value="true">مفتوح (متاح للطلاب)</option>
+             <option value="false">مغلق مؤقتاً</option>
+           </select>
+        </div>
+        <div class="fg">
+           <label>رسالة إغلاق التسجيل</label>
+           <input type="text" id="adminRegClosedMsg" placeholder="تم إغلاق باب التسجيل حالياً، تابعونا للمزيد.">
         </div>
       </div>
       
@@ -1022,35 +1100,43 @@ async function retry(fn, tries = 4) {
   throw last;
 }
 
-/* ---------- جلب وتطبيق روابط السوشيال ميديا ---------- */
+/* ---------- جلب وتطبيق روابط السوشيال ميديا وإعدادات التسجيل ---------- */
 async function loadSocialLinks() {
   try {
     const snap = await getDoc(doc(db, "settings", "social_links"));
     
-    // دالة مساعدة لتطبيق الرابط وإظهار/إخفاء الزر
-    const applyLink = (elementId, url, isWhatsapp = false) => {
+    const applyLink = (elementId, url, isWhatsapp = false, labelId = null, labelText = "") => {
       const el = $(elementId);
+      if (!el) return;
       if (url && url.trim() !== "") {
-        el.href = isWhatsapp ? `https://wa.me/${url}` : url;
-        el.style.display = "flex"; // إظهار الزر
+        el.href = isWhatsapp ? `https://wa.me/${url.replace(/\D/g, "")}` : safeUrl(url.trim());
+        el.style.display = "flex";
+        if (labelId && $(labelId) && labelText) {
+          $(labelId).textContent = labelText;
+          el.title = labelText;
+          el.setAttribute("aria-label", labelText);
+        }
       } else {
-        el.style.display = "none"; // إخفاء الزر إذا لم يوجد رابط
+        el.style.display = "none";
       }
     };
 
     if (snap.exists()) {
       const data = snap.data();
-      applyLink("waLink", data.whatsapp, true);
-      applyLink("wa2Link", data.whatsapp2, true);
-      applyLink("fbLink", data.facebook);
-      applyLink("fb2Link", data.facebook2);
+      applyLink("waLink", data.whatsapp, true, "waLabel", data.waLabel || "واتساب المبادرة");
+      applyLink("wa2Link", data.whatsapp2, true, "wa2Label", data.wa2Label || "واتساب الاستفسارات");
+      applyLink("fbLink", data.facebook || "https://www.facebook.com/share/19PMpQ3kAy/?mibextid=wwXIfr", false, "fbLabel", data.fbLabel || "الصفحة الرسمية الأولى");
+      applyLink("fb2Link", data.facebook2 || "https://www.facebook.com/CairoUniversitySU?rdid=fSzKvdoxYF0C8MQL&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1EzYzcPPJk%2F#", false, "fb2Label", data.fb2Label || "اتحاد طلاب جامعة القاهرة");
       applyLink("instaLink", data.instagram);
       applyLink("tiktokLink", data.tiktok);
+      const isOpen = data.regOpen !== false;
+      $("regFormBox").style.display = isOpen ? "" : "none";
+      $("regClosedBox").style.display = isOpen ? "none" : "block";
+      if (data.regClosedMsg) $("regClosedMsg").textContent = data.regClosedMsg;
     } else {
-      // الروابط الافتراضية إذا لم تكن الإعدادات محفوظة بعد
-      applyLink("waLink", "201099583667", true);
-      applyLink("fbLink", "https://www.facebook.com/share/19PMpQ3kAy/?mibextid=wwXIfr");
-      // الباقي سيكون مخفي تلقائياً
+      applyLink("waLink", "201099583667", true, "waLabel", "واتساب المبادرة");
+      applyLink("fbLink", "https://www.facebook.com/share/19PMpQ3kAy/?mibextid=wwXIfr", false, "fbLabel", "الصفحة الرسمية الأولى");
+      applyLink("fb2Link", "https://www.facebook.com/CairoUniversitySU?rdid=fSzKvdoxYF0C8MQL&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1EzYzcPPJk%2F#", false, "fb2Label", "اتحاد طلاب جامعة القاهرة");
     }
   } catch (e) {
     console.error("خطأ في جلب الروابط:", e);
@@ -1110,6 +1196,24 @@ async function uploadImage(file, label, onDone) {
   try { body = await imageCompression(file, { maxSizeMB: 0.3, maxWidthOrHeight: 1200, useWebWorker: true }); }
   catch { if (file.size > 8 * 1024 * 1024) throw new Error("حجم الصورة كبير جداً"); }
   const url = await retry(async () => {
+    try {
+      const sigRes = await fetch("/api/sign-upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ label, mimeType: body.type || file.type, size: body.size || file.size })
+      });
+      if (sigRes.ok) {
+        const sig = await sigRes.json();
+        const fd = new FormData();
+        fd.append("file", body);
+        fd.append("api_key", sig.apiKey);
+        fd.append("timestamp", sig.timestamp);
+        fd.append("signature", sig.signature);
+        fd.append("folder", sig.folder);
+        const upRes = await fetch(sig.uploadUrl || CLOUDINARY_URL, { method: "POST", body: fd });
+        if (upRes.ok) return (await upRes.json()).secure_url;
+      }
+    } catch (_) {}
     const fd = new FormData(); fd.append("file", body); fd.append("upload_preset", PRESET);
     const res = await fetch(CLOUDINARY_URL, { method: "POST", body: fd });
     if (!res.ok) throw new Error("upload " + res.status);
@@ -1384,8 +1488,12 @@ async function loadSettingsForm() {
     if (!snap.exists()) return;
     const data = snap.data();
     $("adminWa").value = data.whatsapp || ""; $("adminWa2").value = data.whatsapp2 || "";
+    $("adminWaLabel").value = data.waLabel || ""; $("adminWa2Label").value = data.wa2Label || "";
     $("adminFb").value = data.facebook || ""; $("adminFb2").value = data.facebook2 || "";
+    $("adminFbLabel").value = data.fbLabel || ""; $("adminFb2Label").value = data.fb2Label || "";
     $("adminInsta").value = data.instagram || ""; $("adminTiktok").value = data.tiktok || "";
+    $("adminRegOpen").value = data.regOpen === false ? "false" : "true";
+    $("adminRegClosedMsg").value = data.regClosedMsg || "";
   } catch (e) { console.error(e); }
 }
 function setTab(name) {
@@ -1401,7 +1509,7 @@ function setTab(name) {
 }
 document.querySelectorAll(".tabs .tab").forEach(t => t.addEventListener("click", () => setTab(t.dataset.tab)));
 
-/* ---------- حفظ إعدادات السوشيال ميديا ---------- */
+/* ---------- حفظ إعدادات السوشيال ميديا والتحكم في التسجيل ---------- */
 $("btnSaveSettings").onclick = async () => {
   const btn = $("btnSaveSettings");
   const noticeBox = $("settingsNotice");
@@ -1410,12 +1518,18 @@ $("btnSaveSettings").onclick = async () => {
     await setDoc(doc(db, "settings", "social_links"), {
       whatsapp: $("adminWa").value.replace(/\D/g, ''),
       whatsapp2: $("adminWa2").value.replace(/\D/g, ''),
+      waLabel: $("adminWaLabel").value.trim(),
+      wa2Label: $("adminWa2Label").value.trim(),
       facebook: $("adminFb").value.trim(),
       facebook2: $("adminFb2").value.trim(),
+      fbLabel: $("adminFbLabel").value.trim(),
+      fb2Label: $("adminFb2Label").value.trim(),
       instagram: $("adminInsta").value.trim(),
-      tiktok: $("adminTiktok").value.trim()
+      tiktok: $("adminTiktok").value.trim(),
+      regOpen: $("adminRegOpen").value !== "false",
+      regClosedMsg: $("adminRegClosedMsg").value.trim()
     });
-    notice(noticeBox, "ok", "تم حفظ الإعدادات بنجاح. ستتغير الروابط في الموقع فوراً.");
+    notice(noticeBox, "ok", "تم حفظ الإعدادات بنجاح. ستتغير الروابط والأزرار في الموقع فوراً.");
     loadSocialLinks(); 
   } catch (error) {
     notice(noticeBox, "bad", "حدث خطأ أثناء الحفظ. تأكد من صلاحيات الحساب (Firestore Rules).");
@@ -1801,6 +1915,13 @@ $("btnDeleteAll").onclick = async () => {
     btn.disabled = false; btn.innerHTML = oldLabel;
   }
 };
+
+/* ---------- نافذة سياسة الخصوصية ---------- */
+const privModal = $("privacyModal");
+$("privacyLink")?.addEventListener("click", e => { e.preventDefault(); privModal.classList.add("show"); });
+$("closePrivacy")?.addEventListener("click", () => privModal.classList.remove("show"));
+$("acceptPrivacyBtn")?.addEventListener("click", () => { $("agreePolicy").checked = true; setInvalid("agreePolicy", false); privModal.classList.remove("show"); });
+privModal?.addEventListener("click", e => { if (e.target === privModal) privModal.classList.remove("show"); });
 
 /* ---------- جاهزية التطبيق ---------- */
 window.__svcReady();
