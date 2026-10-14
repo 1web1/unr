@@ -255,6 +255,14 @@ a{color:var(--gold)}
 .fb,.fb2{background:linear-gradient(135deg,#0d3b66,#8a1538);border:2px solid var(--gold)}
 .fbtn .f-fallback{display:none;position:absolute;inset:0;align-items:center;justify-content:center;background:#1877F2;border-radius:50%}
 .fbtn.noimg .f-fallback{display:flex}
+.fbtn .f-soc-badge{display:none;position:absolute;bottom:-2px;right:-2px;color:#fff;width:20px;height:20px;border-radius:50%;align-items:center;justify-content:center;border:2px solid #040d14;box-shadow:0 0 0 1px rgba(255,255,255,.3),0 2px 6px rgba(0,0,0,.4)}
+.fbtn .f-soc-badge.sb-insta{background:linear-gradient(45deg,#f09433,#dc2743,#bc1888)}
+.fbtn .f-soc-badge.sb-tiktok{background:#000}
+.fbtn.hasimg .f-soc-badge{display:inline-flex}
+.fbtn.hasimg>i.f-main{display:none}
+.fbtn.hasimg{border:2px solid var(--gold)}
+.fbtn .f-avatar.soc{display:none}
+.fbtn.hasimg .f-avatar.soc{display:block}
 .insta{background:linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)}
 .tiktok{background:#000000;border:1px solid rgba(255,255,255,.2)}
 
@@ -472,8 +480,8 @@ html[data-theme="light"] .bulk-bar{background:rgba(143,111,0,.1)}
     <span class="f-badge">2</span>
     <span class="f-tip" id="fb2Label">اتحاد طلاب جامعة القاهرة</span>
   </a>
-  <a href="#" id="instaLink" target="_blank" rel="noopener" class="fbtn insta" title="انستجرام" aria-label="انستجرام"><i class="fab fa-instagram"></i><span class="f-tip">انستجرام</span></a>
-  <a href="#" id="tiktokLink" target="_blank" rel="noopener" class="fbtn tiktok" title="تيك توك" aria-label="تيك توك"><i class="fab fa-tiktok"></i><span class="f-tip">تيك توك</span></a>
+  <a href="#" id="instaLink" target="_blank" rel="noopener" class="fbtn insta" title="انستجرام" aria-label="انستجرام"><img id="instaImg" class="f-avatar soc" alt="صورة انستجرام"><i class="fab fa-instagram f-main"></i><span class="f-soc-badge sb-insta"><i class="fab fa-instagram" style="font-size:10px"></i></span><span class="f-tip">انستجرام</span></a>
+  <a href="#" id="tiktokLink" target="_blank" rel="noopener" class="fbtn tiktok" title="تيك توك" aria-label="تيك توك"><img id="tiktokImg" class="f-avatar soc" alt="صورة تيك توك"><i class="fab fa-tiktok f-main"></i><span class="f-soc-badge sb-tiktok"><i class="fab fa-tiktok" style="font-size:10px"></i></span><span class="f-tip">تيك توك</span></a>
 </div>
 
 <header class="navbar">
@@ -796,8 +804,16 @@ html[data-theme="light"] .bulk-bar{background:rgba(143,111,0,.1)}
            <input type="text" id="adminInsta" dir="ltr" placeholder="https://instagram.com/...">
         </div>
         <div class="fg">
+           <label>صورة انستجرام (اختياري - رابط صورة مباشر)</label>
+           <input type="text" id="adminInstaImg" dir="ltr" placeholder="https://res.cloudinary.com/...">
+        </div>
+        <div class="fg">
            <label>تيك توك (رابط)</label>
            <input type="text" id="adminTiktok" dir="ltr" placeholder="https://tiktok.com/@...">
+        </div>
+        <div class="fg">
+           <label>صورة تيك توك (اختياري - رابط صورة مباشر)</label>
+           <input type="text" id="adminTiktokImg" dir="ltr" placeholder="https://res.cloudinary.com/...">
         </div>
         <div class="fg">
            <label>حالة التسجيل للطلاب</label>
@@ -1151,6 +1167,8 @@ async function loadSocialLinks() {
     const d = snap.exists() ? snap.data() : {};
     setFbAvatar("fbImg", d.fbImg, d.facebook || $("fbLink").href);
     setFbAvatar("fb2Img", d.fb2Img, d.facebook2 || $("fb2Link").href);
+    setSocAvatar("instaImg", d.instaImg);
+    setSocAvatar("tiktokImg", d.tiktokImg);
   } catch (e) {
     console.error("خطأ في جلب الروابط:", e);
   }
@@ -1182,6 +1200,17 @@ function setFbAvatar(imgId, customImg, pageUrl) {
   };
   img.onerror = next;
   next();
+}
+
+function setSocAvatar(imgId, url) {
+  const img = $(imgId); if (!img) return;
+  const btn = img.closest(".fbtn");
+  btn.classList.remove("hasimg");
+  const u = url && url.trim() ? safeUrl(url.trim()) : "#";
+  if (u === "#") return;
+  img.onload = () => btn.classList.add("hasimg");
+  img.onerror = () => btn.classList.remove("hasimg");
+  img.src = u;
 }
 
 loadSocialLinks();
@@ -1535,6 +1564,7 @@ async function loadSettingsForm() {
     $("adminFbLabel").value = data.fbLabel || ""; $("adminFb2Label").value = data.fb2Label || "";
     $("adminFbImg").value = data.fbImg || ""; $("adminFb2Img").value = data.fb2Img || "";
     $("adminInsta").value = data.instagram || ""; $("adminTiktok").value = data.tiktok || "";
+    $("adminInstaImg").value = data.instaImg || ""; $("adminTiktokImg").value = data.tiktokImg || "";
     $("adminRegOpen").value = data.regOpen === false ? "false" : "true";
     $("adminRegClosedMsg").value = data.regClosedMsg || "";
   } catch (e) { console.error(e); }
@@ -1571,6 +1601,8 @@ $("btnSaveSettings").onclick = async () => {
       fb2Img: $("adminFb2Img").value.trim(),
       instagram: $("adminInsta").value.trim(),
       tiktok: $("adminTiktok").value.trim(),
+      instaImg: $("adminInstaImg").value.trim(),
+      tiktokImg: $("adminTiktokImg").value.trim(),
       regOpen: $("adminRegOpen").value !== "false",
       regClosedMsg: $("adminRegClosedMsg").value.trim()
     });
