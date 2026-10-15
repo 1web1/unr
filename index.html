@@ -354,24 +354,6 @@ a.act:hover{transform:translateY(-4px);border-color:var(--gold)}
 .role-chip[aria-pressed="true"]{border-color:#e11d2e;background:rgba(225,29,46,.12)}
 .role-chip[aria-pressed="true"] .dot{background:#e11d2e;border-color:#e11d2e;box-shadow:0 0 0 3px rgba(225,29,46,.3)}
 .fg.invalid .role-chip{border-color:var(--bad)}
-.com-chip{display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(0,0,0,.35);border:1.5px solid rgba(255,255,255,.2);color:#fff;border-radius:12px;font-family:inherit;font-weight:600;font-size:14px;cursor:pointer;transition:.2s;text-align:right}
-.com-chip:hover{border-color:rgba(255,255,255,.45)}
-.com-chip i{color:var(--gold);width:18px;text-align:center}
-.com-chip .dot{flex:none;margin-inline-start:auto;width:20px;height:20px;border-radius:50%;border:2px solid rgba(255,255,255,.45);transition:.2s}
-.com-chip[aria-pressed="true"]{border-color:#e11d2e;background:rgba(225,29,46,.12)}
-.com-chip[aria-pressed="true"] .dot{background:#e11d2e;border-color:#e11d2e;box-shadow:0 0 0 3px rgba(225,29,46,.3)}
-.fg.invalid .com-chip{border-color:var(--bad)}
-.com-chip{align-items:flex-start}
-.com-chip i{margin-top:3px}
-.com-chip .ct{display:flex;flex-direction:column;gap:3px;min-width:0}
-.com-chip .ct small{font-weight:400;font-size:12px;line-height:1.6;opacity:.75}
-.com-chip .dot{margin-top:2px}
-.com-chip:disabled{opacity:.4;cursor:not-allowed}
-.com-hint{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 0 10px;font-size:13px;color:var(--muted)}
-.com-hint b{color:var(--gold)}
-.com-hint.limit{color:#ff8a8a}
-@media(max-width:560px){#committees.roles{grid-template-columns:1fr}}
-.cmt-tags{display:block;margin-top:4px;font-size:12px;opacity:.8;line-height:1.7}
 .photo-rule{margin-top:8px;padding:10px 12px;border-radius:10px;background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.45);font-size:12.5px;line-height:1.8;color:rgba(255,255,255,.9)}
 .photo-rule i{color:var(--gold)}
 label.ck{display:flex;gap:10px;align-items:flex-start;font-weight:400;font-size:13px;line-height:1.8;cursor:pointer}
@@ -464,13 +446,6 @@ html[data-theme="light"] .role-chip .dot{border-color:rgba(0,0,0,.35)}
 html[data-theme="light"] .role-chip[aria-pressed="true"]{border-color:#e11d2e;background:rgba(225,29,46,.1)}
 html[data-theme="light"] .role-chip[aria-pressed="true"] .dot{background:#e11d2e;border-color:#e11d2e}
 html[data-theme="light"] .fg.invalid .role-chip{border-color:var(--bad)}
-html[data-theme="light"] .com-chip{background:rgba(255,255,255,.85);border-color:rgba(0,0,0,.2);color:#1a1a1a}
-html[data-theme="light"] .com-chip:hover{border-color:rgba(0,0,0,.45)}
-html[data-theme="light"] .com-chip .dot{border-color:rgba(0,0,0,.35)}
-html[data-theme="light"] .com-chip[aria-pressed="true"]{border-color:#e11d2e;background:rgba(225,29,46,.1)}
-html[data-theme="light"] .com-chip[aria-pressed="true"] .dot{background:#e11d2e;border-color:#e11d2e}
-html[data-theme="light"] .fg.invalid .com-chip{border-color:var(--bad)}
-html[data-theme="light"] .com-hint.limit{color:#c62828}
 html[data-theme="light"] .progress .bar{background:rgba(0,0,0,.1)}
 html[data-theme="light"] .status-result{background:rgba(0,0,0,.06)}
 /* لوحة الإدارة */
@@ -608,18 +583,6 @@ html[data-theme="light"] .bulk-bar{background:rgba(143,111,0,.1)}
               <option value="الأولى">الفرقة الأولى</option><option value="الثانية">الفرقة الثانية</option><option value="الثالثة">الفرقة الثالثة</option><option value="الرابعة">الفرقة الرابعة</option><option value="الخامسة">الفرقة الخامسة</option><option value="السادسة">الفرقة السادسة</option><option value="السابعة">الفرقة السابعة</option></select><div class="err">اختر الفرقة</div></div>
           <div class="fg"><label for="facebookLink">رابط حساب الفيسبوك</label><input type="text" id="facebookLink" placeholder="facebook.com/username" dir="ltr" required><div class="err">اكتب رابط فيسبوك صحيح</div></div>
           <div class="fg"><label for="gmail">البريد الإلكتروني (Gmail)</label><input type="email" id="gmail" placeholder="example@gmail.com" dir="ltr" required><div class="err">بريد إلكتروني غير صحيح</div></div>
-          <div class="fg"><label>لجان التطوع التي تفضلها</label>
-            <div class="com-hint" id="comHint"><span>اختر لجنة واحدة على الأقل وحتى <b>3 لجان</b> كحد أقصى</span><span id="comCount">0/3</span></div>
-            <div class="roles" id="committees" role="group" aria-label="لجان التطوع">
-              <button type="button" class="com-chip" data-com="اللجنة الرياضية" aria-pressed="false"><i class="fas fa-futbol"></i><span class="ct"><span>اللجنة الرياضية</span><small>برامج ومسابقات للارتقاء بمستوى النشاط الرياضي</small></span><span class="dot"></span></button>
-              <button type="button" class="com-chip" data-com="اللجنة الثقافية" aria-pressed="false"><i class="fas fa-book-open"></i><span class="ct"><span>اللجنة الثقافية</span><small>تنمية الوعي الثقافي لدى الطلاب عبر برامج ثقافية متنوعة</small></span><span class="dot"></span></button>
-              <button type="button" class="com-chip" data-com="اللجنة الاجتماعية" aria-pressed="false"><i class="fas fa-people-group"></i><span class="ct"><span>اللجنة الاجتماعية</span><small>أنشطة اجتماعية تكسب مهارات متميزة في العمل الاجتماعي</small></span><span class="dot"></span></button>
-              <button type="button" class="com-chip" data-com="لجنة التنظيم" aria-pressed="false"><i class="fas fa-sitemap"></i><span class="ct"><span>لجنة التنظيم</span><small>تنظيم الفعاليات والمؤتمرات والأنشطة التي تنفذها المبادرة</small></span><span class="dot"></span></button>
-              <button type="button" class="com-chip" data-com="اللجنة الفنية" aria-pressed="false"><i class="fas fa-palette"></i><span class="ct"><span>اللجنة الفنية</span><small>تنمية الحس الجمالي والتذوق الفني وصقل موهبة الإبداع</small></span><span class="dot"></span></button>
-              <button type="button" class="com-chip" data-com="اللجنة العلمية" aria-pressed="false"><i class="fas fa-flask"></i><span class="ct"><span>اللجنة العلمية</span><small>الجمعيات العلمية وأندية العلوم والصلة بين الأساتذة والطلاب</small></span><span class="dot"></span></button>
-              <button type="button" class="com-chip" data-com="اللجنة الإعلامية" aria-pressed="false"><i class="fas fa-bullhorn"></i><span class="ct"><span>اللجنة الإعلامية</span><small>العمل الإعلامي والتواصل الاجتماعي وتسويق أفكار المبادرة</small></span><span class="dot"></span></button>
-            </div><div class="err">اختر لجنة واحدة على الأقل (حتى 3 لجان)</div></div>
-          <div class="fg"><label for="hobby">الهواية المفضلة</label><input type="text" id="hobby" maxlength="100" placeholder="مثال: القراءة، الرسم، كرة القدم..." required><div class="err">اكتب هوايتك المفضلة (حرفان على الأقل)</div></div>
           <div class="fg"><label for="profileImage">الصورة الشخصية <small>(JPG أو PNG أو WebP، حتى 8 ميجا)</small></label><input type="file" id="profileImage" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required><div class="photo-rule"><i class="fas fa-circle-info"></i> <b>شروط الصورة الشخصية:</b> صورة رسمية لائقة، الوجه واضح والخلفية بسيطة، <b>وليست سيلفي</b>، بدون فلاتر أو نظارة شمس أو صور جماعية. الصور غير المطابقة يتم رفض الطلب بسببها.</div><div class="err">ارفع صورة شخصية بصيغة JPG أو PNG أو WebP وحجمها أقل من 8 ميجا</div></div>
           <div class="fg"><label for="idImage">صورة البطاقة <small>(JPG أو PNG أو WebP، حتى 8 ميجا)</small></label><input type="file" id="idImage" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required><div class="err">ارفع صورة البطاقة بصيغة JPG أو PNG أو WebP وحجمها أقل من 8 ميجا</div></div>
           <div class="fg"><label for="cardImage">صورة الكارنيه أو بطاقة الترشيح <small>(JPG أو PNG أو WebP، حتى 8 ميجا)</small></label><input type="file" id="cardImage" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required><div class="err">ارفع صورة الكارنيه بصيغة JPG أو PNG أو WebP وحجمها أقل من 8 ميجا</div></div>
@@ -1341,24 +1304,6 @@ function validateImageField(id) {
   const bad = !IMG_TYPES.includes(f.type) || f.size > IMG_MAX;
   return setInvalid(id, bad);
 }
-const MAX_COMMITTEES = 3;
-const comChips = [...document.querySelectorAll(".com-chip")];
-const getCommittees = () => comChips.filter(b => b.getAttribute("aria-pressed") === "true").map(b => b.dataset.com);
-function syncCommittees() {
-  const n = getCommittees().length;
-  $("comCount").textContent = n + "/" + MAX_COMMITTEES;
-  $("comHint").classList.toggle("limit", n >= MAX_COMMITTEES);
-  comChips.forEach(b => { b.disabled = n >= MAX_COMMITTEES && b.getAttribute("aria-pressed") !== "true"; });
-}
-comChips.forEach(b => b.addEventListener("click", () => {
-  const on = b.getAttribute("aria-pressed") === "true";
-  if (!on && getCommittees().length >= MAX_COMMITTEES) return;
-  b.setAttribute("aria-pressed", String(!on));
-  $("committees").closest(".fg").classList.remove("invalid");
-  syncCommittees();
-}));
-function resetCommittees() { comChips.forEach(b => b.setAttribute("aria-pressed", "false")); syncCommittees(); }
-
 function validate() {
   const v = id => toLatin($(id).value);
   let bad = false;
@@ -1369,8 +1314,6 @@ function validate() {
   bad |= setInvalid("level", !$("level").value);
   bad |= setInvalid("facebookLink", !/facebook\.com|fb\.com|fb\.me/i.test(v("facebookLink")));
   bad |= setInvalid("gmail", !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v("gmail")));
-  bad |= setInvalid("hobby", $("hobby").value.trim().length < 2);
-  bad |= setInvalid("committees", getCommittees().length < 1 || getCommittees().length > MAX_COMMITTEES);
   bad |= setInvalid("agreePolicy", !$("agreePolicy").checked);
   ["profileImage","idImage","cardImage"].forEach(id => { bad |= validateImageField(id); });
   return !bad;
@@ -1384,7 +1327,7 @@ form.addEventListener("submit", async e => {
   const box = $("regNotice"); box.className = "notice";
   if (!validate()) { notice(box, "bad", "راجع الحقول المظللة بالأحمر ثم أعد الإرسال."); form.querySelector(".invalid")?.scrollIntoView({behavior:"smooth",block:"center"}); return; }
   if (!navigator.onLine) { notice(box, "bad", "لا يوجد اتصال بالإنترنت. بياناتك ما زالت في الصفحة، أعد المحاولة عند عودة الاتصال."); return; }
-  if (!withinClientLimit("rl_reg", 3, 300000)) { notice(box, "bad", "وصلت للحد الأقصى لمحاولات الإرسال (3 كل 5 دقائق). حاول بعد 5 دقائق أو تواصل معنا على واتساب."); return; }
+  if (!withinClientLimit("rl_reg", 3, 3600000)) { notice(box, "bad", "وصلت للحد الأقصى لمحاولات الإرسال (3 كل ساعة). حاول لاحقاً أو تواصل معنا على واتساب."); return; }
 
   submitting = true; $("submitBtn").disabled = true; $("progress").style.display = "block";
   const setP = (n, t) => { $("fill").style.width = n + "\%"; $("progressText").textContent = t; };
@@ -1392,7 +1335,7 @@ form.addEventListener("submit", async e => {
     const nid = toLatin($("nationalId").value);
 
     setP(5, "جاري التحقق من الرقم القومي...");
-    const existingSnap = await getDoc(doc(db, "status", nid)); // قواعد Firestore تمنع قراءة students لغير الأدمن
+    const existingSnap = await getDoc(doc(db, "students", nid));
     if (existingSnap.exists() && existingSnap.data().status !== "rejected") {
       const st = existingSnap.data().status;
       notice(box, "bad", st === "accepted"
@@ -1419,7 +1362,6 @@ form.addEventListener("submit", async e => {
         fullName: $("fullName").value.trim().replace(/\s+/g, " "), phone: toLatin($("phone").value), nationalId: nid,
         college: $("college").value, level: $("level").value, facebook: fb, email: toLatin($("gmail").value),
         profileImageUrl: profileUrl, idCardUrl: idUrl, studentCardUrl: cardUrl,
-        committees: getCommittees(), hobby: $("hobby").value.trim().replace(/\s+/g, " "),
         timestamp: serverTimestamp(), status: "pending", adminMessage: "طلبك قيد المراجعة حالياً."
       });
       batch.set(doc(db, "status", nid), { status: "pending", adminMessage: "طلبك قيد المراجعة حالياً." });
@@ -1428,12 +1370,11 @@ form.addEventListener("submit", async e => {
 
     setP(100, "تم!");
     notice(box, "ok", "تم التسجيل بنجاح ✅ احتفظ برقمك القومي للاستعلام عن حالة طلبك من قسم «حالة الطلب».");
-    form.reset(); resetCommittees(); uploaded.clear();
+    form.reset(); uploaded.clear();
   } catch (err) {
-    console.error("registration error:", err);
     const dup = err && (err.code === "permission-denied");
     notice(box, "bad", dup
-      ? "تعذر قبول الطلب. لو الرقم القومي مسجل من قبل استعلم عن حالته من قسم «حالة الطلب»، وإلا تأكد من صحة كل البيانات أو تواصل معنا على واتساب."
+      ? "هذا الرقم القومي مسجل من قبل. استعلم عن حالة طلبك من قسم «حالة الطلب» أو تواصل معنا على واتساب."
       : "تعذر إتمام الإرسال بسبب ضعف الاتصال. بياناتك وصورك ما زالت في الصفحة، اضغط «إرسال البيانات» مرة أخرى.");
   } finally {
     submitting = false; $("submitBtn").disabled = false; setTimeout(() => $("progress").style.display = "none", 800);
@@ -1475,7 +1416,7 @@ function render(list) {
     const img = d.profileImageUrl ? `<a href="${safeUrl(d.profileImageUrl)}" target="_blank" rel="noopener"><img src="${optImg(safeUrl(d.profileImageUrl))}" class="thumb" alt="" loading="lazy"></a>` : "-";
     return `<tr>
       <td><input type="checkbox" class="sel-ck" data-sel="${esc(id)}" ${selected.has(id) ? "checked" : ""} aria-label="تحديد"></td>
-      <td>${img}</td><td>${esc(d.fullName)}${Array.isArray(d.committees) && d.committees.length ? `<span class="cmt-tags">اللجان: ${d.committees.map(esc).join("، ")}</span>` : ""}${d.hobby ? `<span class="cmt-tags">الهواية: ${esc(d.hobby)}</span>` : ""}</td><td>${esc(d.nationalId)}</td><td>${esc(d.college)}/${esc(d.level)}</td><td dir="ltr">${esc(d.phone)}<br><a class="btn-sm b-wa" href="${stuWaLink(d)}" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> واتساب</a></td>
+      <td>${img}</td><td>${esc(d.fullName)}</td><td>${esc(d.nationalId)}</td><td>${esc(d.college)}/${esc(d.level)}</td><td dir="ltr">${esc(d.phone)}<br><a class="btn-sm b-wa" href="${stuWaLink(d)}" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> واتساب</a></td>
       <td><a href="${safeUrl(d.facebook)}" target="_blank" rel="noopener"><i class="fab fa-facebook" style="color:#1877F2;font-size:18px"></i></a>
           <a href="mailto:${esc(d.email)}"><i class="fas fa-envelope" style="font-size:18px;margin-right:8px"></i></a></td>
       <td><a href="${safeUrl(d.idCardUrl)}" target="_blank" rel="noopener">بطاقة</a>${d.studentCardUrl ? ` | <a href="${safeUrl(d.studentCardUrl)}" target="_blank" rel="noopener">كارنيه</a>` : ""}</td>
@@ -1748,8 +1689,6 @@ async function exportStudents() {
       { header: "الهاتف", key: "phone", width: 14 },
       { header: "الكلية", key: "college", width: 14 },
       { header: "الفرقة", key: "level", width: 12 },
-      { header: "اللجان", key: "committees", width: 34 },
-      { header: "الهواية", key: "hobby", width: 24 },
       { header: "فيسبوك", key: "facebook", width: 32 },
       { header: "إيميل", key: "email", width: 26 },
       { header: "الحالة", key: "status", width: 12 },
@@ -1764,7 +1703,7 @@ async function exportStudents() {
       const status = ["accepted", "rejected"].includes(d.status) ? d.status : "pending";
       const row = ws.addRow({
         nationalId: d.nationalId || "", fullName: d.fullName || "", phone: d.phone || "",
-        college: d.college || "", level: d.level || "", committees: Array.isArray(d.committees) ? d.committees.join("، ") : "", hobby: d.hobby || "", facebook: d.facebook || "", email: d.email || "",
+        college: d.college || "", level: d.level || "", facebook: d.facebook || "", email: d.email || "",
         status: STAT[status], adminMessage: d.adminMessage || "",
         date: d.timestamp?.toDate ? d.timestamp.toDate().toLocaleString("ar-EG") : "",
         profileImageUrl: d.profileImageUrl || "", idCardUrl: d.idCardUrl || "", studentCardUrl: d.studentCardUrl || ""
@@ -1807,7 +1746,7 @@ mForm.addEventListener("submit", async e => {
   const box = $("mNotice"); box.className = "notice";
   if (!validateMedia()) { notice(box, "bad", "راجع الحقول المظللة بالأحمر ثم أعد الإرسال."); mForm.querySelector(".invalid")?.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
   if (!navigator.onLine) { notice(box, "bad", "لا يوجد اتصال بالإنترنت. بياناتك ما زالت في الصفحة، أعد المحاولة عند عودة الاتصال."); return; }
-  if (!withinClientLimit("rl_media", 3, 300000)) { notice(box, "bad", "وصلت للحد الأقصى لمحاولات الإرسال (3 كل 5 دقائق). حاول بعد 5 دقائق أو تواصل معنا على واتساب."); return; }
+  if (!withinClientLimit("rl_media", 3, 3600000)) { notice(box, "bad", "وصلت للحد الأقصى لمحاولات الإرسال (3 كل ساعة). حاول لاحقاً أو تواصل معنا على واتساب."); return; }
 
   mSubmitting = true; $("mSubmitBtn").disabled = true; $("mProgress").style.display = "block";
   const setP = (n, t) => { $("mFill").style.width = n + "%"; $("mProgressText").textContent = t; };
@@ -1957,8 +1896,6 @@ async function backupAllToExcel(allStudents, allMedia) {
     { header: "الهاتف", key: "phone", width: 14 },
     { header: "الكلية", key: "college", width: 14 },
     { header: "الفرقة", key: "level", width: 12 },
-      { header: "اللجان", key: "committees", width: 34 },
-      { header: "الهواية", key: "hobby", width: 24 },
     { header: "فيسبوك", key: "facebook", width: 32 },
     { header: "إيميل", key: "email", width: 26 },
     { header: "الحالة", key: "status", width: 12 },
@@ -1973,7 +1910,7 @@ async function backupAllToExcel(allStudents, allMedia) {
     const status = ["accepted", "rejected"].includes(d.status) ? d.status : "pending";
     const row = ws1.addRow({
       nationalId: d.nationalId || "", fullName: d.fullName || "", phone: d.phone || "",
-      college: d.college || "", level: d.level || "", committees: Array.isArray(d.committees) ? d.committees.join("، ") : "", hobby: d.hobby || "", facebook: d.facebook || "", email: d.email || "",
+      college: d.college || "", level: d.level || "", facebook: d.facebook || "", email: d.email || "",
       status: STAT[status], adminMessage: d.adminMessage || "",
       date: d.timestamp?.toDate ? d.timestamp.toDate().toLocaleString("ar-EG") : "",
       profileImageUrl: d.profileImageUrl || "", idCardUrl: d.idCardUrl || "", studentCardUrl: d.studentCardUrl || ""
@@ -2074,22 +2011,16 @@ if (Router.current() === "admin") enterAdmin();
   function setup() {
     var sel = ".about-box,.goal,.gallery h3,.gallery>*,.act,.status-box,.form-box,#activities h2,#activities .sub";
     var els = document.querySelectorAll(sel);
-    if (!("IntersectionObserver" in window)) return;
-    function done(el) { el.classList.add("in"); io.unobserve(el); setTimeout(function () { el.classList.remove("reveal", "in"); el.style.removeProperty("--d"); }, 1200); }
+    if (!("IntersectionObserver" in window)) { document.querySelectorAll(".reveal").forEach(function (e) { e.classList.add("in"); }); return; }
     var io = new IntersectionObserver(function (es) {
-      es.forEach(function (en) {
-        var el = en.target;
-        // يظهر بالحركة لما يدخل الشاشة، ولو المستخدم عدّى عليه بسرعة (قفز بالقائمة) يظهر على طول عشان ما يفضلش مخفي
-        if (en.isIntersecting || en.boundingClientRect.top < 0) done(el);
-      });
-    }, { threshold: 0, rootMargin: "0px 0px -40px 0px" });
+      es.forEach(function (en) { if (en.isIntersecting) { var el = en.target; el.classList.add("in"); io.unobserve(el); setTimeout(function () { el.classList.remove("reveal", "in"); el.style.removeProperty("--d"); }, 1200); } });
+    }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
     els.forEach(function (e, i) {
       e.classList.add("reveal"); e.style.setProperty("--d", ((i % 4) * 0.08) + "s"); io.observe(e);
     });
-    void document.body.offsetHeight; // تثبيت الحالة المخفية أولاً عشان الحركة تشتغل حتى للعناصر الظاهرة وقت التحميل
     document.querySelectorAll("#faq .reveal").forEach(function (e, i) { e.style.setProperty("--d", ((i % 4) * 0.08) + "s"); io.observe(e); });
   }
-  setup(); // السكربت في آخر الصفحة، فمفيش داعي نستنى load (كان بيسبب اختفاء مفاجئ بعد ما المحتوى يظهر)
+  if (document.readyState === "complete") setup(); else window.addEventListener("load", setup);
 })();
 </script>
 
