@@ -2074,16 +2074,22 @@ if (Router.current() === "admin") enterAdmin();
   function setup() {
     var sel = ".about-box,.goal,.gallery h3,.gallery>*,.act,.status-box,.form-box,#activities h2,#activities .sub";
     var els = document.querySelectorAll(sel);
-    if (!("IntersectionObserver" in window)) { document.querySelectorAll(".reveal").forEach(function (e) { e.classList.add("in"); }); return; }
+    if (!("IntersectionObserver" in window)) return;
+    function done(el) { el.classList.add("in"); io.unobserve(el); setTimeout(function () { el.classList.remove("reveal", "in"); el.style.removeProperty("--d"); }, 1200); }
     var io = new IntersectionObserver(function (es) {
-      es.forEach(function (en) { if (en.isIntersecting) { var el = en.target; el.classList.add("in"); io.unobserve(el); setTimeout(function () { el.classList.remove("reveal", "in"); el.style.removeProperty("--d"); }, 1200); } });
-    }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+      es.forEach(function (en) {
+        var el = en.target;
+        // يظهر بالحركة لما يدخل الشاشة، ولو المستخدم عدّى عليه بسرعة (قفز بالقائمة) يظهر على طول عشان ما يفضلش مخفي
+        if (en.isIntersecting || en.boundingClientRect.top < 0) done(el);
+      });
+    }, { threshold: 0, rootMargin: "0px 0px -40px 0px" });
     els.forEach(function (e, i) {
       e.classList.add("reveal"); e.style.setProperty("--d", ((i % 4) * 0.08) + "s"); io.observe(e);
     });
+    void document.body.offsetHeight; // تثبيت الحالة المخفية أولاً عشان الحركة تشتغل حتى للعناصر الظاهرة وقت التحميل
     document.querySelectorAll("#faq .reveal").forEach(function (e, i) { e.style.setProperty("--d", ((i % 4) * 0.08) + "s"); io.observe(e); });
   }
-  if (document.readyState === "complete") setup(); else window.addEventListener("load", setup);
+  setup(); // السكربت في آخر الصفحة، فمفيش داعي نستنى load (كان بيسبب اختفاء مفاجئ بعد ما المحتوى يظهر)
 })();
 </script>
 
