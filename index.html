@@ -402,7 +402,6 @@ label.ck input[type=checkbox]{width:18px;height:18px;flex:none;margin:4px 0 0;pa
 /* Admin filters + bulk */
 .adm-filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 12px}
 .adm-filters select{padding:9px 12px;border-radius:10px;background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.2);font-family:inherit;min-width:150px}
-.adm-filters select option{color:#111}
 .adm-filters .cnt{color:var(--muted);font-size:13px;margin-inline-start:auto}
 .bulk-bar{display:none;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 12px;padding:10px 14px;border-radius:12px;background:rgba(201,162,39,.14);border:1px solid var(--gold)}
 .bulk-bar.show{display:flex}
@@ -482,6 +481,52 @@ html[data-theme="light"] .thumb{border-color:rgba(0,0,0,.2)}
 html[data-theme="light"] .b-save{color:#fff}
 html[data-theme="light"] .adm-filters select{background:rgba(255,255,255,.9);color:#1a1a1a;border-color:rgba(0,0,0,.25)}
 html[data-theme="light"] .bulk-bar{background:rgba(143,111,0,.1)}
+
+/* ===== Unified Select Styling (dropdowns: كل الكليات / الفرق / الحالات ... ) ===== */
+:root{color-scheme:dark}
+select,.adm-filters select,.edit-input[data-f]{
+  -webkit-appearance:none;-moz-appearance:none;appearance:none;
+  cursor:pointer;color-scheme:dark;
+  padding-block:11px;padding-inline:14px 40px;
+  background-color:rgba(10,20,32,.78);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23d4af37' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:left 12px center;background-size:14px;
+  color:#fff;border:1.5px solid rgba(212,175,55,.45);border-radius:12px;
+  font-family:inherit;font-weight:600;line-height:1.4;text-align:right;
+  transition:border-color .2s,box-shadow .2s,background-color .2s;
+}
+select:hover{border-color:var(--gold);background-color:rgba(18,32,48,.9)}
+select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,175,55,.25);outline:none}
+select:disabled{opacity:.55;cursor:not-allowed}
+.adm-filters select{min-width:170px;padding-block:10px;font-size:14px}
+.edit-input[data-f]{font-size:12px;padding-block:6px;padding-inline:8px 28px;border-radius:8px;background-position:left 8px center;background-size:11px;min-width:110px}
+
+/* قائمة الاختيارات نفسها */
+select option,select optgroup,.adm-filters select option{
+  background-color:#13202e;color:#fff;font-family:inherit;font-size:15px;font-weight:600;
+  padding:10px 14px;direction:rtl;text-align:right;
+}
+select option:checked,select option:hover{background:linear-gradient(0deg,#d4af37,#d4af37);color:#111}
+select option[disabled],select option[value=""]{color:rgba(255,255,255,.6)}
+select option:disabled{color:rgba(255,255,255,.4)}
+
+/* الوضع الفاتح */
+html[data-theme="light"] select,html[data-theme="light"] .adm-filters select,html[data-theme="light"] .edit-input[data-f]{
+  color-scheme:light;background-color:rgba(255,255,255,.96);color:#1a1a1a;border-color:rgba(143,111,0,.55);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238f6f00' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+}
+html[data-theme="light"] select:hover{background-color:#fff}
+html[data-theme="light"] select:focus{box-shadow:0 0 0 3px rgba(143,111,0,.22)}
+html[data-theme="light"] select option,html[data-theme="light"] .adm-filters select option{background-color:#fff;color:#1a1a1a}
+html[data-theme="light"] select option:checked,html[data-theme="light"] select option:hover{background:linear-gradient(0deg,#f1d77a,#f1d77a);color:#111}
+html[data-theme="light"] select option[disabled],html[data-theme="light"] select option[value=""]{color:rgba(0,0,0,.5)}
+
+/* شريط تمرير القائمة (كروم/إيدج/فايرفوكس) */
+select{scrollbar-width:thin;scrollbar-color:#d4af37 #13202e}
+select::-webkit-scrollbar{width:10px}
+select::-webkit-scrollbar-track{background:#13202e}
+select::-webkit-scrollbar-thumb{background:#d4af37;border-radius:8px}
+/* ===== /Unified Select Styling ===== */
 </style>
 </head>
 <body>
@@ -762,6 +807,7 @@ html[data-theme="light"] .bulk-bar{background:rgba(143,111,0,.1)}
       <div class="adm-filters">
         <select id="fCollege" aria-label="فلترة بالكلية"><option value="">كل الكليات</option></select>
         <select id="fLevel" aria-label="فلترة بالفرقة"><option value="">كل الفرق</option></select>
+        <select id="fCommittee" aria-label="فلترة باللجنة"><option value="">كل اللجان</option></select>
         <select id="fStatus" aria-label="فلترة بالحالة"><option value="">كل الحالات</option><option value="pending">مراجعة</option><option value="accepted">مقبول</option><option value="rejected">مرفوض</option></select>
         <button class="btn-sm b-del" id="fReset" type="button">إعادة ضبط</button>
         <span class="cnt" id="fCount"></span>
@@ -888,6 +934,7 @@ html[data-theme="light"] .bulk-bar{background:rgba(143,111,0,.1)}
         '<p>معايشة ميدانية للطلاب مع أكاديمية الشرطة، للتعرف على العمل الشرطي عن قرب وتعزيز قيم الانضباط والانتماء للوطن.</p>' +
         '<div class="uni-imgs">' +
           '<img src="images/livein-police.jpg" alt="معايشة الشرطة" style="grid-column:1/-1;height:auto;max-height:480px;object-fit:cover" loading="lazy">' +
+          '<img src="images/livein-military-4.jpg" alt="معايشة الشرطة" style="grid-column:1/-1;height:auto;max-height:480px;object-fit:cover" loading="lazy">' +
         '</div>' +
       '</div>' +
       '<div class="uni-event">' +
@@ -896,7 +943,6 @@ html[data-theme="light"] .bulk-bar{background:rgba(143,111,0,.1)}
         '<div class="uni-imgs">' +
           '<img src="images/livein-military-1.jpg" alt="معايشة الأكاديمية العسكرية" loading="lazy">' +
           '<img src="images/livein-military-2.jpg" alt="معايشة الأكاديمية العسكرية" loading="lazy">' +
-          '<img src="images/livein-military-4.jpg" alt="معايشة الأكاديمية العسكرية" style="grid-column:1/-1;height:auto;max-height:480px;object-fit:cover" loading="lazy">' +
           '<img src="images/livein-military-5.jpg" alt="معايشة الأكاديمية العسكرية" style="grid-column:1/-1;height:auto;max-height:480px;object-fit:cover" loading="lazy">' +
         '</div>' +
       '</div>'
@@ -956,14 +1002,6 @@ html[data-theme="light"] .bulk-bar{background:rgba(143,111,0,.1)}
         '</div>' +
       '</div>' +
       '<div class="uni-event">' +
-        '<h4>زيارة المتحف المصري الكبير للمتميزين في الأنشطة</h4>' +
-        '<p>تنظيم زيارة إلى المتحف المصري الكبير للطلاب المتميزين في الأنشطة الطلابية، تقديراً لجهودهم وتعزيزاً لانتمائهم الحضاري والوطني.</p>' +
-        '<div class="uni-imgs">' +
-          '<img src="images/uni-museum-visit-1.jpg" alt="زيارة المتحف المصري الكبير للمتميزين في الأنشطة" loading="lazy">' +
-          '<img src="images/uni-museum-visit-2.jpg" alt="زيارة المتحف المصري الكبير للمتميزين في الأنشطة" loading="lazy">' +
-        '</div>' +
-      '</div>' +
-      '<div class="uni-event">' +
         '<h4>زيارة رئيس كوريا الجنوبية لجامعة القاهرة</h4>' +
         '<p>استقبال جامعة القاهرة لرئيس جمهورية كوريا الجنوبية ضمن فعاليات تعزيز التعاون التعليمي والثقافي بين البلدين.</p>' +
         '<div class="uni-imgs">' +
@@ -1002,6 +1040,14 @@ html[data-theme="light"] .bulk-bar{background:rgba(143,111,0,.1)}
         '<div class="uni-imgs">' +
           '<img src="images/visit-bookfair-1.jpg" alt="زيارة معرض القاهرة الدولي للكتاب" loading="lazy">' +
           '<img src="images/visit-bookfair-2.jpg" alt="زيارة معرض القاهرة الدولي للكتاب" loading="lazy">' +
+        '</div>' +
+      '</div>' +
+      '<div class="uni-event">' +
+        '<h4>زيارة المتحف المصري الكبير للمتميزين في الأنشطة</h4>' +
+        '<p>تنظيم زيارة إلى المتحف المصري الكبير للطلاب المتميزين في الأنشطة الطلابية، تقديراً لجهودهم وتعزيزاً لانتمائهم الحضاري والوطني.</p>' +
+        '<div class="uni-imgs">' +
+          '<img src="images/uni-museum-visit-1.jpg" alt="زيارة المتحف المصري الكبير للمتميزين في الأنشطة" loading="lazy">' +
+          '<img src="images/uni-museum-visit-2.jpg" alt="زيارة المتحف المصري الكبير للمتميزين في الأنشطة" loading="lazy">' +
         '</div>' +
       '</div>'
     }
@@ -1511,11 +1557,12 @@ function stuWaLink(d) {
 }
 function filtered() {
   const t = toLatin($("adminSearch").value).toLowerCase();
-  const c = $("fCollege").value, l = $("fLevel").value, s = $("fStatus").value;
+  const c = $("fCollege").value, l = $("fLevel").value, s = $("fStatus").value, cm = $("fCommittee").value;
   return cache.filter(x => {
     const d = x.data;
     if (c && d.college !== c) return false;
     if (l && d.level !== l) return false;
+    if (cm && !(Array.isArray(d.committees) ? d.committees : String(d.committees || "").split(/[،,]/).map(z => z.trim())).includes(cm)) return false;
     if (s && (["accepted", "rejected"].includes(d.status) ? d.status : "pending") !== s) return false;
     return !t || `${d.fullName} ${d.phone} ${d.nationalId}`.toLowerCase().includes(t);
   });
@@ -1538,8 +1585,9 @@ function updateBulk(list) {
 }
 COLLEGES.forEach(([c]) => $("fCollege").insertAdjacentHTML("beforeend", `<option>${esc(c)}</option>`));
 LEVELS.forEach(([l]) => $("fLevel").insertAdjacentHTML("beforeend", `<option>${esc(l)}</option>`));
-["fCollege", "fLevel", "fStatus"].forEach(id => $(id).addEventListener("change", refreshStudents));
-$("fReset").onclick = () => { ["fCollege", "fLevel", "fStatus"].forEach(id => $(id).value = ""); $("adminSearch").value = ""; refreshStudents(); renderMedia(filteredMedia()); };
+comChips.forEach(b => $("fCommittee").insertAdjacentHTML("beforeend", `<option>${esc(b.dataset.com)}</option>`));
+["fCollege", "fLevel", "fStatus", "fCommittee"].forEach(id => $(id).addEventListener("change", refreshStudents));
+$("fReset").onclick = () => { ["fCollege", "fLevel", "fStatus", "fCommittee"].forEach(id => $(id).value = ""); $("adminSearch").value = ""; refreshStudents(); renderMedia(filteredMedia()); };
 $("reviewBody").addEventListener("change", e => {
   const ck = e.target.closest("[data-sel]"); if (!ck) return;
   ck.checked ? selected.add(ck.dataset.sel) : selected.delete(ck.dataset.sel);
