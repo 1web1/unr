@@ -270,9 +270,19 @@ html[data-theme="light"] .cm-wrap textarea{background:#fff;color:#111;border-col
 .actions{display:flex;gap:10px;flex-wrap:wrap;flex:1;justify-content:flex-end}
 .search{min-width:240px;flex:1;max-width:420px}
 .btn-export{background:var(--ok);color:#fff;border:0;padding:10px 18px;border-radius:10px;font-weight:800;font-family:inherit;cursor:pointer;font-size:13px}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:18px}
-.stat{background:rgba(255,255,255,.06);padding:12px;border-radius:12px;text-align:center;border:1px solid rgba(255,255,255,.1)}
-.stat h3{margin:0;color:var(--gold);font-size:13px}.stat p{margin:4px 0 0;font-size:22px;font-weight:800}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px}
+.stat{--c:var(--gold);position:relative;overflow:hidden;display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);transition:transform .2s,background .2s,border-color .2s,box-shadow .2s;user-select:none}
+.stat::before{content:"";position:absolute;inset-block:0;inset-inline-start:0;width:4px;background:var(--c)}
+.stat .ico{flex:none;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:17px;color:var(--c);background:rgba(255,255,255,.08);background:color-mix(in srgb,var(--c) 18%,transparent)}
+.stat .meta{min-width:0}
+.stat h3{margin:0 0 2px;color:var(--muted);font-size:13px;font-weight:600}
+.stat p{margin:0;font-size:26px;font-weight:800;line-height:1.1;color:inherit}
+.stat .pct{margin-inline-start:auto;align-self:flex-start;font-size:11px;font-weight:700;color:var(--c);background:rgba(255,255,255,.08);background:color-mix(in srgb,var(--c) 15%,transparent);padding:3px 8px;border-radius:999px}
+.stat .pct:empty{display:none}
+.stat[data-s]{cursor:pointer}
+.stat[data-s]:hover{transform:translateY(-2px);background:rgba(255,255,255,.09)}
+.stat.on{border-color:var(--c);background:rgba(255,255,255,.1);background:color-mix(in srgb,var(--c) 14%,transparent);box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.stat[data-s="pending"]{--c:var(--warn)}.stat[data-s="accepted"]{--c:var(--ok)}.stat[data-s="rejected"]{--c:var(--bad)}
 .tabs{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
 .tab{flex:1;background:rgba(255,255,255,.06);color:var(--muted);border:1px solid rgba(255,255,255,.15);padding:9px;border-radius:10px;font-family:inherit;font-weight:600;cursor:pointer}
 .tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
@@ -858,16 +868,16 @@ select::-webkit-scrollbar-thumb{background:#d4af37;border-radius:8px}
       </div>
     </div>
     <div class="stats" id="studentStats">
-      <div class="stat"><h3>الإجمالي</h3><p id="stTotal">0</p></div>
-      <div class="stat"><h3>مراجعة</h3><p id="stPending">0</p></div>
-      <div class="stat"><h3>مقبول</h3><p id="stAccepted">0</p></div>
-      <div class="stat"><h3>مرفوض</h3><p id="stRejected">0</p></div>
+      <div class="stat" data-s=""><span class="ico"><i class="fas fa-users"></i></span><div class="meta"><h3>الكل</h3><p id="stTotal">0</p></div><span class="pct"></span></div>
+      <div class="stat" data-s="pending"><span class="ico"><i class="fas fa-hourglass-half"></i></span><div class="meta"><h3>مراجعة</h3><p id="stPending">0</p></div><span class="pct"></span></div>
+      <div class="stat" data-s="accepted"><span class="ico"><i class="fas fa-circle-check"></i></span><div class="meta"><h3>مقبول</h3><p id="stAccepted">0</p></div><span class="pct"></span></div>
+      <div class="stat" data-s="rejected"><span class="ico"><i class="fas fa-circle-xmark"></i></span><div class="meta"><h3>مرفوض</h3><p id="stRejected">0</p></div><span class="pct"></span></div>
     </div>
     <div class="stats" id="mediaStats" style="display:none">
-      <div class="stat"><h3>إجمالي الميديا</h3><p id="mdTotal">0</p></div>
-      <div class="stat"><h3>مراجعة</h3><p id="mdPending">0</p></div>
-      <div class="stat"><h3>مقبول</h3><p id="mdAccepted">0</p></div>
-      <div class="stat"><h3>مرفوض</h3><p id="mdRejected">0</p></div>
+      <div class="stat" data-s=""><span class="ico"><i class="fas fa-users"></i></span><div class="meta"><h3>الكل</h3><p id="mdTotal">0</p></div><span class="pct"></span></div>
+      <div class="stat" data-s="pending"><span class="ico"><i class="fas fa-hourglass-half"></i></span><div class="meta"><h3>مراجعة</h3><p id="mdPending">0</p></div><span class="pct"></span></div>
+      <div class="stat" data-s="accepted"><span class="ico"><i class="fas fa-circle-check"></i></span><div class="meta"><h3>مقبول</h3><p id="mdAccepted">0</p></div><span class="pct"></span></div>
+      <div class="stat" data-s="rejected"><span class="ico"><i class="fas fa-circle-xmark"></i></span><div class="meta"><h3>مرفوض</h3><p id="mdRejected">0</p></div><span class="pct"></span></div>
     </div>
     <div class="tabs">
       <button class="tab active" id="tabReview" data-tab="review">مراجعة الطلبات</button>
@@ -1870,7 +1880,32 @@ COLLEGES.forEach(([c]) => $("fCollege").insertAdjacentHTML("beforeend", `<option
 LEVELS.forEach(([l]) => $("fLevel").insertAdjacentHTML("beforeend", `<option>${esc(l)}</option>`));
 comChips.forEach(b => $("fCommittee").insertAdjacentHTML("beforeend", `<option>${esc(b.dataset.com)}</option>`));
 ["fCollege", "fLevel", "fStatus", "fCommittee"].forEach(id => $(id).addEventListener("change", refreshStudents));
-$("fReset").onclick = () => { ["fCollege", "fLevel", "fStatus", "fCommittee"].forEach(id => $(id).value = ""); $("adminSearch").value = ""; refreshStudents(); renderMedia(filteredMedia()); };
+/* نسبة كل حالة من الإجمالي تتحدّث لوحدها مع تغيّر الأرقام */
+document.querySelectorAll(".stats").forEach(box => {
+  const upd = () => {
+    const tot = parseInt(box.querySelector('.stat[data-s=""] p').textContent) || 0;
+    box.querySelectorAll(".stat[data-s]:not([data-s=''])").forEach(st => {
+      const v = parseInt(st.querySelector("p").textContent) || 0;
+      const pc = st.querySelector(".pct"), t = tot ? Math.round(v * 100 / tot) + "%" : "";
+      if (pc.textContent !== t) pc.textContent = t;
+    });
+  };
+  const mo = new MutationObserver(upd);
+  box.querySelectorAll(".stat p").forEach(p => mo.observe(p, { childList: true, characterData: true, subtree: true }));
+  upd();
+});
+/* الضغط على أي عدّاد يفلتر القائمة بالحالة دي */
+function syncStatPills() {
+  const v = $("fStatus").value;
+  document.querySelectorAll(".stat[data-s]").forEach(p => p.classList.toggle("on", p.dataset.s === v && v !== ""));
+}
+document.querySelectorAll(".stat[data-s]").forEach(p => p.addEventListener("click", () => {
+  const same = $("fStatus").value === p.dataset.s;
+  $("fStatus").value = same ? "" : p.dataset.s;
+  refreshStudents(); renderMedia(filteredMedia()); syncStatPills();
+}));
+$("fStatus").addEventListener("change", syncStatPills);
+$("fReset").onclick = () => { ["fCollege", "fLevel", "fStatus", "fCommittee"].forEach(id => $(id).value = ""); $("adminSearch").value = ""; refreshStudents(); renderMedia(filteredMedia()); syncStatPills(); };
 $("reviewBody").addEventListener("change", e => {
   const ck = e.target.closest("[data-sel]"); if (!ck) return;
   ck.checked ? selected.add(ck.dataset.sel) : selected.delete(ck.dataset.sel);
