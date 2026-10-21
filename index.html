@@ -2360,6 +2360,30 @@ function styleStatusCell(row, status) {
   c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: STATUS_FILL[status] || STATUS_FILL.pending } };
 }
 
+/* أزرار الصور في الإكسل: خلية مُلوّنة كأنها زرار، الضغط عليها يفتح الصورة في المتصفح */
+const IMG_BTN = {
+  profileImageUrl: { label: "👤 عرض الشخصية", fill: "FF0D6EFD" },
+  idCardUrl:       { label: "🪪 عرض البطاقة", fill: "FF198754" },
+  studentCardUrl:  { label: "🎓 عرض الكارنيه", fill: "FF6F42C1" }
+};
+function styleImageLinks(row) {
+  Object.keys(IMG_BTN).forEach(key => {
+    const cell = row.getCell(key);
+    const raw = String(cell.value || "").trim();
+    const border = { style: "medium", color: { argb: "FFFFFFFF" } };
+    cell.alignment = { horizontal: "center", vertical: "middle" };
+    if (!/^https?:\/\//i.test(raw)) {            // مفيش صورة مرفوعة
+      cell.value = "—";
+      cell.font = { color: { argb: "FF999999" } };
+      return;
+    }
+    cell.value = { text: IMG_BTN[key].label, hyperlink: raw, tooltip: "اضغط لفتح الصورة" };
+    cell.font = { bold: true, underline: false, color: { argb: "FFFFFFFF" } };
+    cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: IMG_BTN[key].fill } };
+    cell.border = { top: border, left: border, right: border, bottom: border };
+  });
+}
+
 async function exportStudents() {
   if (typeof ExcelJS === "undefined") return alert("مكتبة Excel لم تُحمَّل بعد، أعد المحاولة بعد ثواني.");
   const data = filtered(); if (!data.length) return alert("لا توجد بيانات!");
@@ -2381,9 +2405,9 @@ async function exportStudents() {
       { header: "الحالة", key: "status", width: 12 },
       { header: "رسالة الإدارة", key: "adminMessage", width: 32 },
       { header: "تاريخ التسجيل", key: "date", width: 20 },
-      { header: "الصورة الشخصية", key: "profileImageUrl", width: 34 },
-      { header: "صورة البطاقة", key: "idCardUrl", width: 34 },
-      { header: "صورة الكارنيه", key: "studentCardUrl", width: 34 }
+      { header: "الصورة الشخصية", key: "profileImageUrl", width: 19 },
+      { header: "صورة البطاقة", key: "idCardUrl", width: 19 },
+      { header: "صورة الكارنيه", key: "studentCardUrl", width: 19 }
     ];
     styleHeaderRow(ws);
     data.forEach(({ data: d }, i) => {
@@ -2396,7 +2420,7 @@ async function exportStudents() {
         profileImageUrl: d.profileImageUrl || "", idCardUrl: d.idCardUrl || "", studentCardUrl: d.studentCardUrl || ""
       });
       styleDataRow(row, i % 2 === 1);
-      styleStatusCell(row, status);
+      styleStatusCell(row, status); styleImageLinks(row);
     });
     const buf = await wb.xlsx.writeBuffer();
     downloadWorkbookBuffer(buf, `الطلاب-${new Date().toISOString().slice(0, 10)}.xlsx`);
@@ -2544,9 +2568,9 @@ async function exportMedia() {
       { header: "رابط الأعمال", key: "driveLink", width: 34 },
       { header: "الحالة", key: "status", width: 12 },
       { header: "التاريخ", key: "date", width: 20 },
-      { header: "الصورة الشخصية", key: "profileImageUrl", width: 34 },
-      { header: "صورة البطاقة", key: "idCardUrl", width: 34 },
-      { header: "صورة الكارنيه", key: "studentCardUrl", width: 34 }
+      { header: "الصورة الشخصية", key: "profileImageUrl", width: 19 },
+      { header: "صورة البطاقة", key: "idCardUrl", width: 19 },
+      { header: "صورة الكارنيه", key: "studentCardUrl", width: 19 }
     ];
     styleHeaderRow(ws);
     data.forEach(({ data: d }, i) => {
@@ -2557,7 +2581,7 @@ async function exportMedia() {
         profileImageUrl: d.profileImageUrl || "", idCardUrl: d.idCardUrl || "", studentCardUrl: d.studentCardUrl || ""
       });
       styleDataRow(row, i % 2 === 1);
-      styleStatusCell(row, status);
+      styleStatusCell(row, status); styleImageLinks(row);
     });
     const buf = await wb.xlsx.writeBuffer();
     downloadWorkbookBuffer(buf, `الميديا-${new Date().toISOString().slice(0, 10)}.xlsx`);
@@ -2590,9 +2614,9 @@ async function backupAllToExcel(allStudents, allMedia) {
     { header: "الحالة", key: "status", width: 12 },
     { header: "رسالة الإدارة", key: "adminMessage", width: 32 },
     { header: "تاريخ التسجيل", key: "date", width: 20 },
-    { header: "الصورة الشخصية", key: "profileImageUrl", width: 34 },
-    { header: "صورة البطاقة", key: "idCardUrl", width: 34 },
-    { header: "صورة الكارنيه", key: "studentCardUrl", width: 34 }
+    { header: "الصورة الشخصية", key: "profileImageUrl", width: 19 },
+    { header: "صورة البطاقة", key: "idCardUrl", width: 19 },
+    { header: "صورة الكارنيه", key: "studentCardUrl", width: 19 }
   ];
   styleHeaderRow(ws1);
   allStudents.forEach(({ data: d }, i) => {
@@ -2605,7 +2629,7 @@ async function backupAllToExcel(allStudents, allMedia) {
       profileImageUrl: d.profileImageUrl || "", idCardUrl: d.idCardUrl || "", studentCardUrl: d.studentCardUrl || ""
     });
     styleDataRow(row, i % 2 === 1);
-    styleStatusCell(row, status);
+    styleStatusCell(row, status); styleImageLinks(row);
   });
 
   const ws2 = wb.addWorksheet("الميديا");
@@ -2616,9 +2640,9 @@ async function backupAllToExcel(allStudents, allMedia) {
     { header: "رابط الأعمال", key: "driveLink", width: 34 },
     { header: "الحالة", key: "status", width: 12 },
     { header: "التاريخ", key: "date", width: 20 },
-    { header: "الصورة الشخصية", key: "profileImageUrl", width: 34 },
-    { header: "صورة البطاقة", key: "idCardUrl", width: 34 },
-    { header: "صورة الكارنيه", key: "studentCardUrl", width: 34 }
+    { header: "الصورة الشخصية", key: "profileImageUrl", width: 19 },
+    { header: "صورة البطاقة", key: "idCardUrl", width: 19 },
+    { header: "صورة الكارنيه", key: "studentCardUrl", width: 19 }
   ];
   styleHeaderRow(ws2);
   allMedia.forEach(({ data: d }, i) => {
@@ -2629,7 +2653,7 @@ async function backupAllToExcel(allStudents, allMedia) {
       profileImageUrl: d.profileImageUrl || "", idCardUrl: d.idCardUrl || "", studentCardUrl: d.studentCardUrl || ""
     });
     styleDataRow(row, i % 2 === 1);
-    styleStatusCell(row, status);
+    styleStatusCell(row, status); styleImageLinks(row);
   });
 
   const buf = await wb.xlsx.writeBuffer();
