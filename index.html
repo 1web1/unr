@@ -641,6 +641,29 @@ html[data-theme="light"] .more-acts a.on{background:var(--c);color:#fff;border-c
 .st-row p{margin:6px 0 0;color:var(--muted);font-size:14px}
 .st-hint{margin:12px 0 0;color:var(--muted);font-size:13px}
 html[data-theme="light"] .st-row{border-bottom-color:rgba(0,0,0,.12)}
+/* جروبات الكليات */
+.grp-row{display:grid;grid-template-columns:210px 1fr 90px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+.grp-row input{width:100%}
+html[data-theme="light"] .grp-row{border-bottom-color:rgba(0,0,0,.1)}
+@media(max-width:700px){.grp-row{grid-template-columns:1fr}}
+.st-group{display:inline-block;margin-top:10px;padding:10px 16px;border-radius:10px;background:#25D366;color:#fff!important;font-weight:800;text-decoration:none}
+.st-warn{font-size:12px;color:var(--muted);margin-top:6px}
+/* وصل القبول */
+.receipt{background:#fff;color:#1a1a1a;border:2px dashed #0d6efd;border-radius:14px;padding:18px;margin-top:12px;text-align:right;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.rc-top{display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:2px solid #eee;padding-bottom:10px}
+.rc-org{font-weight:800;font-size:15px}.rc-org small{display:block;font-weight:600;color:#666;font-size:12px}
+.rc-title{background:#198754;color:#fff;padding:6px 14px;border-radius:20px;font-weight:800;white-space:nowrap}
+.rc-ok{margin:12px 0;font-weight:800;color:#198754;font-size:16px}
+.rc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rc-grid span,.rc-code span{display:block;font-size:12px;color:#777}
+.rc-grid b{font-size:14px;word-break:break-word}
+.rc-code{margin-top:12px;background:#f3f6ff;border-radius:10px;padding:10px;text-align:center}
+.rc-code b{font-size:22px;letter-spacing:2px;color:#0d6efd}
+.rc-note{font-size:11px;color:#777;margin:10px 0 0}
+.st-retry{margin-top:12px;width:100%}
+@media(max-width:480px){.rc-grid{grid-template-columns:1fr}}
+#receiptPrint{display:none}
+@media print{body.print-receipt>*:not(#receiptPrint){display:none!important}body.print-receipt #receiptPrint{display:block!important;padding:20px}body.print-receipt{background:#fff!important}}
 </style>
 </head>
 <body>
@@ -979,6 +1002,7 @@ html[data-theme="light"] .st-row{border-bottom-color:rgba(0,0,0,.12)}
       <button class="tab" id="tabEdit" data-tab="edit">تعديل البيانات</button>
       <button class="tab" id="tabMedia" data-tab="media"><i class="fas fa-camera"></i> فريق الميديا</button>
       <button class="tab" id="tabElection" data-tab="election"><i class="fas fa-check-to-slot"></i> الانتخابات</button>
+      <button class="tab" id="tabGroups" data-tab="groups"><i class="fab fa-whatsapp"></i> جروبات الكليات</button>
       <button class="tab" id="tabContent" data-tab="content"><i class="fas fa-pen-to-square"></i> محتوى الموقع</button>
       <button class="tab" id="tabSettings" data-tab="settings">الإعدادات</button> 
     </div>
@@ -1021,6 +1045,26 @@ html[data-theme="light"] .st-row{border-bottom-color:rgba(0,0,0,.12)}
     <div id="electionWrap" class="tbl-wrap" style="display:none">
       <div id="electionLoading" class="notice ok" style="display:none"></div>
       <table><thead><tr><th>الصورة</th><th>الاسم / اللجنة</th><th>الرقم القومي</th><th>الكلية/الفرقة</th><th>الهاتف</th><th>روابط</th><th>المرفقات</th><th>الحالة</th><th>التاريخ</th><th>الإجراء</th></tr></thead><tbody id="electionBody"></tbody></table>
+    </div>
+
+    <!-- جروبات واتساب للكليات -->
+    <div id="groupsWrap" class="glass" style="display:none;padding:20px;margin-top:10px">
+      <h3 style="margin-top:0">جروبات واتساب للكليات</h3>
+      <p style="color:var(--muted);line-height:1.9;margin-top:0">حط لينك جروب كل كلية هنا. لما تقبل طالب، بيظهرله لينك جروب كليته <b>بس</b> في «حالة الطلب» بعد ما يكتب رقمه القومي (اللينك مش ظاهر لأي حد تاني). لو غيّرت لينك، اضغط «حفظ» وبعدين «تطبيق على المقبولين» وبيتحدّث عند كل الطلاب مرة واحدة.</p>
+      <div class="notice ok" style="display:block;text-align:right;line-height:1.9;margin-bottom:14px">
+        <b>مهم عشان محدش برا المبادرة يدخل:</b> في كل جروب واتساب افتح <b>معلومات الجروب ← إعدادات الجروب ← الموافقة على الأعضاء الجدد</b> وشغّلها. كده أي حد معاه اللينك هيبعت طلب انضمام بس، وإنت (أدمن الجروب) توافق بعد ما تتأكد من رقمه بالأداة اللي تحت.
+      </div>
+      <div id="grpRows"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+        <button class="btn-export" id="btnSaveGroups"><i class="fas fa-floppy-disk"></i> حفظ اللينكات</button>
+        <button class="btn-export" id="btnApplyGroups" style="background:#0d6efd"><i class="fas fa-users"></i> تطبيق على المقبولين</button>
+      </div>
+      <div id="grpNotice" class="notice" style="margin-top:12px"></div>
+      <hr style="border:0;border-top:1px solid rgba(128,128,128,.25);margin:20px 0">
+      <h4 style="margin:0 0 6px">التحقق من رقم قبل الموافقة على دخول الجروب</h4>
+      <p style="color:var(--muted);margin:0 0 10px;font-size:14px">انسخ الرقم اللي بعت طلب انضمام (بأي شكل: 01... أو +20...) وشوف هو طالب مقبول ولا لأ.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><input class="edit-input" id="grpPhone" dir="ltr" placeholder="01xxxxxxxxx أو +20 1xx xxx xxxx" style="flex:1;min-width:200px"><button class="btn-export" id="btnCheckPhone"><i class="fas fa-magnifying-glass"></i> تحقق</button></div>
+      <div id="grpCheckRes" style="margin-top:10px"></div>
     </div>
 
     <!-- محتوى الموقع -->
@@ -1904,6 +1948,39 @@ form.addEventListener("submit", async e => {
 /* ---------- الاستعلام عن الحالة (الاستمارة العادية + الانتخابات + الميديا) ---------- */
 const STATUS_MSG = { pending: "طلبك قيد المراجعة حالياً.", accepted: "تم قبول طلبك. هنتواصل معاك على واتساب.", rejected: "للأسف لم يتم قبول طلبك." };
 const ST_LABELS = { pending: "مراجعة", accepted: "مقبول", rejected: "مرفوض" };
+const RETRY_GO = { status: "register", election_status: "election", media_status: "media" };
+const maskNid = n => n.slice(0, 3) + "•".repeat(7) + n.slice(-4);
+function statusExtra(col, st, d, nid) {
+  if (st === "rejected") return `<button type="button" class="btn-main st-retry" data-go="${RETRY_GO[col] || "register"}">إعادة المحاولة (سجّل من جديد)</button>`;
+  if (col === "status" && st === "accepted") {
+    if (!d.receiptCode) return `<p class="st-warn">وصل القبول هيظهر هنا خلال وقت قصير، اعمل بحث تاني بعد شوية.</p>`;
+    const date = d.acceptedAt ? new Date(d.acceptedAt).toLocaleDateString("ar-EG", { year: "numeric", month: "long", day: "numeric" }) : "-";
+    return `<div class="receipt" id="receiptCard">
+      <div class="rc-top"><div class="rc-org">مبادرة رعاية الشباب<small>جامعة القاهرة</small></div><div class="rc-title">وصل قبول</div></div>
+      <div class="rc-ok">✓ تم قبول الطالب في المبادرة</div>
+      <div class="rc-grid">
+        <div><span>الاسم</span><b>${esc(d.receiptName || "")}</b></div>
+        <div><span>الكلية / الفرقة</span><b>${esc(d.receiptCollege || "")} / ${esc(d.receiptLevel || "")}</b></div>
+        <div><span>الرقم القومي</span><b dir="ltr">${maskNid(nid)}</b></div>
+        <div><span>تاريخ القبول</span><b>${esc(date)}</b></div>
+      </div>
+      <div class="rc-code"><span>رقم الوصل</span><b dir="ltr">${esc(d.receiptCode)}</b></div>
+      <p class="rc-note">يُقدَّم هذا الوصل عند الطلب للتحقق من التسجيل. تتم مراجعة صحته برقمه لدى الإدارة.</p>
+    </div>
+    <button type="button" class="btn-main st-retry" id="btnPrintReceipt"><i class="fas fa-print"></i> طباعة / حفظ PDF</button>
+    <p class="st-warn">تقدر كمان تاخد سكرين شوت للوصل. محدش يقدر يزوّره لأن رقمه بتتم مراجعته عندنا.</p>`;
+  }
+  return "";
+}
+document.addEventListener("click", e => {
+  if (!e.target.closest("#btnPrintReceipt")) return;
+  const src = $("receiptCard"); if (!src) return;
+  const wrap = document.createElement("div"); wrap.id = "receiptPrint";
+  wrap.innerHTML = src.outerHTML.replace('id="receiptCard"', "");
+  document.body.appendChild(wrap); document.body.classList.add("print-receipt");
+  const done = () => { document.body.classList.remove("print-receipt"); wrap.remove(); window.removeEventListener("afterprint", done); };
+  window.addEventListener("afterprint", done); window.print();
+});
 $("statusForm").addEventListener("submit", async e => {
   e.preventDefault();
   const nid = toLatin($("searchNid").value);
@@ -1919,13 +1996,13 @@ $("statusForm").addEventListener("submit", async e => {
     ];
     const results = await Promise.all(lookups.map(([label, col]) =>
       retry(() => getDoc(doc(db, col, nid)), 2)
-        .then(snap => snap.exists() ? { label, d: snap.data() } : null)
+        .then(snap => snap.exists() ? { label, col, d: snap.data() } : null)
         .catch(e => { if (e && e.code === "permission-denied") return null; throw e; })));
     const found = results.filter(Boolean);
     if (!found.length) return notice(err, "bad", "لا يوجد طلب بهذا الرقم القومي.");
-    $("stRows").innerHTML = found.map(({ label, d }) => {
+    $("stRows").innerHTML = found.map(({ label, col, d }) => {
       const st = ["accepted", "rejected"].includes(d.status) ? d.status : "pending";
-      return `<div class="st-row"><div class="st-top"><span class="st-label">${esc(label)}</span><span class="badge badge-${st}">${ST_LABELS[st]}</span></div><p>${esc(d.adminMessage || STATUS_MSG[st])}</p></div>`;
+      return `<div class="st-row"><div class="st-top"><span class="st-label">${esc(label)}</span><span class="badge badge-${st}">${ST_LABELS[st]}</span></div><p>${esc(d.adminMessage || STATUS_MSG[st])}</p>${statusExtra(col, st, d, nid)}${col === "status" && st === "accepted" && GROUP_RE.test(d.groupLink || "") ? `<a class="st-group" href="${esc(d.groupLink)}" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i> انضم لجروب كلية ${esc(d.groupName || "")}</a><p class="st-warn">الجروب خاص بطلاب المبادرة فقط، ممنوع مشاركة اللينك. دخولك بيتم بعد الموافقة والتأكد من رقمك.</p>` : ""}</div>`;
     }).join("");
     res.style.display = "block";
   } catch { notice(err, "bad", "تعذر البحث الآن، حاول مرة أخرى."); }
@@ -1947,7 +2024,7 @@ function render(list) {
     const img = d.profileImageUrl ? `<a class="imgv" data-t="الصورة الشخصية" href="${safeUrl(d.profileImageUrl)}" target="_blank" rel="noopener"><img src="${optImg(safeUrl(d.profileImageUrl))}" class="thumb" alt="" loading="lazy"></a>` : "-";
     return `<tr>
       <td><input type="checkbox" class="sel-ck" data-sel="${esc(id)}" ${selected.has(id) ? "checked" : ""} aria-label="تحديد"></td>
-      <td>${img}</td><td>${esc(d.fullName)}${Array.isArray(d.committees) && d.committees.length ? `<span class="cmt-tags">اللجان: ${d.committees.map(esc).join("، ")}</span>` : ""}${d.hobby ? `<span class="cmt-tags">الهواية: ${esc(d.hobby)}</span>` : ""}</td><td>${esc(d.nationalId)}</td><td>${esc(d.college)}/${esc(d.level)}</td><td dir="ltr">${esc(d.phone)}<br><a class="btn-sm b-wa" href="${stuWaLink(d)}" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> واتساب</a></td>
+      <td>${img}</td><td>${esc(d.fullName)}${Array.isArray(d.committees) && d.committees.length ? `<span class="cmt-tags">اللجان: ${d.committees.map(esc).join("، ")}</span>` : ""}${d.hobby ? `<span class="cmt-tags">الهواية: ${esc(d.hobby)}</span>` : ""}${d.receiptCode ? `<span class="cmt-tags">وصل: ${esc(d.receiptCode)}</span>` : ""}</td><td>${esc(d.nationalId)}</td><td>${esc(d.college)}/${esc(d.level)}</td><td dir="ltr">${esc(d.phone)}<br><a class="btn-sm b-wa" href="${stuWaLink(d)}" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> واتساب</a></td>
       <td><a href="${safeUrl(d.facebook)}" target="_blank" rel="noopener"><i class="fab fa-facebook" style="color:#1877F2;font-size:18px"></i></a>
           <a href="mailto:${esc(d.email)}"><i class="fas fa-envelope" style="font-size:18px;margin-right:8px"></i></a></td>
       <td><a class="imgv" data-t="صورة البطاقة" href="${safeUrl(d.idCardUrl)}" target="_blank" rel="noopener">بطاقة</a>${d.studentCardUrl ? ` | <a class="imgv" data-t="صورة الكارنيه" href="${safeUrl(d.studentCardUrl)}" target="_blank" rel="noopener">كارنيه</a>` : ""}</td>
@@ -1990,7 +2067,7 @@ function filtered() {
     if (l && d.level !== l) return false;
     if (cm && !(Array.isArray(d.committees) ? d.committees : String(d.committees || "").split(/[،,]/).map(z => z.trim())).includes(cm)) return false;
     if (s && (["accepted", "rejected"].includes(d.status) ? d.status : "pending") !== s) return false;
-    return !t || `${d.fullName} ${d.phone} ${d.nationalId}`.toLowerCase().includes(t);
+    return !t || `${d.fullName} ${d.phone} ${d.nationalId} ${d.receiptCode || ""}`.toLowerCase().includes(t);
   });
 }
 function refreshStudents() {
@@ -2059,11 +2136,13 @@ document.addEventListener("click", async e => {
   if (!confirm(`تأكيد ${label} ${ids.length} طالب؟`)) return;
   b.disabled = true;
   try {
+    const links = await loadGroupLinks().catch(() => ({}));
     for (let i = 0; i < ids.length; i += 200) {
       const wb = writeBatch(db);
       ids.slice(i, i + 200).forEach(id => {
-        wb.update(doc(db, "students", id), { status: act, adminMessage: msg });
-        wb.set(doc(db, "status", id), { status: act, adminMessage: msg }, { merge: true });
+        const d = dataOf(id), rf = receiptFields(d, act);
+        wb.update(doc(db, "students", id), { status: act, adminMessage: msg, ...rf });
+        wb.set(doc(db, "status", id), { status: act, adminMessage: msg, ...groupFields(d.college, act, links), ...rf, ...receiptInfo(d, act) }, { merge: true });
       });
       await wb.commit();
     }
@@ -2131,7 +2210,7 @@ $("btnSync").onclick = async () => {
 };
 
 /* ---------- تابات الإدارة ---------- */
-const PANEL = { review: "reviewWrap", edit: "editWrap", media: "mediaWrap", election: "electionWrap", settings: "settingsWrap", content: "contentWrap" };
+const PANEL = { review: "reviewWrap", edit: "editWrap", media: "mediaWrap", election: "electionWrap", groups: "groupsWrap", settings: "settingsWrap", content: "contentWrap" };
 let activeTab = "review";
 async function loadSettingsForm() {
   try {
@@ -2158,12 +2237,13 @@ function setTab(name) {
   document.querySelectorAll(".tabs .tab").forEach(t => t.classList.toggle("active", t.dataset.tab === name));
   Object.values(PANEL).forEach(id => $(id).style.display = "none");
   $(PANEL[name]).style.display = "";
-  $("studentStats").style.display = (name === "media" || name === "election" || name === "content") ? "none" : "";
+  $("studentStats").style.display = (name === "media" || name === "election" || name === "groups" || name === "content") ? "none" : "";
   $("stuTools").style.display = (name === "review" || name === "edit") ? "" : "none";
   $("bulkBar").style.display = name === "review" ? "" : "none";
   $("mediaStats").style.display = name === "media" ? "" : "none";
   $("electionStats").style.display = name === "election" ? "" : "none";
   if (name === "settings") loadSettingsForm();
+  if (name === "groups") loadGroupsPanel();
   if (name === "content") loadContentEditor();
 }
 document.querySelectorAll(".tabs .tab").forEach(t => t.addEventListener("click", () => setTab(t.dataset.tab)));
@@ -2459,6 +2539,94 @@ function loadContentEditor() {
   csRender();
 }
 
+/* ---------- جروبات واتساب للكليات ---------- */
+/* اللينكات متخزنة في admin_private (للأدمن فقط). بتتنسخ لمستند status بتاع الطالب المقبول بس، فمفيش حد يقدر يقراها غير بالرقم القومي بتاعه. */
+const GROUP_RE = /^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9]+/;
+let groupLinks = null;
+async function loadGroupLinks(force) {
+  if (groupLinks && !force) return groupLinks;
+  const snap = await getDoc(doc(db, "admin_private", "college_groups"));
+  groupLinks = snap.exists() ? (snap.data().links || {}) : {};
+  return groupLinks;
+}
+function groupFields(college, status, links) {
+  const url = status === "accepted" ? ((links || {})[college] || "") : "";
+  return { groupLink: url, groupName: url ? college : "" };
+}
+const collegeOf = id => dataOf(id).college || "";
+const dataOf = id => { const x = cache.find(r => r.id === id); return x ? x.data : {}; };
+function genReceiptCode() {
+  const A = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", used = new Set(cache.map(r => r.data.receiptCode));
+  let code;
+  do { const r = crypto.getRandomValues(new Uint8Array(6)); code = "CU-" + [...r].map(n => A[n % A.length]).join(""); } while (used.has(code));
+  return code;
+}
+/* وصل القبول: الكود بيتولّد مرة واحدة عند القبول وبيفضل ثابت، وبيتمسح لو الطالب اتحوّل لمرفوض/مراجعة */
+function receiptFields(d, status) {
+  return status === "accepted" ? { receiptCode: d.receiptCode || genReceiptCode(), acceptedAt: d.acceptedAt || Date.now() } : { receiptCode: "", acceptedAt: 0 };
+}
+function receiptInfo(d, status) {
+  return status === "accepted" ? { receiptName: d.fullName || "", receiptCollege: d.college || "", receiptLevel: d.level || "" } : { receiptName: "", receiptCollege: "", receiptLevel: "" };
+}
+const grpNote = (kind, text) => notice($("grpNotice"), kind, text);
+function renderGroupsPanel() {
+  const acc = {};
+  cache.forEach(({ data: d }) => { if (d.status === "accepted") acc[d.college] = (acc[d.college] || 0) + 1; });
+  $("grpRows").innerHTML = COLLEGES.map(c => c[0]).map(c =>
+    `<div class="grp-row"><b>${esc(c)}</b><input class="edit-input" dir="ltr" data-college="${esc(c)}" placeholder="https://chat.whatsapp.com/..." value="${esc((groupLinks || {})[c] || "")}"><span class="role-tag">${acc[c] || 0} مقبول</span></div>`).join("");
+}
+async function loadGroupsPanel() {
+  $("grpNotice").className = "notice";
+  try { await loadGroupLinks(true); } catch (e) { console.error(e); groupLinks = {}; grpNote("bad", "تعذر تحميل اللينكات. تأكد من نشر قواعد Firestore الجديدة (admin_private)."); }
+  renderGroupsPanel();
+}
+async function applyGroupLinks() {
+  const links = await loadGroupLinks().catch(() => ({}));
+  const list = cache.filter(({ data: d }) => d.status === "accepted");
+  if (!list.length) return grpNote("ok", "لا يوجد طلاب مقبولين لتطبيق اللينكات عليهم.");
+  for (let i = 0; i < list.length; i += 400) {
+    const b = writeBatch(db);
+    list.slice(i, i + 400).forEach(({ id, data: d }) => {
+      const rf = receiptFields(d, "accepted");
+      b.set(doc(db, "status", id), { ...groupFields(d.college, "accepted", links), ...rf, ...receiptInfo(d, "accepted") }, { merge: true });
+      if (!d.receiptCode) { b.update(doc(db, "students", id), rf); d.receiptCode = rf.receiptCode; d.acceptedAt = rf.acceptedAt; }
+    });
+    await b.commit();
+  }
+  grpNote("ok", `تم تحديث ${list.length} طالب مقبول ✅ (لينك الجروب + وصل القبول) — بيشمل آخر الطلبات المعروضة في اللوحة`);
+}
+$("btnSaveGroups").onclick = async () => {
+  const links = {}; let bad = "";
+  $("grpRows").querySelectorAll("input[data-college]").forEach(i => {
+    const v = i.value.trim(); i.style.borderColor = "";
+    if (!v) return;
+    if (!GROUP_RE.test(v)) { bad = i.dataset.college; i.style.borderColor = "var(--bad)"; } else links[i.dataset.college] = v;
+  });
+  if (bad) return grpNote("bad", `لينك جروب «${bad}» غير صحيح. لازم يبدأ بـ https://chat.whatsapp.com/`);
+  const btn = $("btnSaveGroups"); btn.disabled = true;
+  try {
+    await setDoc(doc(db, "admin_private", "college_groups"), { links, updatedAt: serverTimestamp() });
+    groupLinks = links;
+    grpNote("ok", "تم حفظ اللينكات ✅");
+    if (confirm("تطبيق اللينكات على الطلاب المقبولين دلوقتي؟ (مهم لو غيّرت لينك أو ضفت لينك جديد)")) await applyGroupLinks();
+  } catch (e) { console.error(e); grpNote("bad", "تعذر الحفظ. تأكد من نشر قواعد Firestore الجديدة."); }
+  finally { btn.disabled = false; }
+};
+$("btnApplyGroups").onclick = async () => {
+  if (!confirm("هيتم تحديث لينك الجروب عند كل الطلاب المقبولين حسب كلياتهم. متابعة؟")) return;
+  const btn = $("btnApplyGroups"); btn.disabled = true;
+  try { await applyGroupLinks(); } catch (e) { console.error(e); grpNote("bad", "تعذر التطبيق. تأكد من نشر القواعد وحفظ اللينكات."); }
+  finally { btn.disabled = false; }
+};
+$("btnCheckPhone").onclick = () => {
+  let ph = toLatin($("grpPhone").value).replace(/\D/g, "");
+  if (/^20\d{10}$/.test(ph)) ph = "0" + ph.slice(2); else if (/^1[0125]\d{8}$/.test(ph)) ph = "0" + ph;
+  const hit = cache.filter(({ data: d }) => String(d.phone || "") === ph);
+  $("grpCheckRes").innerHTML = hit.length
+    ? hit.map(({ data: d }) => `<div class="st-row"><div class="st-top"><span class="st-label">${esc(d.fullName)}</span>${badge(d.status)}</div><p>${esc(d.college)} / ${esc(d.level)} — ${d.status === "accepted" ? "✅ وافق على دخوله لجروب كلية " + esc(d.college) : d.status === "rejected" ? "❌ مرفوض، ما توافقش" : "⏳ لسه تحت المراجعة، ما توافقش دلوقتي"}</p></div>`).join("")
+    : `<p class="st-warn">❌ الرقم ده مش مسجل كطالب في المبادرة — ما توافقش على دخوله.</p>`;
+};
+
 async function saveStatus(id, patch, statusPatch) {
   const b = writeBatch(db);
   b.update(doc(db, "students", id), patch);
@@ -2473,14 +2641,18 @@ document.addEventListener("click", async e => {
     if (act === "accepted" || act === "rejected") {
       const msg = prompt("رسالة للطالب:", act === "accepted" ? "تم قبول طلبك بنجاح." : "مرفوض لوجود خطأ في البيانات.");
       if (msg === null) return;
-      await saveStatus(id, { status: act, adminMessage: msg }, { status: act, adminMessage: msg });
+      const links = await loadGroupLinks().catch(() => ({}));
+      const d = dataOf(id), rf = receiptFields(d, act);
+      await saveStatus(id, { status: act, adminMessage: msg, ...rf }, { status: act, adminMessage: msg, ...groupFields(d.college, act, links), ...rf, ...receiptInfo(d, act) });
     } else if (act === "delete") {
       if (!confirm("هل أنت متأكد من المسح؟ لا يمكن التراجع.")) return;
       const b = writeBatch(db); b.delete(doc(db, "students", id)); b.delete(doc(db, "status", id)); await b.commit();
     } else if (act === "save") {
       const row = document.querySelector(`[data-row="${CSS.escape(id)}"]`), p = {};
       row.querySelectorAll("[data-f]").forEach(i => p[i.dataset.f] = i.value.trim());
-      await saveStatus(id, p, { status: p.status });
+      const links = await loadGroupLinks().catch(() => ({}));
+      const old = dataOf(id), nd = { ...old, ...p }, rf = receiptFields(old, p.status);
+      await saveStatus(id, { ...p, ...rf }, { status: p.status, ...groupFields(nd.college, p.status, links), ...rf, ...receiptInfo(nd, p.status) });
     }
   } catch { alert("حدث خطأ أثناء الحفظ، حاول مرة أخرى."); }
 });
