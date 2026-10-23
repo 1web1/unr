@@ -78,7 +78,7 @@
      "name": "إزاي أعرف حالة طلبي؟",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "من قسم «حالة الطلب» اكتب رقمك القومي (14 رقم) واضغط بحث، وهتظهرلك حالة طلبك فوراً. اذهب للاستعلام"
+      "text": "من قسم «حالة الطلب» اكتب رقمك القومي (14 رقم) واضغط بحث، وهتظهرلك حالة تسجيل الاستمارة وحالة طلب الانتخابات وحالة التقديم لفريق الميديا، حسب اللي سجّلت فيه. اذهب للاستعلام"
      }
     },
     {
@@ -633,6 +633,14 @@ html[data-theme="light"] .fg.invalid .el-chip{border-color:var(--bad)}
 html[data-theme="light"] .more-acts a[style]{background:color-mix(in srgb,var(--c) 14%,#fff);border-color:var(--c);color:#1a1a1a}
 html[data-theme="light"] .more-acts a[style]:hover{background:color-mix(in srgb,var(--c) 35%,#fff);border-color:var(--c);color:#1a1a1a}
 html[data-theme="light"] .more-acts a.on{background:var(--c);color:#fff;border-color:var(--c)}
+/* نتائج الاستعلام: حالة كل تسجيل لوحده */
+.st-row{text-align:right;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.1)}
+.st-row:last-child{border-bottom:0}
+.st-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.st-label{font-weight:800}
+.st-row p{margin:6px 0 0;color:var(--muted);font-size:14px}
+.st-hint{margin:12px 0 0;color:var(--muted);font-size:13px}
+html[data-theme="light"] .st-row{border-bottom-color:rgba(0,0,0,.12)}
 </style>
 </head>
 <body>
@@ -734,8 +742,7 @@ html[data-theme="light"] .more-acts a.on{background:var(--c);color:#fff;border-c
           <button type="submit" class="btn-main" id="statusBtn">بحث</button>
         </form>
         <div id="statusResult" class="status-result">
-          <h3>الحالة: <span id="statusBadge" class="badge"></span></h3>
-          <p id="statusMsg"></p>
+          <div id="stRows"></div>
         </div>
         <div id="statusErr" class="notice bad"></div>
       </div>
@@ -794,7 +801,7 @@ html[data-theme="light"] .more-acts a.on{background:var(--c);color:#fff;border-c
       <div class="faq-list">
       <details class="glass faq-item reveal"><summary>مين يقدر يسجل في المبادرة؟</summary><div class="faq-a">التسجيل متاح لطلاب جامعة القاهرة. اضغط على «التسجيل» واملأ بياناتك (الاسم رباعي، الرقم القومي، الكلية، الفرقة، وبيانات التواصل).</div></details>
       <details class="glass faq-item reveal"><summary>إيه المطلوب عشان أكمل التسجيل؟</summary><div class="faq-a">هتحتاج صورة شخصية، وصورة البطاقة، وصورة الكارنيه أو بطاقة الترشيح (JPG أو PNG أو WebP، حتى 8 ميجا لكل صورة)، مع الموافقة على سياسة الخصوصية.</div></details>
-      <details class="glass faq-item reveal"><summary>إزاي أعرف حالة طلبي؟</summary><div class="faq-a">من قسم «حالة الطلب» اكتب رقمك القومي (14 رقم) واضغط بحث، وهتظهرلك حالة طلبك فوراً. <a data-go="status">اذهب للاستعلام</a></div></details>
+      <details class="glass faq-item reveal"><summary>إزاي أعرف حالة طلبي؟</summary><div class="faq-a">من قسم «حالة الطلب» اكتب رقمك القومي (14 رقم) واضغط بحث، وهتظهرلك حالة تسجيل الاستمارة وحالة طلب الانتخابات وحالة التقديم لفريق الميديا، حسب اللي سجّلت فيه. <a data-go="status">اذهب للاستعلام</a></div></details>
       <details class="glass faq-item reveal"><summary>إيه الأنشطة اللي بتقدمها المبادرة؟</summary><div class="faq-a">المعايشات الميدانية، والمعسكرات وورش العمل، والأنشطة داخل الجامعة، وأهم الزيارات. <a data-go="activities">شوف الأنشطة</a></div></details>
       <details class="glass faq-item reveal"><summary>إزاي أنضم لفريق الميديا؟</summary><div class="faq-a">اضغط على «انضم للميديا» في القائمة أو زر «التقديم لفريق الميديا» في الصفحة الرئيسية واملأ نموذج التقديم. <a data-go="media">قدّم الآن</a></div></details>
       <details class="glass faq-item reveal"><summary>بياناتي وصوري بتتستخدم في إيه؟</summary><div class="faq-a">بياناتك وصورك بتُستخدم في إجراءات القبول والمتابعة داخل المبادرة فقط، وتقدر تقرأ سياسة الخصوصية قبل الموافقة أثناء التسجيل.</div></details>
@@ -839,6 +846,7 @@ html[data-theme="light"] .more-acts a.on{background:var(--c);color:#fff;border-c
         <form id="mediaForm" novalidate>
           <div class="fg"><label for="mName">الاسم <small>(ثلاثي على الأقل)</small></label><input type="text" id="mName" autocomplete="name" required><div class="err">اكتب اسمك ثلاثياً على الأقل</div></div>
           <div class="fg"><label for="mPhone">رقم الهاتف (واتساب)</label><input type="tel" id="mPhone" inputmode="numeric" maxlength="11" placeholder="01xxxxxxxxx" dir="ltr" required><div class="err">رقم موبايل مصري صحيح (11 رقم يبدأ بـ 01)</div></div>
+          <div class="fg"><label for="mNid">الرقم القومي</label><input type="text" id="mNid" inputmode="numeric" maxlength="14" placeholder="14 رقم" dir="ltr" required><div class="err">اكتب رقماً قومياً صحيحاً من 14 رقم</div></div>
           <div class="fg"><label>التخصص <small>(اختر واحد أو أكثر)</small></label>
             <div class="roles" id="mRoles" role="group" aria-label="التخصص">
               <button type="button" class="role-chip" data-role="مصور فيديو" aria-pressed="false"><i class="fas fa-video"></i> مصور فيديو <span class="dot"></span></button>
@@ -944,6 +952,7 @@ html[data-theme="light"] .more-acts a.on{background:var(--c);color:#fff;border-c
         <input type="text" id="adminSearch" class="search" placeholder="🔍 بحث بالاسم أو الهاتف أو الرقم القومي...">
         <button class="btn-export" id="btnExport"><i class="fas fa-file-excel"></i> تصدير Excel</button>
         <button class="btn-export" id="btnRefresh" style="background:#555"><i class="fas fa-rotate"></i> تحديث</button>
+        <button class="btn-export" id="btnSync" style="background:#0d6efd" title="يفعّل الاستعلام عن الحالة للتسجيلات القديمة في الانتخابات والميديا"><i class="fas fa-link"></i> مزامنة الاستعلام</button>
         <button class="btn-export" id="btnDeleteAll" style="background:#b02a37"><i class="fas fa-trash"></i> مسح الكل</button>
       </div>
     </div>
@@ -1892,20 +1901,32 @@ form.addEventListener("submit", async e => {
 });
 ["nationalId","phone","searchNid"].forEach(id => $(id).addEventListener("input", e => e.target.value = toLatin(e.target.value).replace(/\D/g, "")));
 
-/* ---------- الاستعلام عن الحالة ---------- */
+/* ---------- الاستعلام عن الحالة (الاستمارة العادية + الانتخابات + الميديا) ---------- */
+const STATUS_MSG = { pending: "طلبك قيد المراجعة حالياً.", accepted: "تم قبول طلبك. هنتواصل معاك على واتساب.", rejected: "للأسف لم يتم قبول طلبك." };
+const ST_LABELS = { pending: "مراجعة", accepted: "مقبول", rejected: "مرفوض" };
 $("statusForm").addEventListener("submit", async e => {
   e.preventDefault();
-  const nid = toLatin($("searchNid").value), err = $("statusErr"), res = $("statusResult");
+  const nid = toLatin($("searchNid").value);
+  const err = $("statusErr"), res = $("statusResult");
   err.className = "notice"; res.style.display = "none";
-  if (!/^\d{14}$/.test(nid)) return notice(err, "bad", "اكتب رقماً قومياً صحيحاً من 14 رقم."); 
+  if (!/^\d{14}$/.test(nid)) return notice(err, "bad", "اكتب رقماً قومياً صحيحاً من 14 رقم.");
   $("statusBtn").disabled = true;
   try {
-    const snap = await retry(() => getDoc(doc(db, "status", nid)), 2);
-    if (!snap.exists()) return notice(err, "bad", "لا يوجد طلب بهذا الرقم.");
-    const d = snap.data(), b = $("statusBadge");
-    b.className = "badge badge-" + (["accepted","rejected"].includes(d.status) ? d.status : "pending");
-    b.textContent = d.status === "accepted" ? "مقبول" : d.status === "rejected" ? "مرفوض" : "مراجعة";
-    $("statusMsg").textContent = d.adminMessage || "لا توجد رسالة.";
+    const lookups = [
+      ["حالة تسجيل الاستمارة (الطلب العادي)", "status"],
+      ["حالة تسجيل طلب الانتخابات", "election_status"],
+      ["حالة التقديم لفريق الميديا", "media_status"]
+    ];
+    const results = await Promise.all(lookups.map(([label, col]) =>
+      retry(() => getDoc(doc(db, col, nid)), 2)
+        .then(snap => snap.exists() ? { label, d: snap.data() } : null)
+        .catch(e => { if (e && e.code === "permission-denied") return null; throw e; })));
+    const found = results.filter(Boolean);
+    if (!found.length) return notice(err, "bad", "لا يوجد طلب بهذا الرقم القومي.");
+    $("stRows").innerHTML = found.map(({ label, d }) => {
+      const st = ["accepted", "rejected"].includes(d.status) ? d.status : "pending";
+      return `<div class="st-row"><div class="st-top"><span class="st-label">${esc(label)}</span><span class="badge badge-${st}">${ST_LABELS[st]}</span></div><p>${esc(d.adminMessage || STATUS_MSG[st])}</p></div>`;
+    }).join("");
     res.style.display = "block";
   } catch { notice(err, "bad", "تعذر البحث الآن، حاول مرة أخرى."); }
   finally { $("statusBtn").disabled = false; }
@@ -2087,6 +2108,27 @@ function fetchStudents() {
 
 $("adminSearch").addEventListener("input", debounce(() => { refreshStudents(); renderMedia(filteredMedia()); renderElection(filteredElection()); }, 300));
 $("btnRefresh").onclick = fetchStudents;
+$("btnSync").onclick = async () => {
+  if (!confirm("هيتم تفعيل «حالة الطلب» لكل تسجيلات الانتخابات والميديا الموجودة حالياً (اللي اتسجلت قبل التحديث). متابعة؟")) return;
+  const btn = $("btnSync"); btn.disabled = true;
+  try {
+    const items = [
+      ...electionCache.map(({ id, data: d }) => ["election_status", id, d.status]),
+      ...mediaCache.filter(({ id }) => /^\d{14}$/.test(id)).map(({ id, data: d }) => ["media_status", id, d.status])
+    ];
+    if (!items.length) return alert("لا توجد تسجيلات لمزامنتها.");
+    for (let i = 0; i < items.length; i += 400) {
+      const b = writeBatch(db);
+      items.slice(i, i + 400).forEach(([col, id, st]) => {
+        const k = ["accepted", "rejected"].includes(st) ? st : "pending";
+        b.set(doc(db, col, id), { status: k, adminMessage: STATUS_MSG[k] }, { merge: true });
+      });
+      await b.commit();
+    }
+    alert("تمت المزامنة ✅ (" + items.length + " تسجيل)");
+  } catch (e) { console.error(e); alert("تعذرت المزامنة. تأكد من نشر قواعد Firestore الجديدة."); }
+  finally { btn.disabled = false; }
+};
 
 /* ---------- تابات الإدارة ---------- */
 const PANEL = { review: "reviewWrap", edit: "editWrap", media: "mediaWrap", election: "electionWrap", settings: "settingsWrap", content: "contentWrap" };
@@ -2591,12 +2633,13 @@ function validateMedia() {
   let bad = false;
   bad |= setInvalid("mName", v("mName").split(/\s+/).filter(Boolean).length < 3);
   bad |= setInvalid("mPhone", !/^01[0125]\d{8}$/.test(v("mPhone")));
+  bad |= setInvalid("mNid", !/^\d{14}$/.test(v("mNid")));
   bad |= setInvalid("mDrive", !DRIVE_RE.test(v("mDrive")));
   bad |= setInvalid("mRoles", getRoles().length === 0);
   ["mProfile", "mCard", "mId"].forEach(id => { bad |= validateImageField(id); });
   return !bad;
 }
-$("mPhone").addEventListener("input", e => e.target.value = toLatin(e.target.value).replace(/\D/g, ""));
+["mPhone", "mNid"].forEach(id => $(id).addEventListener("input", e => e.target.value = toLatin(e.target.value).replace(/\D/g, "")));
 
 const roleChips = [...document.querySelectorAll(".role-chip")];
 const getRoles = () => roleChips.filter(b => b.getAttribute("aria-pressed") === "true").map(b => b.dataset.role);
@@ -2626,20 +2669,20 @@ mForm.addEventListener("submit", async e => {
       uploadImage($("mId").files[0], "mi", tick)
     ]);
     setP(90, "جاري حفظ البيانات...");
-    const phone = toLatin($("mPhone").value);
+    const phone = toLatin($("mPhone").value), nid = toLatin($("mNid").value);
     let drive = toLatin($("mDrive").value); if (!/^https?:\/\//i.test(drive)) drive = "https://" + drive;
-    await retry(() => setDoc(doc(db, "media_applicants", phone), {
-      fullName: $("mName").value.trim().replace(/\s+/g, " "), phone, driveLink: drive, roles: getRoles(),
+    await retry(async () => { const batch = writeBatch(db); batch.set(doc(db, "media_applicants", nid), {
+      fullName: $("mName").value.trim().replace(/\s+/g, " "), phone, nationalId: nid, driveLink: drive, roles: getRoles(),
       profileImageUrl: profileUrl, studentCardUrl: cardUrl, idCardUrl: idUrl,
       status: "pending", timestamp: serverTimestamp()
-    }), 3);
+    }); batch.set(doc(db, "media_status", nid), { status: "pending", adminMessage: STATUS_MSG.pending }); await batch.commit(); }, 3);
     setP(100, "تم!");
     notice(box, "ok", "تم إرسال طلبك بنجاح ✅ سنراجع أعمالك ونتواصل معك على واتساب.");
     mForm.reset(); roleChips.forEach(b => b.setAttribute("aria-pressed", "false")); uploaded.clear();
   } catch (err) {
     const denied = err && err.code === "permission-denied";
     notice(box, "bad", denied
-      ? "هذا الرقم مسجل من قبل، أو لا توجد صلاحية للإرسال. تواصل معنا على واتساب."
+      ? "هذا الرقم القومي مسجل من قبل في فريق الميديا، أو لا توجد صلاحية للإرسال. تواصل معنا على واتساب."
       : "تعذر إتمام الإرسال بسبب ضعف الاتصال. بياناتك وصورك ما زالت في الصفحة، اضغط «إرسال طلب الانضمام» مرة أخرى.");
   } finally {
     mSubmitting = false; $("mSubmitBtn").disabled = false; setTimeout(() => $("mProgress").style.display = "none", 800);
@@ -2653,7 +2696,7 @@ const waHref = p => `https://wa.me/20${String(p || "").replace(/\D/g, "").replac
 
 function filteredMedia() {
   const t = toLatin($("adminSearch").value).toLowerCase();
-  return !t ? mediaCache : mediaCache.filter(s => `${s.data.fullName} ${s.data.phone} ${(s.data.roles || []).join(" ")}`.toLowerCase().includes(t));
+  return !t ? mediaCache : mediaCache.filter(s => `${s.data.fullName} ${s.data.phone} ${s.data.nationalId || ""} ${(s.data.roles || []).join(" ")}`.toLowerCase().includes(t));
 }
 async function fetchMediaStats() {
   try {
@@ -2673,7 +2716,7 @@ function renderMedia(list) {
     const img = d.profileImageUrl ? `<a class="imgv" data-t="الصورة الشخصية" href="${safeUrl(d.profileImageUrl)}" target="_blank" rel="noopener"><img src="${optImg(safeUrl(d.profileImageUrl))}" class="thumb" alt="" loading="lazy"></a>` : "-";
     const date = d.timestamp?.toDate ? d.timestamp.toDate().toLocaleDateString("ar-EG") : "-";
     return `<tr>
-      <td>${img}</td><td>${esc(d.fullName)}</td>
+      <td>${img}</td><td>${esc(d.fullName)}${d.nationalId ? `<span class="cmt-tags">الرقم القومي: ${esc(d.nationalId)}</span>` : ""}</td>
       <td dir="ltr">${esc(d.phone)} <a href="${waHref(d.phone)}" target="_blank" rel="noopener" aria-label="واتساب"><i class="fab fa-whatsapp" style="color:#25D366;font-size:18px"></i></a></td>
       <td>${(d.roles || []).map(r => `<span class="role-tag">${esc(r)}</span>`).join("") || "-"}</td>
       <td><a class="imgv" data-t="صورة البطاقة" href="${safeUrl(d.idCardUrl)}" target="_blank" rel="noopener">بطاقة</a> | <a class="imgv" data-t="صورة الكارنيه" href="${safeUrl(d.studentCardUrl)}" target="_blank" rel="noopener">كارنيه</a></td>
@@ -2702,9 +2745,12 @@ document.addEventListener("click", async e => {
   try {
     if (act === "delete") {
       if (!confirm("هل أنت متأكد من مسح هذا الطلب؟ لا يمكن التراجع.")) return;
-      await deleteDoc(doc(db, "media_applicants", id));
+      const b = writeBatch(db); b.delete(doc(db, "media_applicants", id)); if (/^\d{14}$/.test(id)) b.delete(doc(db, "media_status", id)); await b.commit();
     } else {
-      await updateDoc(doc(db, "media_applicants", id), { status: act });
+      const b = writeBatch(db);
+      b.update(doc(db, "media_applicants", id), { status: act });
+      if (/^\d{14}$/.test(id)) b.set(doc(db, "media_status", id), { status: act, adminMessage: STATUS_MSG[act] }, { merge: true });
+      await b.commit();
     }
   } catch { alert("حدث خطأ أثناء الحفظ، حاول مرة أخرى."); }
 });
@@ -2717,6 +2763,7 @@ async function exportMedia() {
     wb.creator = "مبادرة رعاية الشباب - جامعة القاهرة"; wb.created = new Date();
     const ws = wb.addWorksheet("الميديا");
     ws.columns = [
+      { header: "الرقم القومي", key: "nationalId", width: 18 },
       { header: "الاسم", key: "fullName", width: 26 },
       { header: "الهاتف", key: "phone", width: 14 },
       { header: "التخصص", key: "roles", width: 26 },
@@ -2731,7 +2778,7 @@ async function exportMedia() {
     data.forEach(({ data: d }, i) => {
       const status = ["accepted", "rejected"].includes(d.status) ? d.status : "pending";
       const row = ws.addRow({
-        fullName: d.fullName || "", phone: d.phone || "", roles: (d.roles || []).join("، "), driveLink: d.driveLink || "",
+        nationalId: d.nationalId || "", fullName: d.fullName || "", phone: d.phone || "", roles: (d.roles || []).join("، "), driveLink: d.driveLink || "",
         status: STAT[status], date: d.timestamp?.toDate ? d.timestamp.toDate().toLocaleString("ar-EG") : "",
         profileImageUrl: d.profileImageUrl || "", idCardUrl: d.idCardUrl || "", studentCardUrl: d.studentCardUrl || ""
       });
@@ -2795,13 +2842,13 @@ eForm.addEventListener("submit", async e => {
     setP(90, "جاري حفظ البيانات...");
     let fb = toLatin($("elFb").value); if (!/^https?:\/\//i.test(fb)) fb = "https://" + fb;
     const committee = getElCommittee();
-    await retry(() => setDoc(doc(db, COL_ELECTION, nid), {
+    await retry(async () => { const batch = writeBatch(db); batch.set(doc(db, COL_ELECTION, nid), {
       fullName: $("elName").value.trim().replace(/\s+/g, " "), phone: toLatin($("elPhone").value), nationalId: nid,
       college: $("elCollege").value, level: $("elLevel").value, facebook: fb, email: toLatin($("elGmail").value),
       profileImageUrl: profileUrl, idCardUrl: idUrl, studentCardUrl: cardUrl,
       committee, committees: [committee], hobby: $("elHobby").value.trim().replace(/\s+/g, " "),
       timestamp: serverTimestamp(), status: "pending"
-    }), 3);
+    }); batch.set(doc(db, "election_status", nid), { status: "pending", adminMessage: STATUS_MSG.pending }); await batch.commit(); }, 3);
     setP(100, "تم!");
     notice(box, "ok", "تم تسجيلك في الانتخابات بنجاح ✅ هنراجع بياناتك ونتواصل معاك على واتساب.");
     eForm.reset(); elChips.forEach(b => b.setAttribute("aria-pressed", "false")); uploaded.clear();
@@ -2879,9 +2926,12 @@ document.addEventListener("click", async e => {
   try {
     if (act === "delete") {
       if (!confirm("هل أنت متأكد من مسح هذا التسجيل؟ لا يمكن التراجع.")) return;
-      await deleteDoc(doc(db, COL_ELECTION, id));
+      const b = writeBatch(db); b.delete(doc(db, COL_ELECTION, id)); b.delete(doc(db, "election_status", id)); await b.commit();
     } else {
-      await updateDoc(doc(db, COL_ELECTION, id), { status: act });
+      const b = writeBatch(db);
+      b.update(doc(db, COL_ELECTION, id), { status: act });
+      b.set(doc(db, "election_status", id), { status: act, adminMessage: STATUS_MSG[act] }, { merge: true });
+      await b.commit();
     }
     fetchElectionStats();
   } catch { alert("حدث خطأ أثناء الحفظ، حاول مرة أخرى."); }
@@ -2946,6 +2996,7 @@ async function backupAllToExcel(allStudents, allMedia, allElection = []) {
 
   const ws2 = wb.addWorksheet("الميديا");
   ws2.columns = [
+    { header: "الرقم القومي", key: "nationalId", width: 18 },
     { header: "الاسم", key: "fullName", width: 26 },
     { header: "الهاتف", key: "phone", width: 14 },
     { header: "التخصص", key: "roles", width: 26 },
@@ -2960,7 +3011,7 @@ async function backupAllToExcel(allStudents, allMedia, allElection = []) {
   allMedia.forEach(({ data: d }, i) => {
     const status = ["accepted", "rejected"].includes(d.status) ? d.status : "pending";
     const row = ws2.addRow({
-      fullName: d.fullName || "", phone: d.phone || "", roles: (d.roles || []).join("، "), driveLink: d.driveLink || "",
+      nationalId: d.nationalId || "", fullName: d.fullName || "", phone: d.phone || "", roles: (d.roles || []).join("، "), driveLink: d.driveLink || "",
       status: STAT[status], date: d.timestamp?.toDate ? d.timestamp.toDate().toLocaleString("ar-EG") : "",
       profileImageUrl: d.profileImageUrl || "", idCardUrl: d.idCardUrl || "", studentCardUrl: d.studentCardUrl || ""
     });
@@ -3011,6 +3062,7 @@ $("btnDeleteAll").onclick = async () => {
     await deleteAllDocsInCollection("status");
     await deleteAllDocsInCollection("media_applicants");
     try { await deleteAllDocsInCollection("election_applicants"); } catch (e) { console.warn("election delete", e); }
+    for (const c of ["election_status", "media_status"]) { try { await deleteAllDocsInCollection(c); } catch (e) { console.warn(c, e); } }
 
     alert("تم أخذ نسخة احتياطية بالإكسل، وتم مسح كل البيانات بنجاح.");
     fetchStudents();
