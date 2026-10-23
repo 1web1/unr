@@ -604,6 +604,35 @@ select::-webkit-scrollbar{width:10px}
 select::-webkit-scrollbar-track{background:#13202e}
 select::-webkit-scrollbar-thumb{background:#d4af37;border-radius:8px}
 /* ===== /Unified Select Styling ===== */
+/* تسجيل الانتخابات */
+.el-chip{display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(0,0,0,.35);border:1.5px solid rgba(255,255,255,.2);color:#fff;border-radius:12px;font-family:inherit;font-weight:600;font-size:14px;cursor:pointer;transition:.2s;text-align:right}
+.el-chip:hover{border-color:rgba(255,255,255,.45)}
+.el-chip i{color:var(--gold);width:18px;text-align:center}
+.el-chip .dot{flex:none;margin-inline-start:auto;width:20px;height:20px;border-radius:50%;border:2px solid rgba(255,255,255,.45);transition:.2s}
+.el-chip[aria-pressed="true"]{border-color:#e11d2e;background:rgba(225,29,46,.12)}
+.el-chip[aria-pressed="true"] .dot{background:#e11d2e;border-color:#e11d2e;box-shadow:0 0 0 3px rgba(225,29,46,.3)}
+.fg.invalid .el-chip{border-color:var(--bad)}
+.el-chip{align-items:flex-start}
+.el-chip i{margin-top:3px}
+.el-chip .ct{display:flex;flex-direction:column;gap:3px;min-width:0}
+.el-chip .ct small{font-weight:400;font-size:12px;line-height:1.6;opacity:.75}
+.el-chip .dot{margin-top:2px}
+.el-chip:disabled{opacity:.4;cursor:not-allowed}
+html[data-theme="light"] .el-chip{background:rgba(255,255,255,.85);border-color:rgba(0,0,0,.2);color:#1a1a1a}
+html[data-theme="light"] .el-chip:hover{border-color:rgba(0,0,0,.45)}
+html[data-theme="light"] .el-chip .dot{border-color:rgba(0,0,0,.35)}
+html[data-theme="light"] .el-chip[aria-pressed="true"]{border-color:#e11d2e;background:rgba(225,29,46,.1)}
+html[data-theme="light"] .el-chip[aria-pressed="true"] .dot{background:#e11d2e;border-color:#e11d2e}
+html[data-theme="light"] .fg.invalid .el-chip{border-color:var(--bad)}
+@media(max-width:560px){#elCommittees.roles{grid-template-columns:1fr}}
+/* شريط الأنشطة أعلى الصفحة: كل نشاط بلونه، والنشاط الحالي متلوّن بالكامل */
+.act-nav{margin:0 0 26px}
+.more-acts a[style]{border:1.5px solid var(--c);background:color-mix(in srgb,var(--c) 16%,transparent);transition:.2s}
+.more-acts a[style]:hover{background:color-mix(in srgb,var(--c) 45%,transparent);border-color:var(--c)}
+.more-acts a.on{background:var(--c);color:#fff;font-weight:800;box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 30%,transparent);text-shadow:0 1px 2px rgba(0,0,0,.35)}
+html[data-theme="light"] .more-acts a[style]{background:color-mix(in srgb,var(--c) 14%,#fff);border-color:var(--c);color:#1a1a1a}
+html[data-theme="light"] .more-acts a[style]:hover{background:color-mix(in srgb,var(--c) 35%,#fff);border-color:var(--c);color:#1a1a1a}
+html[data-theme="light"] .more-acts a.on{background:var(--c);color:#fff;border-color:var(--c)}
 </style>
 </head>
 <body>
@@ -646,6 +675,7 @@ select::-webkit-scrollbar-thumb{background:#d4af37;border-radius:8px}
     <button class="nav-btn" data-go="status">حالة الطلب</button>
     <button class="nav-btn" data-go="faq">أسئلة شائعة</button>
     <button class="nav-btn nav-media" data-go="media">انضم للميديا</button>
+    <button class="nav-btn nav-media" data-go="election">تسجيل انتخابات</button>
     <button class="nav-btn nav-cta" data-go="register">التسجيل</button>
     <button class="nav-btn" id="btnAdmin" data-go="admin">الإدارة</button>
     <button class="nav-btn btn-danger" id="btnLogout" style="display:none">خروج</button>
@@ -662,6 +692,7 @@ select::-webkit-scrollbar-thumb{background:#d4af37;border-radius:8px}
     <div class="hero-actions">
       <button class="glass btn-hero" data-go="register">ابدأ التسجيل للطلاب</button>
       <button class="glass btn-hero btn-hero-gold" data-go="media">التقديم لفريق الميديا</button>
+      <button class="glass btn-hero btn-hero-gold" data-go="election">تسجيل انتخابات</button>
     </div>
     <button class="hero-arrow" data-go="about" aria-label="انزل للأسفل"><i class="fas fa-chevron-down"></i></button>
   </section>
@@ -786,9 +817,8 @@ select::-webkit-scrollbar-thumb{background:#d4af37;border-radius:8px}
   </section>
   <section class="section" style="padding-top:36px">
     <div class="wrap">
+      <div class="more-acts act-nav" id="actMore" role="navigation" aria-label="الأنشطة"></div>
       <div id="actContent"></div>
-      <h3 class="more-title">أنشطة أخرى</h3>
-      <div class="more-acts" id="actMore"></div>
     </div>
   </section>
 </main>
@@ -823,6 +853,56 @@ select::-webkit-scrollbar-thumb{background:#d4af37;border-radius:8px}
           <button type="submit" class="btn-main" id="mSubmitBtn">إرسال طلب الانضمام</button>
           <div class="progress" id="mProgress"><div class="bar"><div class="fill" id="mFill"></div></div><p id="mProgressText"></p></div>
           <div id="mNotice" class="notice" role="status"></div>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ تسجيل الانتخابات ============ -->
+<main id="electionView" class="view">
+  <section class="section">
+    <div class="wrap">
+      <button class="back-link" data-go="hero"><i class="fas fa-arrow-right"></i> الرئيسية</button>
+      <div class="glass closed-box" id="electionClosedBox" style="display:none">
+        <i class="fas fa-lock"></i>
+        <h3>تسجيل الانتخابات مغلق حالياً</h3>
+        <p id="electionClosedMsg" style="color:var(--muted)">تم إغلاق باب تسجيل الانتخابات في الوقت الحالي. تابع صفحاتنا الرسمية لمعرفة موعد الفتح القادم.</p>
+      </div>
+      <div class="glass form-box" id="electionFormBox">
+        <h2>تسجيل انتخابات</h2>
+        <p class="sub">سجّل بياناتك واختر اللجنة التي تتقدم لها (لجنة واحدة فقط).</p>
+        <form id="electionForm" novalidate>
+          <div class="fg"><label for="elName">الاسم رباعي</label><input type="text" id="elName" autocomplete="name" required><div class="err">اكتب الاسم رباعي (4 كلمات على الأقل)</div></div>
+          <div class="fg"><label for="elPhone">رقم الهاتف (واتساب)</label><input type="tel" id="elPhone" inputmode="numeric" maxlength="11" placeholder="01xxxxxxxxx" dir="ltr" required><div class="err">رقم موبايل مصري صحيح (11 رقم يبدأ بـ 01)</div></div>
+          <div class="fg"><label for="elNid">الرقم القومي (14 رقم)</label><input type="text" id="elNid" inputmode="numeric" maxlength="14" dir="ltr" required><div class="err">الرقم القومي يجب أن يكون 14 رقم</div></div>
+          <div class="fg"><label for="elCollege">الكلية</label>
+            <select id="elCollege" required><option value="" disabled selected>اختر كليتك</option>
+              <option>الآداب</option><option>الحقوق</option><option>التجارة</option><option>الاقتصاد والعلوم السياسية</option><option>الإعلام</option><option>دار العلوم</option><option>الخدمة الاجتماعية</option><option>رياض الأطفال</option><option>الآثار</option><option>العلوم</option><option>الهندسة</option><option>الحاسبات والذكاء الاصطناعي</option><option>الطب البشري</option><option>طب الأسنان</option><option>الصيدلة</option><option>العلاج الطبيعي</option><option>التمريض</option><option>الطب البيطري</option><option>الزراعة</option><option>التربية البدنية</option><option>أخرى</option></select><div class="err">اختر الكلية</div></div>
+          <div class="fg"><label for="elLevel">الفرقة</label>
+            <select id="elLevel" required><option value="" disabled selected>اختر الفرقة</option>
+              <option value="الأولى">الفرقة الأولى</option><option value="الثانية">الفرقة الثانية</option><option value="الثالثة">الفرقة الثالثة</option><option value="الرابعة">الفرقة الرابعة</option><option value="الخامسة">الفرقة الخامسة</option><option value="السادسة">الفرقة السادسة</option><option value="السابعة">الفرقة السابعة</option></select><div class="err">اختر الفرقة</div></div>
+          <div class="fg"><label for="elFb">رابط حساب الفيسبوك</label><input type="text" id="elFb" placeholder="facebook.com/username" dir="ltr" required><div class="err">اكتب رابط فيسبوك صحيح</div></div>
+          <div class="fg"><label for="elGmail">البريد الإلكتروني (Gmail)</label><input type="email" id="elGmail" placeholder="example@gmail.com" dir="ltr" required><div class="err">بريد إلكتروني غير صحيح</div></div>
+<div class="fg"><label>اللجنة التي تتقدم لها</label>
+            <div class="com-hint"><span>اختر <b>لجنة واحدة فقط</b></span></div>
+            <div class="roles" id="elCommittees" role="radiogroup" aria-label="اللجنة">
+              <button type="button" class="el-chip" data-com="اللجنة الرياضية" aria-pressed="false"><i class="fas fa-futbol"></i><span class="ct"><span>اللجنة الرياضية</span><small>برامج ومسابقات للارتقاء بمستوى النشاط الرياضي</small></span><span class="dot"></span></button>
+              <button type="button" class="el-chip" data-com="اللجنة الثقافية" aria-pressed="false"><i class="fas fa-book-open"></i><span class="ct"><span>اللجنة الثقافية</span><small>تنمية الوعي الثقافي لدى الطلاب عبر برامج ثقافية متنوعة</small></span><span class="dot"></span></button>
+              <button type="button" class="el-chip" data-com="اللجنة الاجتماعية" aria-pressed="false"><i class="fas fa-people-group"></i><span class="ct"><span>اللجنة الاجتماعية</span><small>أنشطة اجتماعية تكسب مهارات متميزة في العمل الاجتماعي</small></span><span class="dot"></span></button>
+              <button type="button" class="el-chip" data-com="لجنة التنظيم" aria-pressed="false"><i class="fas fa-sitemap"></i><span class="ct"><span>لجنة التنظيم</span><small>تنظيم الفعاليات والمؤتمرات والأنشطة التي تنفذها المبادرة</small></span><span class="dot"></span></button>
+              <button type="button" class="el-chip" data-com="اللجنة الفنية" aria-pressed="false"><i class="fas fa-palette"></i><span class="ct"><span>اللجنة الفنية</span><small>تنمية الحس الجمالي والتذوق الفني وصقل موهبة الإبداع</small></span><span class="dot"></span></button>
+              <button type="button" class="el-chip" data-com="اللجنة العلمية" aria-pressed="false"><i class="fas fa-flask"></i><span class="ct"><span>اللجنة العلمية</span><small>الجمعيات العلمية وأندية العلوم والصلة بين الأساتذة والطلاب</small></span><span class="dot"></span></button>
+              <button type="button" class="el-chip" data-com="اللجنة الإعلامية" aria-pressed="false"><i class="fas fa-bullhorn"></i><span class="ct"><span>اللجنة الإعلامية</span><small>العمل الإعلامي والتواصل الاجتماعي وتسويق أفكار المبادرة</small></span><span class="dot"></span></button>
+            </div><div class="err">اختر لجنة واحدة</div></div>
+          <div class="fg"><label for="elHobby">الهواية المفضلة</label><input type="text" id="elHobby" maxlength="100" placeholder="مثال: القراءة، الرسم، كرة القدم..." required><div class="err">اكتب هوايتك المفضلة (حرفان على الأقل)</div></div>
+          <div class="fg"><label for="elProfile">الصورة الشخصية <small>(JPG أو PNG أو WebP، حتى 8 ميجا)</small></label><input type="file" id="elProfile" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required><div class="photo-rule"><i class="fas fa-circle-info"></i> <b>شروط الصورة الشخصية:</b> صورة رسمية لائقة، الوجه واضح والخلفية بسيطة، <b>وليست سيلفي</b>، بدون فلاتر أو نظارة شمس أو صور جماعية. الصور غير المطابقة يتم رفض الطلب بسببها.</div><div class="err">ارفع صورة شخصية بصيغة JPG أو PNG أو WebP وحجمها أقل من 8 ميجا</div></div>
+          <div class="fg"><label for="elId">صورة البطاقة <small>(JPG أو PNG أو WebP، حتى 8 ميجا)</small></label><input type="file" id="elId" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required><div class="err">ارفع صورة البطاقة بصيغة JPG أو PNG أو WebP وحجمها أقل من 8 ميجا</div></div>
+          <div class="fg"><label for="elCard">صورة الكارنيه أو بطاقة الترشيح <small>(JPG أو PNG أو WebP، حتى 8 ميجا)</small></label><input type="file" id="elCard" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required><div class="err">ارفع صورة الكارنيه بصيغة JPG أو PNG أو WebP وحجمها أقل من 8 ميجا</div></div>
+          <div class="fg"><label class="ck"><input type="checkbox" id="elAgree"><span>أوافق على <a href="#" id="elPrivacyLink" style="color:var(--gold)">سياسة الخصوصية</a> واستخدام بياناتي وصوري في إجراءات القبول والمتابعة داخل المبادرة.</span></label><div class="err">لازم توافق على سياسة الخصوصية للمتابعة</div></div>
+          <button type="submit" class="btn-main" id="elSubmitBtn">إرسال البيانات</button>
+          <div class="progress" id="elProgress"><div class="bar"><div class="fill" id="elFill"></div></div><p id="elProgressText"></p></div>
+          <div id="elNotice" class="notice" role="status"></div>
         </form>
       </div>
     </div>
@@ -879,10 +959,17 @@ select::-webkit-scrollbar-thumb{background:#d4af37;border-radius:8px}
       <div class="stat" data-s="accepted"><span class="ico"><i class="fas fa-circle-check"></i></span><div class="meta"><h3>مقبول</h3><p id="mdAccepted">0</p></div><span class="pct"></span></div>
       <div class="stat" data-s="rejected"><span class="ico"><i class="fas fa-circle-xmark"></i></span><div class="meta"><h3>مرفوض</h3><p id="mdRejected">0</p></div><span class="pct"></span></div>
     </div>
+    <div class="stats" id="electionStats" style="display:none">
+      <div class="stat" data-s=""><span class="ico"><i class="fas fa-users"></i></span><div class="meta"><h3>الكل</h3><p id="elstTotal">0</p></div><span class="pct"></span></div>
+      <div class="stat" data-s="pending"><span class="ico"><i class="fas fa-hourglass-half"></i></span><div class="meta"><h3>مراجعة</h3><p id="elstPending">0</p></div><span class="pct"></span></div>
+      <div class="stat" data-s="accepted"><span class="ico"><i class="fas fa-circle-check"></i></span><div class="meta"><h3>مقبول</h3><p id="elstAccepted">0</p></div><span class="pct"></span></div>
+      <div class="stat" data-s="rejected"><span class="ico"><i class="fas fa-circle-xmark"></i></span><div class="meta"><h3>مرفوض</h3><p id="elstRejected">0</p></div><span class="pct"></span></div>
+    </div>
     <div class="tabs">
       <button class="tab active" id="tabReview" data-tab="review">مراجعة الطلبات</button>
       <button class="tab" id="tabEdit" data-tab="edit">تعديل البيانات</button>
       <button class="tab" id="tabMedia" data-tab="media"><i class="fas fa-camera"></i> فريق الميديا</button>
+      <button class="tab" id="tabElection" data-tab="election"><i class="fas fa-check-to-slot"></i> الانتخابات</button>
       <button class="tab" id="tabContent" data-tab="content"><i class="fas fa-pen-to-square"></i> محتوى الموقع</button>
       <button class="tab" id="tabSettings" data-tab="settings">الإعدادات</button> 
     </div>
@@ -919,6 +1006,12 @@ select::-webkit-scrollbar-thumb{background:#d4af37;border-radius:8px}
     <div id="mediaWrap" class="tbl-wrap" style="display:none">
       <div id="mediaLoading" class="notice ok" style="display:none"></div>
       <table><thead><tr><th>الصورة</th><th>الاسم</th><th>الهاتف</th><th>التخصص</th><th>المرفقات</th><th>الأعمال</th><th>الحالة</th><th>التاريخ</th><th>الإجراء</th></tr></thead><tbody id="mediaBody"></tbody></table>
+    </div>
+
+    <!-- قسم الانتخابات -->
+    <div id="electionWrap" class="tbl-wrap" style="display:none">
+      <div id="electionLoading" class="notice ok" style="display:none"></div>
+      <table><thead><tr><th>الصورة</th><th>الاسم / اللجنة</th><th>الرقم القومي</th><th>الكلية/الفرقة</th><th>الهاتف</th><th>روابط</th><th>المرفقات</th><th>الحالة</th><th>التاريخ</th><th>الإجراء</th></tr></thead><tbody id="electionBody"></tbody></table>
     </div>
 
     <!-- محتوى الموقع -->
@@ -1007,6 +1100,17 @@ select::-webkit-scrollbar-thumb{background:#d4af37;border-radius:8px}
         <div class="fg">
            <label>رسالة إغلاق التقديم للميديا</label>
            <input type="text" id="adminMediaClosedMsg" placeholder="تم إغلاق باب التقديم لفريق الميديا حالياً، تابعونا للمزيد.">
+        </div>
+        <div class="fg">
+           <label>حالة تسجيل الانتخابات</label>
+           <select id="adminElectionOpen">
+             <option value="true">مفتوح (متاح للطلاب)</option>
+             <option value="false">مغلق مؤقتاً</option>
+           </select>
+        </div>
+        <div class="fg">
+           <label>رسالة إغلاق تسجيل الانتخابات</label>
+           <input type="text" id="adminElectionClosedMsg" placeholder="تم إغلاق باب تسجيل الانتخابات حالياً، تابعونا للمزيد.">
         </div>
       </div>
       
@@ -1252,7 +1356,7 @@ select::-webkit-scrollbar-thumb{background:#d4af37;border-radius:8px}
   };
 
   var SECTIONS = ["hero", "about", "activities", "status", "register", "faq"];
-  var VIEWS = { activity: "activityView", media: "mediaView", admin: "adminView" };
+  var VIEWS = { activity: "activityView", media: "mediaView", election: "electionView", admin: "adminView" };
   var current = null, view = "site";
 
   function setView(name) {
@@ -1278,8 +1382,10 @@ select::-webkit-scrollbar-thumb{background:#d4af37;border-radius:8px}
       : '<div class="glass empty"><i class="fas fa-hourglass-half"></i><h3>المحتوى قريباً</h3>' +
         "<p>سيتم إضافة تفاصيل «" + a.title + "» هنا قريباً.</p>" +
         '<button class="btn-main" data-go="register">سجّل في المبادرة</button></div>';
-    $("actMore").innerHTML = Object.keys(ACTS).filter(function (k) { return k !== key; }).map(function (k) {
-      return '<a href="#activity/' + k + '" data-go="activity/' + k + '">' + ACTS[k].title + "</a>";
+    var PILL = ["#e11d2e", "#0d6efd", "#198754", "#d4af37", "#6f42c1", "#fd7e14", "#20c997"];
+    $("actMore").innerHTML = Object.keys(ACTS).map(function (k, i) {
+      return '<a href="#activity/' + k + '" data-go="activity/' + k + '" style="--c:' + PILL[i % PILL.length] + '"' +
+        (k === key ? ' class="on" aria-current="page"' : "") + ">" + ACTS[k].title + "</a>";
     }).join("");
     return true;
   }
@@ -1292,6 +1398,8 @@ select::-webkit-scrollbar-thumb{background:#d4af37;border-radius:8px}
       current = route; renderActivity(parts[1]); setView("activity"); setActive("activities"); window.scrollTo(0, 0);
     } else if (route === "media") {
       current = route; setView("media"); setActive("media"); window.scrollTo(0, 0);
+    } else if (route === "election") {
+      current = route; setView("election"); setActive("election"); window.scrollTo(0, 0);
     } else if (route === "admin") {
       current = route; setView("admin"); setActive("admin"); window.scrollTo(0, 0);
       document.dispatchEvent(new Event("app:admin"));
@@ -1444,6 +1552,10 @@ async function loadSocialLinks() {
       $("mediaFormBox").style.display = mediaOpen ? "" : "none";
       $("mediaClosedBox").style.display = mediaOpen ? "none" : "block";
       if (data.mediaClosedMsg) $("mediaClosedMsg").textContent = data.mediaClosedMsg;
+      const electionOpen = data.electionOpen !== false;
+      $("electionFormBox").style.display = electionOpen ? "" : "none";
+      $("electionClosedBox").style.display = electionOpen ? "none" : "block";
+      if (data.electionClosedMsg) $("electionClosedMsg").textContent = data.electionClosedMsg;
     } else {
       applyLink("waLink", "201099583667", true, "waLabel", "واتساب المبادرة");
       applyLink("fbLink", "https://www.facebook.com/share/19PMpQ3kAy/?mibextid=wwXIfr", false, "fbLabel", "الصفحة الرسمية الأولى");
@@ -1615,7 +1727,7 @@ function enterAdmin() {
   if (logged) fetchStudents();
 }
 document.addEventListener("app:admin", enterAdmin);
-function stopListeners() { if (unsubscribe) unsubscribe(); if (unsubMedia) unsubMedia(); }
+function stopListeners() { if (unsubscribe) unsubscribe(); if (unsubMedia) unsubMedia(); if (unsubElection) unsubElection(); }
 $("btnLogout").onclick = () => signOut(auth).then(() => { stopListeners(); Router.go("hero"); });
 onAuthStateChanged(auth, user => {
   $("btnLogout").style.display = user ? "" : "none";
@@ -1902,10 +2014,10 @@ function syncStatPills() {
 document.querySelectorAll(".stat[data-s]").forEach(p => p.addEventListener("click", () => {
   const same = $("fStatus").value === p.dataset.s;
   $("fStatus").value = same ? "" : p.dataset.s;
-  refreshStudents(); renderMedia(filteredMedia()); syncStatPills();
+  refreshStudents(); renderMedia(filteredMedia()); renderElection(filteredElection()); syncStatPills();
 }));
 $("fStatus").addEventListener("change", syncStatPills);
-$("fReset").onclick = () => { ["fCollege", "fLevel", "fStatus", "fCommittee"].forEach(id => $(id).value = ""); $("adminSearch").value = ""; refreshStudents(); renderMedia(filteredMedia()); syncStatPills(); };
+$("fReset").onclick = () => { ["fCollege", "fLevel", "fStatus", "fCommittee"].forEach(id => $(id).value = ""); $("adminSearch").value = ""; refreshStudents(); renderMedia(filteredMedia()); renderElection(filteredElection()); syncStatPills(); };
 $("reviewBody").addEventListener("change", e => {
   const ck = e.target.closest("[data-sel]"); if (!ck) return;
   ck.checked ? selected.add(ck.dataset.sel) : selected.delete(ck.dataset.sel);
@@ -1960,6 +2072,7 @@ function fetchStudents() {
   const load = $("dataLoading"); load.style.display = "block"; load.textContent = "جاري جلب البيانات...";
   if (unsubscribe) unsubscribe();
   fetchMedia();
+  fetchElection();
 
   unsubscribe = onSnapshot(query(collection(db, "students"), orderBy("timestamp", "desc"), limit(ADMIN_ROWS_LIMIT)), (snap) => {
     cache = snap.docs.map(s => ({ id: s.id, data: s.data() }));
@@ -1972,11 +2085,11 @@ function fetchStudents() {
 }
 
 
-$("adminSearch").addEventListener("input", debounce(() => { refreshStudents(); renderMedia(filteredMedia()); }, 300));
+$("adminSearch").addEventListener("input", debounce(() => { refreshStudents(); renderMedia(filteredMedia()); renderElection(filteredElection()); }, 300));
 $("btnRefresh").onclick = fetchStudents;
 
 /* ---------- تابات الإدارة ---------- */
-const PANEL = { review: "reviewWrap", edit: "editWrap", media: "mediaWrap", settings: "settingsWrap", content: "contentWrap" };
+const PANEL = { review: "reviewWrap", edit: "editWrap", media: "mediaWrap", election: "electionWrap", settings: "settingsWrap", content: "contentWrap" };
 let activeTab = "review";
 async function loadSettingsForm() {
   try {
@@ -1994,6 +2107,8 @@ async function loadSettingsForm() {
     $("adminRegClosedMsg").value = data.regClosedMsg || "";
     $("adminMediaOpen").value = data.mediaOpen === false ? "false" : "true";
     $("adminMediaClosedMsg").value = data.mediaClosedMsg || "";
+    $("adminElectionOpen").value = data.electionOpen === false ? "false" : "true";
+    $("adminElectionClosedMsg").value = data.electionClosedMsg || "";
   } catch (e) { console.error(e); }
 }
 function setTab(name) {
@@ -2001,10 +2116,11 @@ function setTab(name) {
   document.querySelectorAll(".tabs .tab").forEach(t => t.classList.toggle("active", t.dataset.tab === name));
   Object.values(PANEL).forEach(id => $(id).style.display = "none");
   $(PANEL[name]).style.display = "";
-  $("studentStats").style.display = (name === "media" || name === "content") ? "none" : "";
+  $("studentStats").style.display = (name === "media" || name === "election" || name === "content") ? "none" : "";
   $("stuTools").style.display = (name === "review" || name === "edit") ? "" : "none";
   $("bulkBar").style.display = name === "review" ? "" : "none";
   $("mediaStats").style.display = name === "media" ? "" : "none";
+  $("electionStats").style.display = name === "election" ? "" : "none";
   if (name === "settings") loadSettingsForm();
   if (name === "content") loadContentEditor();
 }
@@ -2034,7 +2150,9 @@ $("btnSaveSettings").onclick = async () => {
       regOpen: $("adminRegOpen").value !== "false",
       regClosedMsg: $("adminRegClosedMsg").value.trim(),
       mediaOpen: $("adminMediaOpen").value !== "false",
-      mediaClosedMsg: $("adminMediaClosedMsg").value.trim()
+      mediaClosedMsg: $("adminMediaClosedMsg").value.trim(),
+      electionOpen: $("adminElectionOpen").value !== "false",
+      electionClosedMsg: $("adminElectionClosedMsg").value.trim()
     });
     notice(noticeBox, "ok", "تم حفظ الإعدادات بنجاح. ستتغير الروابط والأزرار في الموقع فوراً.");
     loadSocialLinks(); 
@@ -2360,27 +2478,64 @@ function styleStatusCell(row, status) {
   c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: STATUS_FILL[status] || STATUS_FILL.pending } };
 }
 
-/* أزرار الصور في الإكسل: خلية مُلوّنة كأنها زرار، الضغط عليها يفتح الصورة في المتصفح */
+/* أزرار الصور والفيسبوك في الإكسل: خلية مُلوّنة كأنها زرار، الضغط عليها يفتح اللينك في المتصفح */
 const IMG_BTN = {
+  facebook:        { label: "🔗 فتح الفيسبوك", fill: "FF1877F2" },
   profileImageUrl: { label: "👤 عرض الشخصية", fill: "FF0D6EFD" },
   idCardUrl:       { label: "🪪 عرض البطاقة", fill: "FF198754" },
   studentCardUrl:  { label: "🎓 عرض الكارنيه", fill: "FF6F42C1" }
 };
 function styleImageLinks(row) {
   Object.keys(IMG_BTN).forEach(key => {
+    if (!row.worksheet.getColumnKey(key)) return;   // الشيت ده مفيهوش العمود ده (مثلاً شيت الميديا مفيهوش فيسبوك)
     const cell = row.getCell(key);
-    const raw = String(cell.value || "").trim();
+    let raw = String(cell.value || "").trim();
+    if (key === "facebook" && raw && !/^https?:\/\//i.test(raw)) raw = "https://" + raw;
     const border = { style: "medium", color: { argb: "FFFFFFFF" } };
     cell.alignment = { horizontal: "center", vertical: "middle" };
-    if (!/^https?:\/\//i.test(raw)) {            // مفيش صورة مرفوعة
+    if (!/^https?:\/\//i.test(raw)) {            // مفيش لينك
       cell.value = "—";
       cell.font = { color: { argb: "FF999999" } };
       return;
     }
-    cell.value = { text: IMG_BTN[key].label, hyperlink: raw, tooltip: "اضغط لفتح الصورة" };
+    cell.value = { text: IMG_BTN[key].label, hyperlink: raw, tooltip: "اضغط للفتح" };
     cell.font = { bold: true, underline: false, color: { argb: "FFFFFFFF" } };
     cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: IMG_BTN[key].fill } };
     cell.border = { top: border, left: border, right: border, bottom: border };
+  });
+}
+/* أعمدة وصفوف شيت الانتخابات (بتتستخدم في التصدير والنسخة الاحتياطية) */
+const ELECTION_COLS = () => [
+  { header: "الرقم القومي", key: "nationalId", width: 18 },
+  { header: "الاسم", key: "fullName", width: 26 },
+  { header: "الهاتف", key: "phone", width: 14 },
+  { header: "الكلية", key: "college", width: 14 },
+  { header: "الفرقة", key: "level", width: 12 },
+  { header: "اللجنة", key: "committee", width: 22 },
+  { header: "الهواية", key: "hobby", width: 24 },
+  { header: "فيسبوك", key: "facebook", width: 19 },
+  { header: "إيميل", key: "email", width: 26 },
+  { header: "الحالة", key: "status", width: 12 },
+  { header: "تاريخ التسجيل", key: "date", width: 20 },
+  { header: "الصورة الشخصية", key: "profileImageUrl", width: 19 },
+  { header: "صورة البطاقة", key: "idCardUrl", width: 19 },
+  { header: "صورة الكارنيه", key: "studentCardUrl", width: 19 }
+];
+function fillElectionSheet(ws, list) {
+  ws.columns = ELECTION_COLS();
+  styleHeaderRow(ws);
+  list.forEach(({ data: d }, i) => {
+    const status = ["accepted", "rejected"].includes(d.status) ? d.status : "pending";
+    const row = ws.addRow({
+      nationalId: d.nationalId || "", fullName: d.fullName || "", phone: d.phone || "",
+      college: d.college || "", level: d.level || "",
+      committee: d.committee || (Array.isArray(d.committees) ? d.committees[0] : "") || "",
+      hobby: d.hobby || "", facebook: d.facebook || "", email: d.email || "",
+      status: STAT[status], date: d.timestamp?.toDate ? d.timestamp.toDate().toLocaleString("ar-EG") : "",
+      profileImageUrl: d.profileImageUrl || "", idCardUrl: d.idCardUrl || "", studentCardUrl: d.studentCardUrl || ""
+    });
+    styleDataRow(row, i % 2 === 1);
+    styleStatusCell(row, status); styleImageLinks(row);
   });
 }
 
@@ -2400,7 +2555,7 @@ async function exportStudents() {
       { header: "الفرقة", key: "level", width: 12 },
       { header: "اللجان", key: "committees", width: 34 },
       { header: "الهواية", key: "hobby", width: 24 },
-      { header: "فيسبوك", key: "facebook", width: 32 },
+      { header: "فيسبوك", key: "facebook", width: 19 },
       { header: "إيميل", key: "email", width: 26 },
       { header: "الحالة", key: "status", width: 12 },
       { header: "رسالة الإدارة", key: "adminMessage", width: 32 },
@@ -2588,7 +2743,164 @@ async function exportMedia() {
   } catch (e) { console.error(e); alert("تعذر إنشاء ملف الإكسل، حاول مرة أخرى."); }
   finally { btn.disabled = false; }
 }
-$("btnExport").onclick = () => activeTab === "media" ? exportMedia() : exportStudents();
+/* ---------- تسجيل الانتخابات (نفس بيانات التسجيل العادي، بس لجنة واحدة فقط) ---------- */
+const COL_ELECTION = "election_applicants";
+const eForm = $("electionForm");
+const elChips = [...document.querySelectorAll(".el-chip")];
+const getElCommittee = () => { const on = elChips.find(b => b.getAttribute("aria-pressed") === "true"); return on ? on.dataset.com : ""; };
+elChips.forEach(b => b.addEventListener("click", () => {
+  elChips.forEach(x => x.setAttribute("aria-pressed", String(x === b)));   // اختيار واحد بس
+  $("elCommittees").closest(".fg").classList.remove("invalid");
+}));
+["elNid", "elPhone"].forEach(id => $(id).addEventListener("input", e => e.target.value = toLatin(e.target.value).replace(/\D/g, "")));
+
+function validateElection() {
+  const v = id => toLatin($(id).value);
+  let bad = false;
+  bad |= setInvalid("elName", v("elName").split(/\s+/).filter(Boolean).length < 4);
+  bad |= setInvalid("elPhone", !/^01[0125]\d{8}$/.test(v("elPhone")));
+  bad |= setInvalid("elNid", !/^\d{14}$/.test(v("elNid")));
+  bad |= setInvalid("elCollege", !$("elCollege").value);
+  bad |= setInvalid("elLevel", !$("elLevel").value);
+  bad |= setInvalid("elFb", !/facebook\.com|fb\.com|fb\.me/i.test(v("elFb")));
+  bad |= setInvalid("elGmail", !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v("elGmail")));
+  bad |= setInvalid("elHobby", $("elHobby").value.trim().length < 2);
+  bad |= setInvalid("elCommittees", !getElCommittee());
+  bad |= setInvalid("elAgree", !$("elAgree").checked);
+  ["elProfile", "elId", "elCard"].forEach(id => { bad |= validateImageField(id); });
+  return !bad;
+}
+
+let elSubmitting = false;
+eForm.addEventListener("submit", async e => {
+  e.preventDefault();
+  if (elSubmitting) return;
+  const box = $("elNotice"); box.className = "notice";
+  if (!validateElection()) { notice(box, "bad", "راجع الحقول المظللة بالأحمر ثم أعد الإرسال."); eForm.querySelector(".invalid")?.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
+  if (!navigator.onLine) { notice(box, "bad", "لا يوجد اتصال بالإنترنت. بياناتك ما زالت في الصفحة، أعد المحاولة عند عودة الاتصال."); return; }
+  if (!withinClientLimit("rl_election", 3, 300000)) { notice(box, "bad", "وصلت للحد الأقصى لمحاولات الإرسال (3 كل 5 دقائق). حاول بعد 5 دقائق أو تواصل معنا على واتساب."); return; }
+
+  elSubmitting = true; $("elSubmitBtn").disabled = true; $("elProgress").style.display = "block";
+  const setP = (n, t) => { $("elFill").style.width = n + "%"; $("elProgressText").textContent = t; };
+  try {
+    const nid = toLatin($("elNid").value);
+    setP(10, "جاري رفع الصور...");
+    let done = 0;
+    const tick = () => setP(10 + (++done) * 25, `تم رفع ${done} من 3 صور`);
+    const [profileUrl, idUrl, cardUrl] = await Promise.all([
+      uploadImage($("elProfile").files[0], "p", tick),
+      uploadImage($("elId").files[0], "i", tick),
+      uploadImage($("elCard").files[0], "c", tick)
+    ]);
+    setP(90, "جاري حفظ البيانات...");
+    let fb = toLatin($("elFb").value); if (!/^https?:\/\//i.test(fb)) fb = "https://" + fb;
+    const committee = getElCommittee();
+    await retry(() => setDoc(doc(db, COL_ELECTION, nid), {
+      fullName: $("elName").value.trim().replace(/\s+/g, " "), phone: toLatin($("elPhone").value), nationalId: nid,
+      college: $("elCollege").value, level: $("elLevel").value, facebook: fb, email: toLatin($("elGmail").value),
+      profileImageUrl: profileUrl, idCardUrl: idUrl, studentCardUrl: cardUrl,
+      committee, committees: [committee], hobby: $("elHobby").value.trim().replace(/\s+/g, " "),
+      timestamp: serverTimestamp(), status: "pending"
+    }), 3);
+    setP(100, "تم!");
+    notice(box, "ok", "تم تسجيلك في الانتخابات بنجاح ✅ هنراجع بياناتك ونتواصل معاك على واتساب.");
+    eForm.reset(); elChips.forEach(b => b.setAttribute("aria-pressed", "false")); uploaded.clear();
+  } catch (err) {
+    console.error("election registration error:", err);
+    const denied = err && err.code === "permission-denied";
+    notice(box, "bad", denied
+      ? "هذا الرقم القومي مسجل من قبل في الانتخابات، أو لا توجد صلاحية للإرسال. تواصل معنا على واتساب."
+      : "تعذر إتمام الإرسال بسبب ضعف الاتصال. بياناتك وصورك ما زالت في الصفحة، اضغط «إرسال البيانات» مرة أخرى.");
+  } finally {
+    elSubmitting = false; $("elSubmitBtn").disabled = false; setTimeout(() => $("elProgress").style.display = "none", 800);
+  }
+});
+
+/* ---------- لوحة الإدارة: الانتخابات ---------- */
+let electionCache = [];
+let unsubElection = null;
+
+function filteredElection() {
+  const t = toLatin($("adminSearch").value).toLowerCase();
+  const st = $("fStatus").value;
+  return electionCache.filter(x => {
+    const d = x.data;
+    if (st && (["accepted", "rejected"].includes(d.status) ? d.status : "pending") !== st) return false;
+    return !t || `${d.fullName} ${d.phone} ${d.nationalId} ${d.committee || ""}`.toLowerCase().includes(t);
+  });
+}
+async function fetchElectionStats() {
+  try {
+    const base = collection(db, COL_ELECTION);
+    const [total, pending, accepted, rejected] = await Promise.all([
+      getCountFromServer(base),
+      getCountFromServer(query(base, where("status", "==", "pending"))),
+      getCountFromServer(query(base, where("status", "==", "accepted"))),
+      getCountFromServer(query(base, where("status", "==", "rejected")))
+    ]);
+    $("elstTotal").textContent = total.data().count; $("elstPending").textContent = pending.data().count;
+    $("elstAccepted").textContent = accepted.data().count; $("elstRejected").textContent = rejected.data().count;
+  } catch (e) { console.error("خطأ في جلب إحصائيات الانتخابات", e); }
+}
+function renderElection(list) {
+  $("electionBody").innerHTML = list.length ? list.map(({ id, data: d }) => {
+    const img = d.profileImageUrl ? `<a class="imgv" data-t="الصورة الشخصية" href="${safeUrl(d.profileImageUrl)}" target="_blank" rel="noopener"><img src="${optImg(safeUrl(d.profileImageUrl))}" class="thumb" alt="" loading="lazy"></a>` : "-";
+    const date = d.timestamp?.toDate ? d.timestamp.toDate().toLocaleDateString("ar-EG") : "-";
+    const com = d.committee || (Array.isArray(d.committees) ? d.committees[0] : "") || "";
+    return `<tr>
+      <td>${img}</td>
+      <td>${esc(d.fullName)}${com ? `<span class="cmt-tags">اللجنة: ${esc(com)}</span>` : ""}${d.hobby ? `<span class="cmt-tags">الهواية: ${esc(d.hobby)}</span>` : ""}</td>
+      <td>${esc(d.nationalId)}</td><td>${esc(d.college)}/${esc(d.level)}</td>
+      <td dir="ltr">${esc(d.phone)} <a href="${waHref(d.phone)}" target="_blank" rel="noopener" aria-label="واتساب"><i class="fab fa-whatsapp" style="color:#25D366;font-size:18px"></i></a></td>
+      <td><a href="${safeUrl(d.facebook)}" target="_blank" rel="noopener"><i class="fab fa-facebook" style="color:#1877F2;font-size:18px"></i></a>
+          <a href="mailto:${esc(d.email)}"><i class="fas fa-envelope" style="font-size:18px;margin-right:8px"></i></a></td>
+      <td><a class="imgv" data-t="صورة البطاقة" href="${safeUrl(d.idCardUrl)}" target="_blank" rel="noopener">بطاقة</a>${d.studentCardUrl ? ` | <a class="imgv" data-t="صورة الكارنيه" href="${safeUrl(d.studentCardUrl)}" target="_blank" rel="noopener">كارنيه</a>` : ""}</td>
+      <td>${badge(d.status)}</td><td>${date}</td>
+      <td><button class="btn-sm b-ok" data-eact="accepted" data-id="${esc(id)}">✔ قبول</button>
+          <button class="btn-sm b-bad" data-eact="rejected" data-id="${esc(id)}">✖ رفض</button>
+          <button class="btn-sm b-del" data-eact="delete" data-id="${esc(id)}">🗑 مسح</button></td></tr>`;
+  }).join("") : `<tr><td colspan="10" style="padding:24px;color:var(--muted)">لا توجد تسجيلات انتخابات حتى الآن.</td></tr>`;
+}
+function fetchElection() {
+  const load = $("electionLoading");
+  if (unsubElection) unsubElection();
+  unsubElection = onSnapshot(query(collection(db, COL_ELECTION), orderBy("timestamp", "desc"), limit(ADMIN_ROWS_LIMIT)), snap => {
+    electionCache = snap.docs.map(s => ({ id: s.id, data: s.data() }));
+    renderElection(filteredElection()); load.style.display = "none";
+  }, () => {
+    load.className = "notice bad"; load.style.display = "block";
+    load.textContent = "خطأ في جلب تسجيلات الانتخابات. تأكد من إضافة صلاحيات election_applicants في Firestore Rules.";
+  });
+  fetchElectionStats();
+}
+document.addEventListener("click", async e => {
+  const btn = e.target.closest("[data-eact]"); if (!btn) return;
+  const id = btn.dataset.id, act = btn.dataset.eact;
+  try {
+    if (act === "delete") {
+      if (!confirm("هل أنت متأكد من مسح هذا التسجيل؟ لا يمكن التراجع.")) return;
+      await deleteDoc(doc(db, COL_ELECTION, id));
+    } else {
+      await updateDoc(doc(db, COL_ELECTION, id), { status: act });
+    }
+    fetchElectionStats();
+  } catch { alert("حدث خطأ أثناء الحفظ، حاول مرة أخرى."); }
+});
+async function exportElection() {
+  if (typeof ExcelJS === "undefined") return alert("مكتبة Excel لم تُحمَّل بعد، أعد المحاولة بعد ثواني.");
+  const data = filteredElection(); if (!data.length) return alert("لا توجد بيانات!");
+  const btn = $("btnExport"); btn.disabled = true;
+  try {
+    const wb = new ExcelJS.Workbook();
+    wb.creator = "مبادرة رعاية الشباب - جامعة القاهرة"; wb.created = new Date();
+    fillElectionSheet(wb.addWorksheet("الانتخابات"), data);
+    const buf = await wb.xlsx.writeBuffer();
+    downloadWorkbookBuffer(buf, `الانتخابات-${new Date().toISOString().slice(0, 10)}.xlsx`);
+  } catch (e) { console.error(e); alert("تعذر إنشاء ملف الإكسل، حاول مرة أخرى."); }
+  finally { btn.disabled = false; }
+}
+
+$("btnExport").onclick = () => activeTab === "media" ? exportMedia() : activeTab === "election" ? exportElection() : exportStudents();
 
 /* ---------- مسح كل البيانات (بعد أخذ نسخة إكسل احتياطية كاملة) ---------- */
 async function fetchAllDocs(colName) {
@@ -2596,7 +2908,7 @@ async function fetchAllDocs(colName) {
   return snap.docs.map(d => ({ id: d.id, data: d.data() }));
 }
 
-async function backupAllToExcel(allStudents, allMedia) {
+async function backupAllToExcel(allStudents, allMedia, allElection = []) {
   const wb = new ExcelJS.Workbook();
   wb.creator = "مبادرة رعاية الشباب - جامعة القاهرة"; wb.created = new Date();
 
@@ -2609,7 +2921,7 @@ async function backupAllToExcel(allStudents, allMedia) {
     { header: "الفرقة", key: "level", width: 12 },
       { header: "اللجان", key: "committees", width: 34 },
       { header: "الهواية", key: "hobby", width: 24 },
-    { header: "فيسبوك", key: "facebook", width: 32 },
+    { header: "فيسبوك", key: "facebook", width: 19 },
     { header: "إيميل", key: "email", width: 26 },
     { header: "الحالة", key: "status", width: 12 },
     { header: "رسالة الإدارة", key: "adminMessage", width: 32 },
@@ -2656,6 +2968,8 @@ async function backupAllToExcel(allStudents, allMedia) {
     styleStatusCell(row, status); styleImageLinks(row);
   });
 
+  fillElectionSheet(wb.addWorksheet("الانتخابات"), allElection);
+
   const buf = await wb.xlsx.writeBuffer();
   downloadWorkbookBuffer(buf, `نسخة-احتياطية-كاملة-${new Date().toISOString().slice(0, 10)}.xlsx`);
 }
@@ -2674,7 +2988,7 @@ async function deleteAllDocsInCollection(colName, idsToSkip) {
 
 $("btnDeleteAll").onclick = async () => {
   if (typeof ExcelJS === "undefined") return alert("مكتبة Excel لم تُحمَّل بعد، أعد المحاولة بعد ثواني.");
-  const first = confirm("سيتم مسح كل بيانات الطلاب وطلبات الميديا (النصوص والصور) نهائياً من الموقع، بعد أخذ نسخة إكسل احتياطية كاملة أولاً. هل تريد المتابعة؟");
+  const first = confirm("سيتم مسح كل بيانات الطلاب وطلبات الميديا وتسجيلات الانتخابات (النصوص والصور) نهائياً من الموقع، بعد أخذ نسخة إكسل احتياطية كاملة أولاً. هل تريد المتابعة؟");
   if (!first) return;
   const typed = prompt('هذا الإجراء لا يمكن التراجع عنه. للتأكيد اكتب كلمة "مسح" بالضبط:');
   if (typed !== "مسح") { alert("تم الإلغاء."); return; }
@@ -2682,19 +2996,21 @@ $("btnDeleteAll").onclick = async () => {
   const btn = $("btnDeleteAll"); btn.disabled = true;
   const oldLabel = btn.innerHTML; btn.innerHTML = "جاري أخذ نسخة احتياطية...";
   try {
-    const [allStudents, allMedia] = await Promise.all([
+    const [allStudents, allMedia, allElection] = await Promise.all([
       fetchAllDocs("students"),
-      fetchAllDocs("media_applicants")
+      fetchAllDocs("media_applicants"),
+      fetchAllDocs("election_applicants").catch(() => [])
     ]);
 
-    if (!allStudents.length && !allMedia.length) { alert("لا توجد بيانات لمسحها."); return; }
+    if (!allStudents.length && !allMedia.length && !allElection.length) { alert("لا توجد بيانات لمسحها."); return; }
 
-    await backupAllToExcel(allStudents, allMedia);
+    await backupAllToExcel(allStudents, allMedia, allElection);
 
     btn.innerHTML = "جاري المسح...";
     await deleteAllDocsInCollection("students");
     await deleteAllDocsInCollection("status");
     await deleteAllDocsInCollection("media_applicants");
+    try { await deleteAllDocsInCollection("election_applicants"); } catch (e) { console.warn("election delete", e); }
 
     alert("تم أخذ نسخة احتياطية بالإكسل، وتم مسح كل البيانات بنجاح.");
     fetchStudents();
@@ -2708,9 +3024,11 @@ $("btnDeleteAll").onclick = async () => {
 
 /* ---------- نافذة سياسة الخصوصية ---------- */
 const privModal = $("privacyModal");
-$("privacyLink")?.addEventListener("click", e => { e.preventDefault(); privModal.classList.add("show"); });
+let privTarget = "agreePolicy";
+$("privacyLink")?.addEventListener("click", e => { e.preventDefault(); privTarget = "agreePolicy"; privModal.classList.add("show"); });
+$("elPrivacyLink")?.addEventListener("click", e => { e.preventDefault(); privTarget = "elAgree"; privModal.classList.add("show"); });
 $("closePrivacy")?.addEventListener("click", () => privModal.classList.remove("show"));
-$("acceptPrivacyBtn")?.addEventListener("click", () => { $("agreePolicy").checked = true; setInvalid("agreePolicy", false); privModal.classList.remove("show"); });
+$("acceptPrivacyBtn")?.addEventListener("click", () => { $(privTarget).checked = true; setInvalid(privTarget, false); privModal.classList.remove("show"); });
 privModal?.addEventListener("click", e => { if (e.target === privModal) privModal.classList.remove("show"); });
 
 /* ---------- جاهزية التطبيق ---------- */
