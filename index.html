@@ -664,6 +664,7 @@ html[data-theme="light"] .grp-row{border-bottom-color:rgba(0,0,0,.1)}
 @media(max-width:480px){.rc-grid{grid-template-columns:1fr}}
 #receiptPrint{display:none}
 @media print{body.print-receipt>*:not(#receiptPrint){display:none!important}body.print-receipt #receiptPrint{display:block!important;padding:20px}body.print-receipt{background:#fff!important}}
+.st-row .receipt .rc-note{color:#777;font-size:11px;margin:10px 0 0}
 </style>
 </head>
 <body>
@@ -918,13 +919,13 @@ html[data-theme="light"] .grp-row{border-bottom-color:rgba(0,0,0,.1)}
 <div class="fg"><label>اللجنة التي تتقدم لها</label>
             <div class="com-hint"><span>اختر <b>لجنة واحدة فقط</b></span></div>
             <div class="roles" id="elCommittees" role="radiogroup" aria-label="اللجنة">
-              <button type="button" class="el-chip" data-com="اللجنة الرياضية" aria-pressed="false"><i class="fas fa-futbol"></i><span class="ct"><span>اللجنة الرياضية</span><small>برامج ومسابقات للارتقاء بمستوى النشاط الرياضي</small></span><span class="dot"></span></button>
-              <button type="button" class="el-chip" data-com="اللجنة الثقافية" aria-pressed="false"><i class="fas fa-book-open"></i><span class="ct"><span>اللجنة الثقافية</span><small>تنمية الوعي الثقافي لدى الطلاب عبر برامج ثقافية متنوعة</small></span><span class="dot"></span></button>
-              <button type="button" class="el-chip" data-com="اللجنة الاجتماعية" aria-pressed="false"><i class="fas fa-people-group"></i><span class="ct"><span>اللجنة الاجتماعية</span><small>أنشطة اجتماعية تكسب مهارات متميزة في العمل الاجتماعي</small></span><span class="dot"></span></button>
-              <button type="button" class="el-chip" data-com="لجنة التنظيم" aria-pressed="false"><i class="fas fa-sitemap"></i><span class="ct"><span>لجنة التنظيم</span><small>تنظيم الفعاليات والمؤتمرات والأنشطة التي تنفذها المبادرة</small></span><span class="dot"></span></button>
-              <button type="button" class="el-chip" data-com="اللجنة الفنية" aria-pressed="false"><i class="fas fa-palette"></i><span class="ct"><span>اللجنة الفنية</span><small>تنمية الحس الجمالي والتذوق الفني وصقل موهبة الإبداع</small></span><span class="dot"></span></button>
-              <button type="button" class="el-chip" data-com="اللجنة العلمية" aria-pressed="false"><i class="fas fa-flask"></i><span class="ct"><span>اللجنة العلمية</span><small>الجمعيات العلمية وأندية العلوم والصلة بين الأساتذة والطلاب</small></span><span class="dot"></span></button>
-              <button type="button" class="el-chip" data-com="اللجنة الإعلامية" aria-pressed="false"><i class="fas fa-bullhorn"></i><span class="ct"><span>اللجنة الإعلامية</span><small>العمل الإعلامي والتواصل الاجتماعي وتسويق أفكار المبادرة</small></span><span class="dot"></span></button>
+              <button type="button" class="el-chip" data-com="لجنة الأسر" aria-pressed="false"><i class="fas fa-house-user"></i><span class="ct"><span>لجنة الأسر</span></span><span class="dot"></span></button>
+              <button type="button" class="el-chip" data-com="لجنة النشاط الرياضي" aria-pressed="false"><i class="fas fa-futbol"></i><span class="ct"><span>لجنة النشاط الرياضي</span></span><span class="dot"></span></button>
+              <button type="button" class="el-chip" data-com="لجنة النشاط الثقافي" aria-pressed="false"><i class="fas fa-book-open"></i><span class="ct"><span>لجنة النشاط الثقافي</span></span><span class="dot"></span></button>
+              <button type="button" class="el-chip" data-com="لجنة النشاط الفني" aria-pressed="false"><i class="fas fa-palette"></i><span class="ct"><span>لجنة النشاط الفني</span></span><span class="dot"></span></button>
+              <button type="button" class="el-chip" data-com="لجنة الجوالة والخدمة العامة والمعسكرات" aria-pressed="false"><i class="fas fa-campground"></i><span class="ct"><span>لجنة الجوالة والخدمة العامة والمعسكرات</span></span><span class="dot"></span></button>
+              <button type="button" class="el-chip" data-com="لجنة النشاط الاجتماعي" aria-pressed="false"><i class="fas fa-people-group"></i><span class="ct"><span>لجنة النشاط الاجتماعي</span></span><span class="dot"></span></button>
+              <button type="button" class="el-chip" data-com="لجنة النشاط العلمي والتكنولوجي" aria-pressed="false"><i class="fas fa-flask"></i><span class="ct"><span>لجنة النشاط العلمي والتكنولوجي</span></span><span class="dot"></span></button>
             </div><div class="err">اختر لجنة واحدة</div></div>
           <div class="fg"><label for="elHobby">الهواية المفضلة</label><input type="text" id="elHobby" maxlength="100" placeholder="مثال: القراءة، الرسم، كرة القدم..." required><div class="err">اكتب هوايتك المفضلة (حرفان على الأقل)</div></div>
           <div class="fg"><label for="elProfile">الصورة الشخصية <small>(JPG أو PNG أو WebP، حتى 8 ميجا)</small></label><input type="file" id="elProfile" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required><div class="photo-rule"><i class="fas fa-circle-info"></i> <b>شروط الصورة الشخصية:</b> صورة رسمية لائقة، الوجه واضح والخلفية بسيطة، <b>وليست سيلفي</b>، بدون فلاتر أو نظارة شمس أو صور جماعية. الصور غير المطابقة يتم رفض الطلب بسببها.</div><div class="err">ارفع صورة شخصية بصيغة JPG أو PNG أو WebP وحجمها أقل من 8 ميجا</div></div>
