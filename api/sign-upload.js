@@ -10,7 +10,8 @@ const ADMIN_LABELS = ["site-content"];                   // صور محتوى ا
 async function rateLimit(req) {
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (!url || !token) throw new Error("Rate-limit storage is not configured");
+  // Upstash اختياري: لو مش متظبط بنكمّل من غير حد (الرفع لسه موقّع ومحدود بالحجم والنوع)
+  if (!url || !token) { console.warn("Upstash not configured: upload rate limit is off"); return true; }
   const bucket = Math.floor(Date.now() / (15 * 60 * 1000));
   const key = `mobadara:upload-ticket:${bucket}:${clientIp(req)}`;
   const headers = { Authorization: `Bearer ${token}` };
