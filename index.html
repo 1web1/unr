@@ -1684,7 +1684,13 @@ const GALLERY = [
   ["Screenshot 2026-09-23 163131.png","إنجازات المبادرة في الجامعة","مشاركة مئات الطلاب من مختلف الفرق الدراسية، تنفيذ أنشطة خدمية في الكلية والمناطق المجاورة، دعم الطلاب المتفوقين والأنشطة الطلابية الإيجابية، وتعاون دائم مع إدارة رعاية الشباب واتحاد الطلاب."],
   ["Screenshot 2026-09-23 163119.png","أثر المبادرة على الطلاب","زادت روح التعاون والانتماء بين الطلاب، ووفرت فرصاً تدريبية وتطوعية حقيقية داخل الجامعة، وجعلت الطلاب يشعرون أنهم يشاركون حقاً في بناء بلدهم، وساهمت في تحسين البيئة الجامعية وتجميلها."]
 ];
-const gSrc = f => /^https:\/\//i.test(f) ? window.cld(f, 900) : encodeURI(f);
+/* صور المعرض القديمة (Screenshot ... .png، 1-2 ميجا للواحدة) اتضغطت لـ images/gallery/<رقم>.jpg (حوالي 100 كيلو).
+   الأسماء القديمة لسه متخزنة في محتوى الموقع على Firestore، فبنحوّلها هنا تلقائياً. */
+const gSrc = f => {
+  if (/^https:\/\//i.test(f)) return window.cld(f, 900);
+  const m = /^Screenshot \d{4}-\d{2}-\d{2} (\d{6})\.png$/.exec(String(f));
+  return m ? "images/gallery/" + m[1] + ".jpg" : encodeURI(f);
+};
 function renderGallery(list) {
   $("gallery").innerHTML = "<h3>معرض الصور والفعاليات</h3>" + list.map(g =>
     `<article class="g-item"><img src="${esc(gSrc(g.img))}" alt="${esc(g.title)}" loading="lazy" decoding="async"><div class="g-cap"><h4>${esc(g.title)}</h4><p>${esc(g.text)}</p></div></article>`).join("");
