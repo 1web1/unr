@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <script>document.documentElement.classList.add("js");try{if(localStorage.getItem("theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https: https://www.google-analytics.com https://www.googletagmanager.com https://res.cloudinary.com https://*.googleusercontent.com; connect-src 'self' https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.gstatic.com https://*.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://api.cloudinary.com https://*.firebasestorage.app; object-src 'none'; base-uri 'none'; frame-ancestors 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https: https://www.google-analytics.com https://www.googletagmanager.com https://res.cloudinary.com https://*.googleusercontent.com; connect-src 'self' https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.gstatic.com https://*.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://api.cloudinary.com https://*.firebasestorage.app; object-src 'none'; base-uri 'none'">
 <title>مبادرة رعاية الشباب - جامعة القاهرة</title>
 <meta name="description" content="مبادرة رعاية الشباب بجامعة القاهرة: مساحة طلابية لاكتشاف المواهب وبناء القيادات عبر المعايشات والمعسكرات والأنشطة والزيارات. سجّل الآن وتابع حالة طلبك.">
 <meta name="theme-color" content="#040d14">
@@ -78,7 +78,7 @@
      "name": "إزاي أعرف حالة طلبي؟",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "من قسم «حالة الطلب» اكتب رقمك القومي (14 رقم) واضغط بحث، وهتظهرلك حالة تسجيل الاستمارة وحالة طلب الانتخابات وحالة التقديم لفريق الميديا، حسب اللي سجّلت فيه. اذهب للاستعلام"
+      "text": "من قسم «حالة الطلب» اكتب رقمك القومي (14 رقم) واضغط بحث، وهتظهرلك حالة تسجيل الاستمارة وحالة طلب الانتخابات وحالة التقديم لفريق الميديا، حسب اللي سجّلت فيه."
      }
     },
     {
@@ -86,7 +86,7 @@
      "name": "إيه الأنشطة اللي بتقدمها المبادرة؟",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "المعايشات الميدانية، والمعسكرات وورش العمل، والأنشطة داخل الجامعة، وأهم الزيارات. شوف الأنشطة"
+      "text": "المعايشات الميدانية، والمعسكرات وورش العمل، والأنشطة داخل الجامعة، وأهم الزيارات."
      }
     },
     {
@@ -94,7 +94,7 @@
      "name": "إزاي أنضم لفريق الميديا؟",
      "acceptedAnswer": {
       "@type": "Answer",
-      "text": "اضغط على «انضم للميديا» في القائمة أو زر «التقديم لفريق الميديا» في الصفحة الرئيسية واملأ نموذج التقديم. قدّم الآن"
+      "text": "اضغط على «انضم للميديا» في القائمة أو زر «التقديم لفريق الميديا» في الصفحة الرئيسية واملأ نموذج التقديم."
      }
     },
     {
@@ -343,7 +343,10 @@ html[data-theme="light"] .modal-close{background:rgba(0,0,0,.1);color:#1a1a1a}
  .section{padding:56px 12px}
  .about-box,.form-box,.status-box,.login-box{padding:24px 16px;border-radius:15px}
  .actions{flex-direction:column}.search{max-width:none;width:100%}
- .fbtn{width:44px;height:44px;font-size:20px}
+ .floating{left:10px;bottom:12px;gap:9px;transition:opacity .2s,transform .2s}
+ .fbtn{width:40px;height:40px;font-size:18px}
+ /* أثناء الكتابة في أي فورم، أزرار السوشيال بتختفي عشان متغطيش الخانات */
+ body.typing .floating{opacity:0;pointer-events:none;transform:translateX(-14px)}
 }
 
 /* Settings Grid */
@@ -709,7 +712,7 @@ html[data-theme="light"] .grp-row{border-bottom-color:rgba(0,0,0,.1)}
     <button class="nav-btn nav-media" data-go="media">انضم للميديا</button>
     <button class="nav-btn nav-media" data-go="election">تسجيل انتخابات</button>
     <button class="nav-btn nav-cta" data-go="register">التسجيل</button>
-    <button class="nav-btn" id="btnAdmin" data-go="admin">الإدارة</button>
+    <button class="nav-btn" id="btnAdmin" data-go="admin" style="display:none">الإدارة</button>
     <button class="nav-btn btn-danger" id="btnLogout" style="display:none">خروج</button>
     <button class="nav-btn theme-toggle" id="themeBtn" type="button" aria-label="تبديل الوضع"><i class="fas fa-sun"></i><span class="tt-label"></span></button>
   </nav>
@@ -770,7 +773,7 @@ html[data-theme="light"] .grp-row{border-bottom-color:rgba(0,0,0,.1)}
         <div id="statusResult" class="status-result">
           <div id="stRows"></div>
         </div>
-        <div id="statusErr" class="notice bad"></div>
+        <div id="statusErr" class="notice" role="status"></div>
       </div>
     </div>
   </section>
@@ -880,10 +883,11 @@ html[data-theme="light"] .grp-row{border-bottom-color:rgba(0,0,0,.1)}
               <button type="button" class="role-chip" data-role="مونتير" aria-pressed="false"><i class="fas fa-scissors"></i> مونتير <span class="dot"></span></button>
               <button type="button" class="role-chip" data-role="جرافيك ديزاينر" aria-pressed="false"><i class="fas fa-pen-ruler"></i> جرافيك ديزاينر <span class="dot"></span></button>
             </div><div class="photo-rule"><i class="fas fa-circle-info"></i> <b>شرط التخصص:</b> اختر فقط التخصص الذي <b>تعلّمته وتتقنه فعلاً</b>، وسيتم مراجعة أعمالك في رابط Google Drive للتأكد من مستواك في كل تخصص اخترته.</div><div class="err">اختر تخصصاً واحداً على الأقل</div></div>
-          <div class="fg"><label for="mProfile">الصورة الشخصية</label><input type="file" id="mProfile" accept="image/*" required><div class="photo-rule"><i class="fas fa-circle-info"></i> <b>شروط الصورة الشخصية:</b> صورة رسمية لائقة، الوجه واضح والخلفية بسيطة، <b>وليست سيلفي</b>، بدون فلاتر أو نظارة شمس أو صور جماعية. الصور غير المطابقة يتم رفض الطلب بسببها.</div><div class="err">ارفع صورة شخصية</div></div>
-          <div class="fg"><label for="mCard">صورة الكارنيه</label><input type="file" id="mCard" accept="image/*" required><div class="err">ارفع صورة الكارنيه</div></div>
-          <div class="fg"><label for="mId">صورة البطاقة</label><input type="file" id="mId" accept="image/*" required><div class="err">ارفع صورة البطاقة</div></div>
+          <div class="fg"><label for="mProfile">الصورة الشخصية</label><input type="file" id="mProfile" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required><div class="photo-rule"><i class="fas fa-circle-info"></i> <b>شروط الصورة الشخصية:</b> صورة رسمية لائقة، الوجه واضح والخلفية بسيطة، <b>وليست سيلفي</b>، بدون فلاتر أو نظارة شمس أو صور جماعية. الصور غير المطابقة يتم رفض الطلب بسببها.</div><div class="err">ارفع صورة شخصية</div></div>
+          <div class="fg"><label for="mCard">صورة الكارنيه <small>(JPG أو PNG أو WebP، حتى 8 ميجا)</small></label><input type="file" id="mCard" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required><div class="err">ارفع صورة الكارنيه بصيغة JPG أو PNG أو WebP وحجمها أقل من 8 ميجا</div></div>
+          <div class="fg"><label for="mId">صورة البطاقة <small>(JPG أو PNG أو WebP، حتى 8 ميجا)</small></label><input type="file" id="mId" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" required><div class="err">ارفع صورة البطاقة بصيغة JPG أو PNG أو WebP وحجمها أقل من 8 ميجا</div></div>
           <div class="fg"><label for="mDrive">رابط Google Drive لأعمالك</label><input type="text" id="mDrive" placeholder="https://drive.google.com/..." dir="ltr" required><small class="hint">تأكد أن الرابط متاح لأي شخص لديه الرابط (Anyone with the link).</small><div class="err">اكتب رابط Google Drive صحيح</div></div>
+          <div class="fg"><label class="ck"><input type="checkbox" id="mAgree"><span>أوافق على <a href="#" id="mPrivacyLink" style="color:var(--gold)">سياسة الخصوصية</a> واستخدام بياناتي وصوري في مراجعة طلب الانضمام لفريق الميديا.</span></label><div class="err">لازم توافق على سياسة الخصوصية للمتابعة</div></div>
           <button type="submit" class="btn-main" id="mSubmitBtn">إرسال طلب الانضمام</button>
           <div class="progress" id="mProgress"><div class="bar"><div class="fill" id="mFill"></div></div><p id="mProgressText"></p></div>
           <div id="mNotice" class="notice" role="status"></div>
@@ -967,7 +971,7 @@ html[data-theme="light"] .grp-row{border-bottom-color:rgba(0,0,0,.1)}
       <div class="fg"><input type="email" id="adminEmail" placeholder="البريد الإلكتروني" autocomplete="username" required dir="ltr"></div>
       <div class="fg"><input type="password" id="adminPassword" placeholder="كلمة المرور" autocomplete="current-password" required dir="ltr"></div>
       <button type="submit" class="btn-main">دخول</button>
-      <div id="loginError" class="notice bad">بيانات الدخول غير صحيحة</div>
+      <div id="loginError" class="notice" role="alert"></div>
     </form>
   </div>
 
@@ -1436,12 +1440,12 @@ html[data-theme="light"] .grp-row{border-bottom-color:rgba(0,0,0,.1)}
     $("actContent").innerHTML = a.content
       ? '<div class="glass about-box act-body">' + a.content + "</div>"
       : '<div class="glass empty"><i class="fas fa-hourglass-half"></i><h3>المحتوى قريباً</h3>' +
-        "<p>سيتم إضافة تفاصيل «" + a.title + "» هنا قريباً.</p>" +
+        "<p>سيتم إضافة تفاصيل «" + escH(a.title) + "» هنا قريباً.</p>" +
         '<button class="btn-main" data-go="register">سجّل في المبادرة</button></div>';
     var PILL = ["#e11d2e", "#0d6efd", "#198754", "#d4af37", "#6f42c1", "#fd7e14", "#20c997"];
     $("actMore").innerHTML = Object.keys(ACTS).map(function (k, i) {
       return '<a href="#activity/' + k + '" data-go="activity/' + k + '" style="--c:' + PILL[i % PILL.length] + '"' +
-        (k === key ? ' class="on" aria-current="page"' : "") + ">" + ACTS[k].title + "</a>";
+        (k === key ? ' class="on" aria-current="page"' : "") + ">" + escH(ACTS[k].title) + "</a>";
     }).join("");
     return true;
   }
@@ -1786,19 +1790,14 @@ function stopListeners() { if (unsubscribe) unsubscribe(); if (unsubMedia) unsub
 $("btnLogout").onclick = () => signOut(auth).then(() => { stopListeners(); Router.go("hero"); });
 onAuthStateChanged(auth, user => {
   $("btnLogout").style.display = user ? "" : "none";
+  $("btnAdmin").style.display = user ? "" : "none"; // زرار الإدارة بيظهر للأدمن بس (الدخول من رابط #admin)
   if (user && adminView.classList.contains("show")) { $("loginBox").style.display = "none"; $("dash").style.display = ""; fetchStudents(); }
 });
 $("loginForm").addEventListener("submit", e => {
-  e.preventDefault(); $("loginError").style.display = "none";
-  if (!withinClientLimit("rl_login", 10, 600000)) {
-    $("loginError").textContent = "محاولات دخول كثيرة، حاول بعد 10 دقائق.";
-    $("loginError").style.display = "block";
-    return;
-  }
-  signInWithEmailAndPassword(auth, $("adminEmail").value, $("adminPassword").value).catch(() => {
-    $("loginError").textContent = "بيانات الدخول غير صحيحة";
-    $("loginError").style.display = "block";
-  });
+  e.preventDefault(); $("loginError").className = "notice";
+  if (!withinClientLimit("rl_login", 10, 600000)) return notice($("loginError"), "bad", "محاولات دخول كثيرة، حاول بعد 10 دقائق.");
+  signInWithEmailAndPassword(auth, $("adminEmail").value, $("adminPassword").value)
+    .catch(() => notice($("loginError"), "bad", "بيانات الدخول غير صحيحة"));
 });
 
 /* ---------- رفع الصور ---------- */
@@ -2703,6 +2702,7 @@ document.addEventListener("click", async e => {
       const b = writeBatch(db); b.delete(doc(db, "students", id)); b.delete(doc(db, "status", id));
       const pk = await privKey(id, d.phone); if (pk) b.delete(doc(db, "status_private", pk));
       await b.commit();
+      fetchStudentStats();
       const r = await deleteCloudImages(imgUrlsOf(d));
       if (!r.ok) alert("اتمسح الطلب، لكن تعذر مسح صوره من Cloudinary. امسحها يدوياً من مكتبة الوسائط.");
     } else if (act === "save") {
@@ -2866,6 +2866,7 @@ function validateMedia() {
   bad |= setInvalid("mNid", !/^\d{14}$/.test(v("mNid")));
   bad |= setInvalid("mDrive", !DRIVE_RE.test(v("mDrive")));
   bad |= setInvalid("mRoles", getRoles().length === 0);
+  bad |= setInvalid("mAgree", !$("mAgree").checked);
   ["mProfile", "mCard", "mId"].forEach(id => { bad |= validateImageField(id); });
   return !bad;
 }
@@ -2985,6 +2986,7 @@ document.addEventListener("click", async e => {
       if (/^\d{14}$/.test(id)) b.set(doc(db, "media_status", id), { status: act, adminMessage: STATUS_MSG[act] }, { merge: true });
       await b.commit();
     }
+    fetchMediaStats();
   } catch { alert("حدث خطأ أثناء الحفظ، حاول مرة أخرى."); }
 });
 async function exportMedia() {
@@ -3319,6 +3321,7 @@ const privModal = $("privacyModal");
 let privTarget = "agreePolicy";
 $("privacyLink")?.addEventListener("click", e => { e.preventDefault(); privTarget = "agreePolicy"; privModal.classList.add("show"); });
 $("elPrivacyLink")?.addEventListener("click", e => { e.preventDefault(); privTarget = "elAgree"; privModal.classList.add("show"); });
+$("mPrivacyLink")?.addEventListener("click", e => { e.preventDefault(); privTarget = "mAgree"; privModal.classList.add("show"); });
 $("closePrivacy")?.addEventListener("click", () => privModal.classList.remove("show"));
 $("acceptPrivacyBtn")?.addEventListener("click", () => { $(privTarget).checked = true; setInvalid(privTarget, false); privModal.classList.remove("show"); });
 privModal?.addEventListener("click", e => { if (e.target === privModal) privModal.classList.remove("show"); });
@@ -3395,6 +3398,10 @@ if (Router.current() === "admin") enterAdmin();
     btn.querySelector(".tt-label").textContent = label;
     btn.setAttribute("aria-label", label); btn.setAttribute("title", label);
   }
+  /* أثناء الكتابة في خانة: نخفي أزرار السوشيال العائمة (على الموبايل بس، من الـ CSS) */
+  var FIELD = "input:not([type=checkbox]):not([type=radio]):not([type=file]),select,textarea";
+  document.addEventListener("focusin", function (e) { if (e.target.matches && e.target.matches(FIELD)) document.body.classList.add("typing"); });
+  document.addEventListener("focusout", function (e) { if (e.target.matches && e.target.matches(FIELD)) document.body.classList.remove("typing"); });
   apply(cur);
   btn.addEventListener("click", function () {
     cur = cur === "light" ? "dark" : "light"; apply(cur);
