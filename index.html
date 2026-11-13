@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <script>document.documentElement.classList.add("js");try{if(localStorage.getItem("theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https: https://www.google-analytics.com https://www.googletagmanager.com https://res.cloudinary.com https://*.googleusercontent.com; connect-src 'self' https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.gstatic.com https://*.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://api.cloudinary.com https://*.firebasestorage.app; object-src 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https: https://www.google-analytics.com https://www.googletagmanager.com https://res.cloudinary.com https://*.googleusercontent.com; connect-src 'self' https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.gstatic.com https://*.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com https://identitytoolkit.googleapis.com https://api.cloudinary.com https://res.cloudinary.com https://*.firebasestorage.app; object-src 'none'; base-uri 'none'">
 <title>مبادرة رعاية الشباب - جامعة القاهرة</title>
 <meta name="description" content="مبادرة رعاية الشباب بجامعة القاهرة: مساحة طلابية لاكتشاف المواهب وبناء القيادات عبر المعايشات والمعسكرات والأنشطة والزيارات. سجّل الآن وتابع حالة طلبك.">
 <meta name="theme-color" content="#040d14">
@@ -125,6 +125,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.1/dist/browser-image-compression.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@zip.js/zip.js@2.7.52/dist/zip-full.min.js" defer></script>
 <style>
 :root{--uni-img:url(images/uni-bg.jpg);--primary:#8a1538;--gold:#d4af37;--muted:rgba(255,255,255,.72);--ok:#28a745;--bad:#dc3545;--warn:#ffc107;--nav-h:64px}
 *{box-sizing:border-box}
@@ -466,6 +467,9 @@ label.ck input[type=checkbox]{width:18px;height:18px;flex:none;margin:4px 0 0;pa
 .adm-filters .cnt{color:var(--muted);font-size:13px;margin-inline-start:auto}
 .bulk-bar{display:none;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 12px;padding:10px 14px;border-radius:12px;background:rgba(201,162,39,.14);border:1px solid var(--gold)}
 .bulk-bar.show{display:flex}
+.load-bar{display:none;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 12px;padding:8px 14px;border-radius:12px;background:rgba(13,110,253,.12);border:1px solid rgba(13,110,253,.45);font-size:13px}
+.load-bar.show{display:flex}
+.load-bar span{margin-inline-end:auto}
 .bulk-bar b{color:var(--gold)}
 .sel-ck{width:18px;height:18px;accent-color:var(--gold);cursor:pointer}
 .b-wa{background:#25d366;text-decoration:none;display:inline-block}
@@ -981,6 +985,7 @@ html[data-theme="light"] .grp-row{border-bottom-color:rgba(0,0,0,.1)}
       <div class="actions">
         <input type="text" id="adminSearch" class="search" placeholder="🔍 بحث بالاسم أو الهاتف أو الرقم القومي...">
         <button class="btn-export" id="btnExport"><i class="fas fa-file-excel"></i> تصدير Excel</button>
+        <button class="btn-export" id="btnBackup" style="background:#6f42c1" title="ملف ZIP متشفر بباسورد فيه كل البيانات والصور، بينزل على جهازك"><i class="fas fa-file-zipper"></i> نسخة احتياطية كاملة</button>
         <button class="btn-export" id="btnRefresh" style="background:#555"><i class="fas fa-rotate"></i> تحديث</button>
         <button class="btn-export" id="btnSync" style="background:#0d6efd" title="يفعّل الاستعلام عن الحالة للتسجيلات القديمة في الانتخابات والميديا"><i class="fas fa-link"></i> مزامنة الاستعلام</button>
         <button class="btn-export" id="btnDeleteAll" style="background:#b02a37"><i class="fas fa-trash"></i> مسح الكل</button>
@@ -1031,6 +1036,13 @@ html[data-theme="light"] .grp-row{border-bottom-color:rgba(0,0,0,.1)}
         <button class="btn-sm b-del" data-bulk="clear" type="button">إلغاء التحديد</button>
       </div>
     </div>
+    <!-- تحميل البيانات صفحة صفحة -->
+    <div class="load-bar" id="loadBar">
+      <span id="loadInfo"></span>
+      <button type="button" class="btn-sm b-save" id="btnMore">تحميل 300 كمان</button>
+      <button type="button" class="btn-sm b-save" id="btnLoadAll">تحميل الكل</button>
+    </div>
+    <div id="backupProgress" class="notice" style="text-align:right" role="status"></div>
     <!-- قسم المراجعة -->
     <div id="dataLoading" class="notice ok" style="display:block">جاري جلب البيانات...</div>
     <div id="reviewWrap" class="tbl-wrap">
@@ -1529,7 +1541,10 @@ try { FB = await loadFirebase(); } catch (e) { console.error("Firebase load fail
 const { initializeApp } = FB[0];
 const { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } = FB[1];
 const { getFirestore, collection, getDocs, getDoc, doc, writeBatch, serverTimestamp, onSnapshot, setDoc, updateDoc, deleteDoc, query, orderBy, limit, where, getCountFromServer } = FB[2];
-const ADMIN_ROWS_LIMIT = 1000; // سقف أمان لعدد الصفوف اللي بتتحمّل في لوحة الإدارة (يحمي المتصفح من الإبطاء لو حصل نمو كبير غير متوقع)
+/* لوحة الإدارة بتحمّل البيانات صفحة صفحة (أحدث 300 في كل قسم)، وفيه "تحميل المزيد" و"تحميل الكل".
+   ده بيقلل القراءات من Firestore (الحد المجاني 50 ألف/يوم) ويخلي اللوحة سريعة حتى مع آلاف الطلاب. */
+const PAGE = 300;
+const pageLimit = { students: PAGE, media: PAGE, election: PAGE };
 
 const app = initializeApp({
   apiKey: "AIzaSyCNDOwLJXeCCdlcW-ffxbggbiETS86r3mc",
@@ -2100,10 +2115,10 @@ function stuWaLink(d) {
     : `أهلاً ${name}، بخصوص طلبك في مبادرة رعاية الشباب - جامعة القاهرة.`;
   return `${waHref(d.phone)}?text=${encodeURIComponent(msg.trim())}`;
 }
-function filtered() {
+function filtered(list = cache) {
   const t = toLatin($("adminSearch").value).toLowerCase();
   const c = $("fCollege").value, l = $("fLevel").value, s = $("fStatus").value, cm = $("fCommittee").value;
-  return cache.filter(x => {
+  return list.filter(x => {
     const d = x.data;
     if (c && d.college !== c) return false;
     if (l && d.level !== l) return false;
@@ -2207,27 +2222,57 @@ async function fetchStudentStats() {
     $("stPending").textContent = pending.data().count;
     $("stAccepted").textContent = accepted.data().count;
     $("stRejected").textContent = rejected.data().count;
+    updateLoadBar();
   } catch (e) { console.error("خطأ في جلب الإحصائيات", e); }
 }
 
 function fetchStudents() {
-  const load = $("dataLoading"); load.style.display = "block"; load.textContent = "جاري جلب البيانات...";
-  if (unsubscribe) unsubscribe();
   fetchMedia();
   fetchElection();
-
-  unsubscribe = onSnapshot(query(collection(db, "students"), orderBy("timestamp", "desc"), limit(ADMIN_ROWS_LIMIT)), (snap) => {
+  subStudents();
+  fetchStudentStats();
+}
+function subStudents() {
+  const load = $("dataLoading"); load.className = "notice ok"; load.style.display = "block"; load.textContent = "جاري جلب البيانات...";
+  if (unsubscribe) unsubscribe();
+  unsubscribe = onSnapshot(query(collection(db, "students"), orderBy("timestamp", "desc"), limit(pageLimit.students)), (snap) => {
     cache = snap.docs.map(s => ({ id: s.id, data: s.data() }));
-    refreshStudents();
+    refreshStudents(); updateLoadBar();
     load.style.display = "none";
   }, (error) => {
     load.className = "notice bad"; load.textContent = "خطأ في الجلب. تأكد من صلاحيات الحساب.";
   });
-  fetchStudentStats();
 }
 
+/* ---------- تحميل المزيد / تحميل الكل ---------- */
+const KIND_OF_TAB = { review: "students", edit: "students", media: "media", election: "election" };
+const kindTotal = k => parseInt($({ students: "stTotal", media: "mdTotal", election: "elstTotal" }[k]).textContent) || 0;
+const kindLoaded = k => ({ students: cache, media: mediaCache, election: electionCache }[k]).length;
+function updateLoadBar() {
+  const k = KIND_OF_TAB[activeTab], bar = $("loadBar");
+  if (!k) { bar.classList.remove("show"); return; }
+  const loaded = kindLoaded(k), total = Math.max(kindTotal(k), loaded);
+  const more = loaded < total;
+  bar.classList.toggle("show", more);
+  if (!more) return;
+  $("loadInfo").textContent = `معروض أحدث ${loaded} من ${total}. البحث بالاسم والفلاتر بتشتغل على المعروض بس — البحث بالرقم القومي أو التليفون بيدوّر في الكل تلقائياً.`;
+  $("btnLoadAll").textContent = `تحميل الكل (${total})`;
+}
+function loadMore(k, all) {
+  pageLimit[k] = all ? Math.max(kindTotal(k), kindLoaded(k)) + 50 : pageLimit[k] + PAGE;
+  ({ students: subStudents, media: fetchMedia, election: fetchElection })[k]();
+}
+$("btnMore").onclick = () => { const k = KIND_OF_TAB[activeTab]; if (k) loadMore(k, false); };
+$("btnLoadAll").onclick = () => { const k = KIND_OF_TAB[activeTab]; if (k) loadMore(k, true); };
 
-$("adminSearch").addEventListener("input", debounce(() => { refreshStudents(); renderMedia(filteredMedia()); renderElection(filteredElection()); }, 300));
+/* البحث: بالاسم بيدوّر في المعروض، وبالرقم القومي/التليفون لو مش لاقيه بيحمّل القسم كله ويدوّر فيه */
+$("adminSearch").addEventListener("input", debounce(() => {
+  refreshStudents(); renderMedia(filteredMedia()); renderElection(filteredElection());
+  const k = KIND_OF_TAB[activeTab], digits = toLatin($("adminSearch").value).replace(/\D/g, "");
+  if (!k || !(/^\d{14}$/.test(digits) || /^01\d{9}$/.test(digits))) return;
+  const found = { students: filtered, media: filteredMedia, election: filteredElection }[k]().length > 0;
+  if (!found && kindLoaded(k) < kindTotal(k)) loadMore(k, true);
+}, 400));
 $("btnRefresh").onclick = fetchStudents;
 $("btnSync").onclick = async () => {
   if (!confirm("هيتم تفعيل «حالة الطلب» لكل تسجيلات الانتخابات والميديا الموجودة حالياً (اللي اتسجلت قبل التحديث). متابعة؟")) return;
@@ -2284,6 +2329,7 @@ function setTab(name) {
   $("bulkBar").style.display = name === "review" ? "" : "none";
   $("mediaStats").style.display = name === "media" ? "" : "none";
   $("electionStats").style.display = name === "election" ? "" : "none";
+  updateLoadBar();
   if (name === "settings") loadSettingsForm();
   if (name === "groups") loadGroupsPanel();
   if (name === "content") loadContentEditor();
@@ -2626,10 +2672,17 @@ async function writeStatusDocs(b, id, d, status, rf, links, publicPatch, oldPhon
   else b.delete(doc(db, "status_private", key));
 }
 const grpNote = (kind, text) => notice($("grpNotice"), kind, text);
-function renderGroupsPanel() {
-  const acc = {};
-  cache.forEach(({ data: d }) => { if (d.status === "accepted") acc[d.college] = (acc[d.college] || 0) + 1; });
-  $("grpRows").innerHTML = COLLEGES.map(c => c[0]).map(c =>
+async function renderGroupsPanel() {
+  const names = COLLEGES.map(c => c[0]), acc = {};
+  /* عدد المقبولين في كل كلية من السيرفر (مش من المعروض بس) */
+  try {
+    const counts = await Promise.all(names.map(c => getCountFromServer(query(collection(db, "students"), where("status", "==", "accepted"), where("college", "==", c)))));
+    names.forEach((c, i) => acc[c] = counts[i].data().count);
+  } catch (e) {
+    console.warn("group counts", e);
+    cache.forEach(({ data: d }) => { if (d.status === "accepted") acc[d.college] = (acc[d.college] || 0) + 1; });
+  }
+  $("grpRows").innerHTML = names.map(c =>
     `<div class="grp-row"><b>${esc(c)}</b><input class="edit-input" dir="ltr" data-college="${esc(c)}" placeholder="https://chat.whatsapp.com/..." value="${esc((groupLinks || {})[c] || "")}"><span class="role-tag">${acc[c] || 0} مقبول</span></div>`).join("");
 }
 async function loadGroupsPanel() {
@@ -2639,7 +2692,9 @@ async function loadGroupsPanel() {
 }
 async function applyGroupLinks() {
   const links = await loadGroupLinks().catch(() => ({}));
-  const list = cache.filter(({ data: d }) => d.status === "accepted");
+  /* كل المقبولين من السيرفر، مش المعروض في اللوحة بس */
+  const snap = await getDocs(query(collection(db, "students"), where("status", "==", "accepted")));
+  const list = snap.docs.map(s => ({ id: s.id, data: s.data() }));
   if (!list.length) return grpNote("ok", "لا يوجد طلاب مقبولين لتطبيق اللينكات عليهم.");
   for (let i = 0; i < list.length; i += 150) {
     const b = writeBatch(db);
@@ -2650,7 +2705,7 @@ async function applyGroupLinks() {
     }
     await b.commit();
   }
-  grpNote("ok", `تم تحديث ${list.length} طالب مقبول ✅ (لينك الجروب + وصل القبول، وبيظهروا للطالب برقمه القومي + موبايله بس) — بيشمل آخر الطلبات المعروضة في اللوحة`);
+  grpNote("ok", `تم تحديث كل الطلاب المقبولين (${list.length}) ✅ — لينك الجروب + وصل القبول، وبيظهروا للطالب برقمه القومي + موبايله بس`);
 }
 $("btnSaveGroups").onclick = async () => {
   const links = {}; let bad = "";
@@ -2675,10 +2730,12 @@ $("btnApplyGroups").onclick = async () => {
   try { await applyGroupLinks(); } catch (e) { console.error(e); grpNote("bad", "تعذر التطبيق. تأكد من نشر القواعد وحفظ اللينكات."); }
   finally { btn.disabled = false; }
 };
-$("btnCheckPhone").onclick = () => {
-  let ph = toLatin($("grpPhone").value).replace(/\D/g, "");
-  if (/^20\d{10}$/.test(ph)) ph = "0" + ph.slice(2); else if (/^1[0125]\d{8}$/.test(ph)) ph = "0" + ph;
-  const hit = cache.filter(({ data: d }) => String(d.phone || "") === ph);
+$("btnCheckPhone").onclick = async () => {
+  const ph = normPhone($("grpPhone").value);
+  if (!/^01[0125]\d{8}$/.test(ph)) { $("grpCheckRes").innerHTML = `<p class="st-warn">اكتب رقم موبايل مصري صحيح.</p>`; return; }
+  let hit;
+  try { hit = (await getDocs(query(collection(db, "students"), where("phone", "==", ph)))).docs.map(s => ({ id: s.id, data: s.data() })); } // بيدوّر في كل الطلاب على السيرفر
+  catch (e) { console.error(e); hit = cache.filter(({ data: d }) => String(d.phone || "") === ph); }
   $("grpCheckRes").innerHTML = hit.length
     ? hit.map(({ data: d }) => `<div class="st-row"><div class="st-top"><span class="st-label">${esc(d.fullName)}</span>${badge(d.status)}</div><p>${esc(d.college)} / ${esc(d.level)} — ${d.status === "accepted" ? "✅ وافق على دخوله لجروب كلية " + esc(d.college) : d.status === "rejected" ? "❌ مرفوض، ما توافقش" : "⏳ لسه تحت المراجعة، ما توافقش دلوقتي"}</p></div>`).join("")
     : `<p class="st-warn">❌ الرقم ده مش مسجل كطالب في المبادرة — ما توافقش على دخوله.</p>`;
@@ -2763,11 +2820,20 @@ const IMG_BTN = {
   idCardUrl:       { label: "🪪 عرض البطاقة", fill: "FF198754" },
   studentCardUrl:  { label: "🎓 عرض الكارنيه", fill: "FF6F42C1" }
 };
-function styleImageLinks(row) {
+function styleImageLinks(row, localMap) {
   Object.keys(IMG_BTN).forEach(key => {
     if (!row.worksheet.getColumnKey(key)) return;   // الشيت ده مفيهوش العمود ده (مثلاً شيت الميديا مفيهوش فيسبوك)
     const cell = row.getCell(key);
     let raw = String(cell.value || "").trim();
+    /* في النسخة الاحتياطية: اللينك بيفتح الصورة المحفوظة جوه الملف نفسه (مسار نسبي)، مش من النت */
+    const local = localMap && localMap.get(raw);
+    if (local) {
+      cell.value = { text: IMG_BTN[key].label, hyperlink: local, tooltip: "اضغط للفتح (من النسخة الاحتياطية)" };
+      cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
+      cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: IMG_BTN[key].fill } };
+      cell.alignment = { horizontal: "center", vertical: "middle" };
+      return;
+    }
     if (key === "facebook" && raw && !/^https?:\/\//i.test(raw)) raw = "https://" + raw;
     const border = { style: "medium", color: { argb: "FFFFFFFF" } };
     cell.alignment = { horizontal: "center", vertical: "middle" };
@@ -2799,7 +2865,7 @@ const ELECTION_COLS = () => [
   { header: "صورة البطاقة", key: "idCardUrl", width: 19 },
   { header: "صورة الكارنيه", key: "studentCardUrl", width: 19 }
 ];
-function fillElectionSheet(ws, list) {
+function fillElectionSheet(ws, list, localMap) {
   ws.columns = ELECTION_COLS();
   styleHeaderRow(ws);
   list.forEach(({ data: d }, i) => {
@@ -2813,15 +2879,15 @@ function fillElectionSheet(ws, list) {
       profileImageUrl: d.profileImageUrl || "", idCardUrl: d.idCardUrl || "", studentCardUrl: d.studentCardUrl || ""
     });
     styleDataRow(row, i % 2 === 1);
-    styleStatusCell(row, status); styleImageLinks(row);
+    styleStatusCell(row, status); styleImageLinks(row, localMap);
   });
 }
 
 async function exportStudents() {
   if (typeof ExcelJS === "undefined") return alert("مكتبة Excel لم تُحمَّل بعد، أعد المحاولة بعد ثواني.");
-  const data = filtered(); if (!data.length) return alert("لا توجد بيانات!");
   const btn = $("btnExport"); btn.disabled = true;
   try {
+    const data = filtered(await fetchAllSorted("students")); if (!data.length) return alert("لا توجد بيانات!");
     const wb = new ExcelJS.Workbook();
     wb.creator = "مبادرة رعاية الشباب - جامعة القاهرة"; wb.created = new Date();
     const ws = wb.addWorksheet("الطلاب");
@@ -2931,9 +2997,9 @@ let mediaCache = [];
 let unsubMedia = null;
 const waHref = p => `https://wa.me/20${String(p || "").replace(/\D/g, "").replace(/^0/, "")}`;
 
-function filteredMedia() {
+function filteredMedia(list = mediaCache) {
   const t = toLatin($("adminSearch").value).toLowerCase();
-  return !t ? mediaCache : mediaCache.filter(s => `${s.data.fullName} ${s.data.phone} ${s.data.nationalId || ""} ${(s.data.roles || []).join(" ")}`.toLowerCase().includes(t));
+  return !t ? list : list.filter(s => `${s.data.fullName} ${s.data.phone} ${s.data.nationalId || ""} ${(s.data.roles || []).join(" ")}`.toLowerCase().includes(t));
 }
 async function fetchMediaStats() {
   try {
@@ -2946,6 +3012,7 @@ async function fetchMediaStats() {
     ]);
     $("mdTotal").textContent = total.data().count; $("mdPending").textContent = pending.data().count;
     $("mdAccepted").textContent = accepted.data().count; $("mdRejected").textContent = rejected.data().count;
+    updateLoadBar();
   } catch (e) { console.error("خطأ في جلب إحصائيات الميديا", e); }
 }
 function renderMedia(list) {
@@ -2967,9 +3034,9 @@ function renderMedia(list) {
 function fetchMedia() {
   const load = $("mediaLoading");
   if (unsubMedia) unsubMedia();
-  unsubMedia = onSnapshot(query(collection(db, "media_applicants"), orderBy("timestamp", "desc"), limit(ADMIN_ROWS_LIMIT)), snap => {
+  unsubMedia = onSnapshot(query(collection(db, "media_applicants"), orderBy("timestamp", "desc"), limit(pageLimit.media)), snap => {
     mediaCache = snap.docs.map(s => ({ id: s.id, data: s.data() }));
-    renderMedia(filteredMedia()); load.style.display = "none";
+    renderMedia(filteredMedia()); load.style.display = "none"; updateLoadBar();
   }, () => {
     load.className = "notice bad"; load.style.display = "block";
     load.textContent = "خطأ في جلب طلبات الميديا. تأكد من إضافة صلاحيات media_applicants في Firestore Rules.";
@@ -2997,9 +3064,9 @@ document.addEventListener("click", async e => {
 });
 async function exportMedia() {
   if (typeof ExcelJS === "undefined") return alert("مكتبة Excel لم تُحمَّل بعد، أعد المحاولة بعد ثواني.");
-  const data = filteredMedia(); if (!data.length) return alert("لا توجد بيانات!");
   const btn = $("btnExport"); btn.disabled = true;
   try {
+    const data = filteredMedia(await fetchAllSorted("media_applicants")); if (!data.length) return alert("لا توجد بيانات!");
     const wb = new ExcelJS.Workbook();
     wb.creator = "مبادرة رعاية الشباب - جامعة القاهرة"; wb.created = new Date();
     const ws = wb.addWorksheet("الميديا");
@@ -3108,10 +3175,10 @@ eForm.addEventListener("submit", async e => {
 let electionCache = [];
 let unsubElection = null;
 
-function filteredElection() {
+function filteredElection(list = electionCache) {
   const t = toLatin($("adminSearch").value).toLowerCase();
   const st = $("fStatus").value;
-  return electionCache.filter(x => {
+  return list.filter(x => {
     const d = x.data;
     if (st && (["accepted", "rejected"].includes(d.status) ? d.status : "pending") !== st) return false;
     return !t || `${d.fullName} ${d.phone} ${d.nationalId} ${d.committee || ""}`.toLowerCase().includes(t);
@@ -3128,6 +3195,7 @@ async function fetchElectionStats() {
     ]);
     $("elstTotal").textContent = total.data().count; $("elstPending").textContent = pending.data().count;
     $("elstAccepted").textContent = accepted.data().count; $("elstRejected").textContent = rejected.data().count;
+    updateLoadBar();
   } catch (e) { console.error("خطأ في جلب إحصائيات الانتخابات", e); }
 }
 function renderElection(list) {
@@ -3152,9 +3220,9 @@ function renderElection(list) {
 function fetchElection() {
   const load = $("electionLoading");
   if (unsubElection) unsubElection();
-  unsubElection = onSnapshot(query(collection(db, COL_ELECTION), orderBy("timestamp", "desc"), limit(ADMIN_ROWS_LIMIT)), snap => {
+  unsubElection = onSnapshot(query(collection(db, COL_ELECTION), orderBy("timestamp", "desc"), limit(pageLimit.election)), snap => {
     electionCache = snap.docs.map(s => ({ id: s.id, data: s.data() }));
-    renderElection(filteredElection()); load.style.display = "none";
+    renderElection(filteredElection()); load.style.display = "none"; updateLoadBar();
   }, () => {
     load.className = "notice bad"; load.style.display = "block";
     load.textContent = "خطأ في جلب تسجيلات الانتخابات. تأكد من إضافة صلاحيات election_applicants في Firestore Rules.";
@@ -3182,9 +3250,9 @@ document.addEventListener("click", async e => {
 });
 async function exportElection() {
   if (typeof ExcelJS === "undefined") return alert("مكتبة Excel لم تُحمَّل بعد، أعد المحاولة بعد ثواني.");
-  const data = filteredElection(); if (!data.length) return alert("لا توجد بيانات!");
   const btn = $("btnExport"); btn.disabled = true;
   try {
+    const data = filteredElection(await fetchAllSorted(COL_ELECTION)); if (!data.length) return alert("لا توجد بيانات!");
     const wb = new ExcelJS.Workbook();
     wb.creator = "مبادرة رعاية الشباب - جامعة القاهرة"; wb.created = new Date();
     fillElectionSheet(wb.addWorksheet("الانتخابات"), data);
@@ -3201,8 +3269,13 @@ async function fetchAllDocs(colName) {
   const snap = await getDocs(collection(db, colName));
   return snap.docs.map(d => ({ id: d.id, data: d.data() }));
 }
+/* كل السجلات من السيرفر (مش المعروض بس)، الأحدث الأول — للتصدير والنسخ الاحتياطي */
+const tsMs = d => (d && d.timestamp && d.timestamp.toMillis) ? d.timestamp.toMillis() : 0;
+async function fetchAllSorted(colName) {
+  return (await fetchAllDocs(colName)).sort((a, b) => tsMs(b.data) - tsMs(a.data));
+}
 
-async function backupAllToExcel(allStudents, allMedia, allElection = []) {
+async function buildBackupWorkbook(allStudents, allMedia, allElection = [], localMap = null) {
   const wb = new ExcelJS.Workbook();
   wb.creator = "مبادرة رعاية الشباب - جامعة القاهرة"; wb.created = new Date();
 
@@ -3235,7 +3308,7 @@ async function backupAllToExcel(allStudents, allMedia, allElection = []) {
       profileImageUrl: d.profileImageUrl || "", idCardUrl: d.idCardUrl || "", studentCardUrl: d.studentCardUrl || ""
     });
     styleDataRow(row, i % 2 === 1);
-    styleStatusCell(row, status); styleImageLinks(row);
+    styleStatusCell(row, status); styleImageLinks(row, localMap);
   });
 
   const ws2 = wb.addWorksheet("الميديا");
@@ -3260,14 +3333,116 @@ async function backupAllToExcel(allStudents, allMedia, allElection = []) {
       profileImageUrl: d.profileImageUrl || "", idCardUrl: d.idCardUrl || "", studentCardUrl: d.studentCardUrl || ""
     });
     styleDataRow(row, i % 2 === 1);
-    styleStatusCell(row, status); styleImageLinks(row);
+    styleStatusCell(row, status); styleImageLinks(row, localMap);
   });
 
-  fillElectionSheet(wb.addWorksheet("الانتخابات"), allElection);
+  fillElectionSheet(wb.addWorksheet("الانتخابات"), allElection, localMap);
 
-  const buf = await wb.xlsx.writeBuffer();
-  downloadWorkbookBuffer(buf, `نسخة-احتياطية-كاملة-${new Date().toISOString().slice(0, 10)}.xlsx`);
+  return wb.xlsx.writeBuffer();
 }
+
+/* ====== نسخة احتياطية كاملة: ملف ZIP متشفر (AES-256) بباسورد، فيه:
+   - بيانات.xlsx (كل الطلاب والميديا والانتخابات، وأزرار الصور بتفتح الصور اللي جوه الملف)
+   - بيانات-خام.json (كل الحقول زي ما هي في قاعدة البيانات)
+   - صور/<القسم>/<الرقم القومي>/... (الصور الأصلية نفسها، مش لينكات)
+   بيتكتب على الجهاز مباشرة (من غير ما يتحمّل كله في الذاكرة) لو المتصفح بيدعم ده. ====== */
+const BK_SECTIONS = [["students", "الطلاب"], ["media_applicants", "الميديا"], [COL_ELECTION, "الانتخابات"]];
+const BK_IMG_NAMES = { profileImageUrl: "صورة-شخصية", idCardUrl: "بطاقة", studentCardUrl: "كارنيه" };
+const bkProgress = msg => { const n = $("backupProgress"); if (msg) notice(n, "ok", msg); else n.className = "notice"; };
+function bkErr(msg) { const e = new Error(msg); e.userMsg = msg; return e; }
+async function pickBackupTarget(name) {
+  /* لازم تتنادي أول حاجة بعد الضغطة (المتصفح بيطلب ضغطة حقيقية عشان يفتح نافذة الحفظ) */
+  if (window.showSaveFilePicker) {
+    try {
+      const h = await window.showSaveFilePicker({ suggestedName: name, types: [{ description: "ZIP", accept: { "application/zip": [".zip"] } }] });
+      return { stream: await h.createWritable() };
+    } catch (e) {
+      if (e && e.name === "AbortError") return null;   // الأدمن قفل نافذة الحفظ
+      console.warn("save picker unavailable, falling back to download", e);
+    }
+  }
+  return { stream: null };
+}
+function askBackupPassword() {
+  const p1 = prompt("اختار باسورد للنسخة الاحتياطية (8 حروف أو أرقام على الأقل).\nهتحتاجه عشان تفتح الملف بـ 7-Zip أو WinRAR — لو نسيته مفيش طريقة نفتح بيها الملف:");
+  if (p1 === null) return null;
+  if (p1.length < 8) { alert("الباسورد لازم يكون 8 حروف أو أرقام على الأقل."); return null; }
+  const p2 = prompt("اكتب الباسورد تاني للتأكيد:");
+  if (p2 !== p1) { alert("الباسوردين مش متطابقين. حاول تاني."); return null; }
+  return p1;
+}
+const bkJson = v => JSON.stringify(v, (k, x) => (x && typeof x === "object" && typeof x.toDate === "function") ? x.toDate().toISOString() : x, 2);
+const safeName = s => String(s || "").replace(/[\\/:*?"<>|\u0000-\u001f]/g, "").trim().slice(0, 60);
+/* target من pickBackupTarget، وبيرجع { records, images, failed: [..] } */
+async function createFullBackup(target, password) {
+  if (typeof zip === "undefined" || typeof ExcelJS === "undefined") throw bkErr("مكتبات النسخ الاحتياطي لسه بتتحمّل، جرّب تاني بعد ثواني.");
+  zip.configure({ useWebWorkers: false });
+  bkProgress("جاري جلب كل البيانات من قاعدة البيانات...");
+  const data = {};
+  for (const [col] of BK_SECTIONS) data[col] = await fetchAllSorted(col).catch(e => { if (col === COL_ELECTION) return []; throw e; });
+  const writer = target.stream || new zip.BlobWriter("application/zip");
+  const zw = new zip.ZipWriter(writer, { password, encryptionStrength: 3 });
+  const localMap = new Map(), failed = [], jobs = [];
+  for (const [col, label] of BK_SECTIONS) for (const { id, data: d } of data[col]) {
+    const folder = `صور/${label}/${safeName(id)} - ${safeName(d.fullName)}`;
+    for (const [field, fname] of Object.entries(BK_IMG_NAMES)) {
+      const url = d[field]; if (typeof url !== "string" || !/^https:\/\//.test(url)) continue;
+      const ext = (/\.(jpe?g|png|webp)(?:$|\?)/i.exec(url) || [, "jpg"])[1].toLowerCase();
+      jobs.push({ url, path: `${folder}/${fname}.${ext}`, who: `${label}: ${d.fullName || id}` });
+    }
+  }
+  let done = 0, chain = Promise.resolve();
+  const addSerial = (path, reader, opts) => (chain = chain.then(() => zw.add(path, reader, opts)));
+  const worker = async () => {
+    while (jobs.length) {
+      const j = jobs.shift();
+      try {
+        const r = await retry(async () => { const res = await fetch(j.url, { cache: "no-store" }); if (!res.ok) { const e = new Error("img " + res.status); if (res.status === 404) e.noRetry = true; throw e; } return res.blob(); }, 3);
+        await addSerial(j.path, new zip.BlobReader(r), { level: 0 });   // الصور مضغوطة أصلاً، فبنخزّنها زي ما هي
+        localMap.set(j.url, j.path);
+      } catch (e) { console.warn("backup image failed", j.url, e); failed.push(j.who); }
+      done++;
+      if (done % 10 === 0 || !jobs.length) bkProgress(`جاري تنزيل الصور: ${done} من ${done + jobs.length}...`);
+    }
+  };
+  const totalImgs = jobs.length;
+  await Promise.all(Array.from({ length: 4 }, worker));
+  await chain;
+  bkProgress("جاري تجهيز ملف الإكسل...");
+  const xbuf = await buildBackupWorkbook(data.students, data.media_applicants, data[COL_ELECTION], localMap);
+  await zw.add("بيانات.xlsx", new zip.Uint8ArrayReader(new Uint8Array(xbuf)));
+  await zw.add("بيانات-خام.json", new zip.TextReader(bkJson({ exportedAt: new Date().toISOString(), students: data.students, media_applicants: data.media_applicants, election_applicants: data[COL_ELECTION] })));
+  await zw.add("اقرأني.txt", new zip.TextReader(
+    "نسخة احتياطية - مبادرة رعاية الشباب - جامعة القاهرة\r\n" +
+    "التاريخ: " + new Date().toLocaleString("ar-EG") + "\r\n\r\n" +
+    "- الملف متشفر بالباسورد اللي اخترته. افتحه بـ 7-Zip أو WinRAR (فتح ويندوز العادي مش بيدعم التشفير ده).\r\n" +
+    "- فك الضغط كله في فولدر واحد، وبعدين افتح بيانات.xlsx: أزرار الصور بتفتح الصور اللي في فولدر صور.\r\n" +
+    "- بيانات-خام.json فيه كل الحقول زي ما كانت في قاعدة البيانات.\r\n" +
+    (failed.length ? "\r\nصور ماتنزلتش (" + failed.length + "):\r\n" + failed.join("\r\n") + "\r\n" : "")));
+  bkProgress("جاري حفظ الملف...");
+  const out = await zw.close();
+  if (!target.stream) {
+    const url = URL.createObjectURL(out);
+    const a = Object.assign(document.createElement("a"), { href: url, download: `نسخة-احتياطية-${new Date().toLocaleDateString("en-CA")}.zip` });
+    document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 5000);
+  }
+  return { records: BK_SECTIONS.reduce((n, [c]) => n + data[c].length, 0), images: totalImgs - failed.length, failed, data };
+}
+$("btnBackup").onclick = async () => {
+  const btn = $("btnBackup");
+  const target = await pickBackupTarget(`نسخة-احتياطية-${new Date().toLocaleDateString("en-CA")}.zip`);
+  if (!target) return;
+  const password = askBackupPassword();
+  if (!password) { if (target.stream) target.stream.abort().catch(() => {}); return; }
+  btn.disabled = true;
+  try {
+    const r = await createFullBackup(target, password);
+    bkProgress(`✅ تم حفظ النسخة الاحتياطية: ${r.records} سجل و${r.images} صورة` + (r.failed.length ? ` — ⚠️ ${r.failed.length} صورة ماتنزلتش (أسماءهم في اقرأني.txt جوه الملف)` : ""));
+  } catch (e) {
+    console.error(e); if (target.stream) target.stream.abort().catch(() => {});
+    notice($("backupProgress"), "bad", e.userMsg || "تعذر عمل النسخة الاحتياطية. اتأكد من النت وحاول تاني.");
+  } finally { btn.disabled = false; }
+};
 
 async function deleteAllDocsInCollection(colName, idsToSkip) {
   const skip = idsToSkip || new Set();
@@ -3282,41 +3457,60 @@ async function deleteAllDocsInCollection(colName, idsToSkip) {
 }
 
 $("btnDeleteAll").onclick = async () => {
-  if (typeof ExcelJS === "undefined") return alert("مكتبة Excel لم تُحمَّل بعد، أعد المحاولة بعد ثواني.");
-  const first = confirm("سيتم مسح كل بيانات الطلاب وطلبات الميديا وتسجيلات الانتخابات (النصوص والصور) نهائياً من الموقع، بعد أخذ نسخة إكسل احتياطية كاملة أولاً. هل تريد المتابعة؟");
+  if (typeof ExcelJS === "undefined" || typeof zip === "undefined") return alert("مكتبات النسخ الاحتياطي لسه بتتحمّل، أعد المحاولة بعد ثواني.");
+  const first = confirm("سيتم مسح كل بيانات الطلاب وطلبات الميديا وتسجيلات الانتخابات (النصوص والصور) نهائياً من الموقع.\n\nقبل المسح هيتعمل ملف نسخة احتياطية كاملة (ZIP متشفر بباسورد فيه كل البيانات والصور) وينزل على جهازك. المسح مش هيبدأ غير لما النسخة تخلص بنجاح.\n\nمتابعة؟");
   if (!first) return;
   const typed = prompt('هذا الإجراء لا يمكن التراجع عنه. للتأكيد اكتب كلمة "مسح" بالضبط:');
   if (typed !== "مسح") { alert("تم الإلغاء."); return; }
+  const target = await pickBackupTarget(`نسخة-احتياطية-قبل-المسح-${new Date().toLocaleDateString("en-CA")}.zip`);
+  if (!target) { alert("تم الإلغاء — لازم تحفظ النسخة الاحتياطية الأول."); return; }
+  const password = askBackupPassword();
+  if (!password) { if (target.stream) target.stream.abort().catch(() => {}); alert("تم الإلغاء."); return; }
 
   const btn = $("btnDeleteAll"); btn.disabled = true;
   const oldLabel = btn.innerHTML; btn.innerHTML = "جاري أخذ نسخة احتياطية...";
+  let deleting = false;
   try {
-    const [allStudents, allMedia, allElection] = await Promise.all([
-      fetchAllDocs("students"),
-      fetchAllDocs("media_applicants"),
-      fetchAllDocs("election_applicants").catch(() => [])
-    ]);
-
-    if (!allStudents.length && !allMedia.length && !allElection.length) { alert("لا توجد بيانات لمسحها."); return; }
-
-    await backupAllToExcel(allStudents, allMedia, allElection);
+    let backup;
+    try { backup = await createFullBackup(target, password); }
+    catch (e) { if (target.stream) target.stream.abort().catch(() => {}); throw e; }
+    const allStudents = backup.data.students, allMedia = backup.data.media_applicants, allElection = backup.data[COL_ELECTION];
+    if (!allStudents.length && !allMedia.length && !allElection.length) { bkProgress(""); alert("لا توجد بيانات لمسحها."); return; }
+    if (backup.failed.length && !confirm(`⚠️ النسخة الاحتياطية اتحفظت، بس ${backup.failed.length} صورة ماتنزلتش (أسماءهم في اقرأني.txt جوه الملف).\nلو كملت المسح، الصور دي هتضيع نهائياً.\n\nتكمّل المسح برضه؟ (الأفضل تلغي وتحاول تاني)`)) {
+      bkProgress("اتلغى المسح. النسخة الاحتياطية اتحفظت، ومفيش أي حاجة اتمسحت."); return;
+    }
+    bkProgress(`✅ النسخة الاحتياطية اتحفظت (${backup.records} سجل و${backup.images} صورة). جاري المسح...`);
 
     btn.innerHTML = "جاري المسح...";
-    await deleteAllDocsInCollection("students");
-    await deleteAllDocsInCollection("status");
-    await deleteAllDocsInCollection("media_applicants");
-    try { await deleteAllDocsInCollection("election_applicants"); } catch (e) { console.warn("election delete", e); }
-    for (const c of ["election_status", "media_status", "status_private"]) { try { await deleteAllDocsInCollection(c); } catch (e) { console.warn(c, e); } }
+    deleting = true;
+    /* بنمسح بالظبط السجلات اللي دخلت في النسخة الاحتياطية، فأي حد سجّل أثناء النسخ مش هيتمسح */
+    const refs = [];
+    for (const { id, data: d } of allStudents) {
+      refs.push(doc(db, "students", id), doc(db, "status", id));
+      const pk = await privKey(id, d.phone); if (pk) refs.push(doc(db, "status_private", pk));
+    }
+    for (const { id } of allMedia) { refs.push(doc(db, "media_applicants", id)); if (/^\d{14}$/.test(id)) refs.push(doc(db, "media_status", id)); }
+    for (const { id } of allElection) refs.push(doc(db, COL_ELECTION, id), doc(db, "election_status", id));
+    for (let i = 0; i < refs.length; i += 400) {
+      const b = writeBatch(db); refs.slice(i, i + 400).forEach(r => b.delete(r)); await b.commit();
+      btn.innerHTML = `جاري المسح... ${Math.min(i + 400, refs.length)}/${refs.length}`;
+    }
 
     btn.innerHTML = "جاري مسح الصور...";
     const imgs = await deleteCloudImages([...allStudents, ...allMedia, ...allElection].flatMap(x => imgUrlsOf(x.data)));
-    alert(imgs.ok
-      ? "تم أخذ نسخة احتياطية بالإكسل، وتم مسح كل البيانات والصور بنجاح."
-      : "تم أخذ نسخة احتياطية بالإكسل ومسح كل البيانات، لكن تعذر مسح بعض الصور من Cloudinary. امسح مجلد mobadara/submissions يدوياً من مكتبة الوسائط.");
+    const doneMsg = imgs.ok
+      ? "✅ تم حفظ النسخة الاحتياطية على جهازك، وتم مسح كل البيانات والصور من الموقع."
+      : "تم حفظ النسخة الاحتياطية ومسح كل البيانات، لكن تعذر مسح بعض الصور من Cloudinary. امسح مجلد mobadara/submissions يدوياً من مكتبة الوسائط.";
+    bkProgress(doneMsg); alert(doneMsg);
+    pageLimit.students = pageLimit.media = pageLimit.election = PAGE;
     fetchStudents();
   } catch (e) {
     console.error(e);
-    alert("حدث خطأ أثناء عملية المسح الشامل. لم يتم حذف أي بيانات بدون التأكد من أخذ النسخة الاحتياطية أولاً — راجع الاتصال وحاول مرة أخرى.");
+    const msg = deleting
+      ? "حصل خطأ في نص المسح (النسخة الاحتياطية اتحفظت كاملة على جهازك). اضغط «تحديث» وبعدين «مسح الكل» تاني عشان يكمّل الباقي."
+      : (e.userMsg ? e.userMsg + " " : "") + "مفيش أي حاجة اتمسحت لأن النسخة الاحتياطية ماخلصتش. راجع الاتصال وحاول مرة أخرى.";
+    notice($("backupProgress"), "bad", msg); alert(msg);
+    if (deleting) fetchStudents();
   } finally {
     btn.disabled = false; btn.innerHTML = oldLabel;
   }
