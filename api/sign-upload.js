@@ -1,17 +1,11 @@
 const crypto = require("crypto");
+const { fail, originOk, clientIp, verifyAdmin } = require("./_lib");
 
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 const MAX_BYTES = 8 * 1024 * 1024;
-const MAX_TICKETS_PER_WINDOW = 12; // أربع استمارات كحد أقصى لكل عنوان IP / 15 دقيقة
-
-function fail(res, status, message) {
-  res.status(status).json({ error: message });
-}
-
-function clientIp(req) {
-  return String(req.headers["x-forwarded-for"] || req.socket.remoteAddress || "unknown")
-    .split(",")[0].trim();
-}
+const MAX_TICKETS_PER_WINDOW = 12; // 3 صور × 4 استمارات كحد أقصى لكل عنوان IP كل 15 دقيقة
+const PUBLIC_LABELS = ["p", "i", "c", "mp", "mc", "mi"]; // صور استمارات الطلاب
+const ADMIN_LABELS = ["site-content"];                   // صور محتوى الموقع (للأدمن بس)
 
 async function rateLimit(req) {
   const url = process.env.UPSTASH_REDIS_REST_URL;
@@ -31,22 +25,24 @@ async function rateLimit(req) {
 
 module.exports = async (req, res) => {
   if (req.method !== "POST") return fail(res, 405, "Method not allowed");
-  const configuredOrigin = process.env.SITE_ORIGIN;
-  if (!configuredOrigin || req.headers.origin !== configuredOrigin) {
-    return fail(res, 403, "Invalid origin");
-  }
+  if (!originOk(req)) return fail(res, 403, "Invalid origin");
   const { label, mimeType, size } = req.body || {};
-  if (!["p", "i", "c", "mp", "mc", "mi"].includes(label) || !ALLOWED_TYPES.has(mimeType) || !Number.isFinite(size) || size <= 0 || size > MAX_BYTES) {
+  const isAdminLabel = ADMIN_LABELS.includes(label);
+  if (!(PUBLIC_LABELS.includes(label) || isAdminLabel) || !ALLOWED_TYPES.has(mimeType) || !Number.isFinite(size) || size <= 0 || size > MAX_BYTES) {
     return fail(res, 400, "Invalid upload metadata");
   }
   try {
-    if (!(await rateLimit(req))) return fail(res, 429, "Too many upload attempts");
+    if (isAdminLabel) {
+      if (!(await verifyAdmin(req))) return fail(res, 401, "Admin sign-in required");
+    } else if (!(await rateLimit(req))) {
+      return fail(res, 429, "Too many upload attempts");
+    }
     const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
     const apiKey = process.env.CLOUDINARY_API_KEY;
     const apiSecret = process.env.CLOUDINARY_API_SECRET;
     if (!cloudName || !apiKey || !apiSecret) throw new Error("Cloudinary is not configured");
     const timestamp = Math.floor(Date.now() / 1000);
-    const folder = "mobadara/submissions";
+    const folder = isAdminLabel ? "mobadara/site" : "mobadara/submissions";
     const toSign = `folder=${folder}&timestamp=${timestamp}${apiSecret}`;
     const signature = crypto.createHash("sha1").update(toSign).digest("hex");
     res.setHeader("Cache-Control", "no-store");
