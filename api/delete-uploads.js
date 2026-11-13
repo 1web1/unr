@@ -25,7 +25,8 @@ module.exports = async (req, res) => {
     const ids = [...new Set(urls.map(u => publicIdOf(u, cloudName)).filter(Boolean))];
     if (!ids.length) return res.status(200).json({ deleted: 0, skipped: urls.length });
 
-    const qs = ids.map(id => "public_ids[]=" + encodeURIComponent(id)).join("&");
+    // invalidate=true: بيمسح النسخ المتخزنة على الـ CDN كمان، عشان الرابط القديم يبطل يفتح الصورة
+    const qs = ids.map(id => "public_ids[]=" + encodeURIComponent(id)).join("&") + "&invalidate=true";
     const r = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/resources/image/upload?${qs}`, {
       method: "DELETE",
       headers: { Authorization: "Basic " + Buffer.from(`${apiKey}:${apiSecret}`).toString("base64") }
