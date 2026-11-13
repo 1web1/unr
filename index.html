@@ -763,6 +763,8 @@ html[data-theme="light"] .grp-row{border-bottom-color:rgba(0,0,0,.1)}
         <form id="statusForm" novalidate>
           <div class="fg"><label for="searchNid">الرقم القومي</label>
             <input type="text" id="searchNid" inputmode="numeric" maxlength="14" placeholder="14 رقم" required></div>
+          <div class="fg"><label for="searchPhone">رقم الموبايل اللي سجلت بيه <small>(لعرض وصل القبول ولينك جروب الكلية)</small></label>
+            <input type="tel" id="searchPhone" inputmode="numeric" maxlength="11" placeholder="01xxxxxxxxx" dir="ltr"></div>
           <button type="submit" class="btn-main" id="statusBtn">بحث</button>
         </form>
         <div id="statusResult" class="status-result">
@@ -1535,7 +1537,6 @@ const app = initializeApp({
 });
 const auth = getAuth(app), db = getFirestore(app);
 const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/wbmanqyt/image/upload";
-const PRESET = "cairo_uni_preset";
 const $ = id => document.getElementById(id);
 
 /* ---------- أدوات أمان ---------- */
@@ -1564,7 +1565,7 @@ const optImg = (url, w = 100) => { try { const u = new URL(url); return u.hostna
 async function retry(fn, tries = 4) {
   let last;
   for (let i = 0; i < tries; i++) {
-    try { return await fn(i); } catch (e) { last = e; if (e && e.code === "permission-denied") throw e; if (i < tries - 1) await sleep(800 * 2 ** i + Math.random() * 700); }
+    try { return await fn(i); } catch (e) { last = e; if (e && (e.code === "permission-denied" || e.noRetry)) throw e; if (i < tries - 1) await sleep(800 * 2 ** i + Math.random() * 700); }
   }
   throw last;
 }
@@ -1808,31 +1809,52 @@ async function uploadImage(file, label, onDone) {
   let body = file;
   try { body = await imageCompression(file, { maxSizeMB: 0.3, maxWidthOrHeight: 1200, useWebWorker: true }); }
   catch { if (file.size > 8 * 1024 * 1024) throw new Error("حجم الصورة كبير جداً"); }
+  // الرفع بيتم بتوقيع من السيرفر بس (مفيش رفع مفتوح بـ upload_preset)
   const url = await retry(async () => {
-    try {
-      const sigRes = await fetch("/api/sign-upload", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ label, mimeType: body.type || file.type, size: body.size || file.size })
-      });
-      if (sigRes.ok) {
-        const sig = await sigRes.json();
-        const fd = new FormData();
-        fd.append("file", body);
-        fd.append("api_key", sig.apiKey);
-        fd.append("timestamp", sig.timestamp);
-        fd.append("signature", sig.signature);
-        fd.append("folder", sig.folder);
-        const upRes = await fetch(sig.uploadUrl || CLOUDINARY_URL, { method: "POST", body: fd });
-        if (upRes.ok) return (await upRes.json()).secure_url;
-      }
-    } catch (_) {}
-    const fd = new FormData(); fd.append("file", body); fd.append("upload_preset", PRESET);
-    const res = await fetch(CLOUDINARY_URL, { method: "POST", body: fd });
-    if (!res.ok) throw new Error("upload " + res.status);
-    return (await res.json()).secure_url;
+    const headers = { "Content-Type": "application/json" };
+    if (label === "site-content" && auth.currentUser) headers.Authorization = "Bearer " + await auth.currentUser.getIdToken();
+    const sigRes = await fetch("/api/sign-upload", {
+      method: "POST", headers,
+      body: JSON.stringify({ label, mimeType: body.type || file.type, size: body.size || file.size })
+    });
+    if (!sigRes.ok) {
+      const err = new Error("sign " + sigRes.status);
+      if (sigRes.status === 429) { err.noRetry = true; err.userMsg = "وصلت للحد الأقصى لرفع الصور. حاول بعد 15 دقيقة أو تواصل معنا على واتساب."; }
+      else if (sigRes.status >= 400 && sigRes.status < 500) { err.noRetry = true; err.userMsg = "تعذر رفع الصور (الصيغة أو الحجم غير مقبول). استخدم JPG أو PNG أو WebP أقل من 8 ميجا."; }
+      throw err;
+    }
+    const sig = await sigRes.json();
+    const fd = new FormData();
+    fd.append("file", body);
+    fd.append("api_key", sig.apiKey);
+    fd.append("timestamp", sig.timestamp);
+    fd.append("signature", sig.signature);
+    fd.append("folder", sig.folder);
+    const upRes = await fetch(sig.uploadUrl || CLOUDINARY_URL, { method: "POST", body: fd });
+    if (!upRes.ok) throw new Error("upload " + upRes.status);
+    return (await upRes.json()).secure_url;
   });
   uploaded.set(key, url); onDone(); return url;
+}
+
+/* مسح صور الطلب من Cloudinary بعد مسحه من قاعدة البيانات (للأدمن بس، عن طريق /api/delete-uploads) */
+const imgUrlsOf = d => [d && d.profileImageUrl, d && d.idCardUrl, d && d.studentCardUrl].filter(u => typeof u === "string" && u);
+async function deleteCloudImages(urls) {
+  urls = [...new Set(urls.filter(Boolean))];
+  if (!urls.length || !auth.currentUser) return { ok: true, deleted: 0 };
+  let deleted = 0, ok = true;
+  for (let i = 0; i < urls.length; i += 100) {
+    try {
+      const r = await fetch("/api/delete-uploads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + await auth.currentUser.getIdToken() },
+        body: JSON.stringify({ urls: urls.slice(i, i + 100) })
+      });
+      if (!r.ok) { ok = false; continue; }
+      deleted += (await r.json()).deleted || 0;
+    } catch (e) { console.error("deleteCloudImages", e); ok = false; }
+  }
+  return { ok, deleted };
 }
 
 /* ---------- التسجيل ---------- */
@@ -1937,24 +1959,35 @@ form.addEventListener("submit", async e => {
   } catch (err) {
     console.error("registration error:", err);
     const dup = err && (err.code === "permission-denied");
-    notice(box, "bad", dup
+    notice(box, "bad", err && err.userMsg ? err.userMsg : dup
       ? "تعذر قبول الطلب. لو الرقم القومي مسجل من قبل استعلم عن حالته من قسم «حالة الطلب»، وإلا تأكد من صحة كل البيانات أو تواصل معنا على واتساب."
       : "تعذر إتمام الإرسال بسبب ضعف الاتصال. بياناتك وصورك ما زالت في الصفحة، اضغط «إرسال البيانات» مرة أخرى.");
   } finally {
     submitting = false; $("submitBtn").disabled = false; setTimeout(() => $("progress").style.display = "none", 800);
   }
 });
-["nationalId","phone","searchNid"].forEach(id => $(id).addEventListener("input", e => e.target.value = toLatin(e.target.value).replace(/\D/g, "")));
+["nationalId","phone","searchNid","searchPhone"].forEach(id => $(id).addEventListener("input", e => e.target.value = toLatin(e.target.value).replace(/\D/g, "")));
 
 /* ---------- الاستعلام عن الحالة (الاستمارة العادية + الانتخابات + الميديا) ---------- */
 const STATUS_MSG = { pending: "طلبك قيد المراجعة حالياً.", accepted: "تم قبول طلبك. هنتواصل معاك على واتساب.", rejected: "للأسف لم يتم قبول طلبك." };
 const ST_LABELS = { pending: "مراجعة", accepted: "مقبول", rejected: "مرفوض" };
 const RETRY_GO = { status: "register", election_status: "election", media_status: "media" };
 const maskNid = n => n.slice(0, 3) + "•".repeat(7) + n.slice(-4);
-function statusExtra(col, st, d, nid) {
+/* بيانات القبول (الاسم، وصل القبول، لينك الجروب) متخزنة في status_private تحت مفتاح = SHA-256(الرقم القومي + الموبايل)،
+   فمحدش يقدر يشوفها بالرقم القومي لوحده. مستند status العام فيه الحالة ورسالة الإدارة بس. */
+const normPhone = p => { let s = toLatin(String(p || "")).replace(/\D/g, ""); if (/^20\d{10}$/.test(s)) s = "0" + s.slice(2); else if (/^1[0125]\d{8}$/.test(s)) s = "0" + s; return s; };
+async function privKey(nid, phone) {
+  const ph = normPhone(phone);
+  if (!/^\d{14}$/.test(String(nid || "")) || !/^01[0125]\d{8}$/.test(ph)) return null;
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("mobadara:" + nid + ":" + ph));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
+function statusExtra(col, st, d, nid, priv, phoneGiven) {
   if (st === "rejected") return `<button type="button" class="btn-main st-retry" data-go="${RETRY_GO[col] || "register"}">إعادة المحاولة (سجّل من جديد)</button>`;
   if (col === "status" && st === "accepted") {
-    if (!d.receiptCode) return `<p class="st-warn">وصل القبول هيظهر هنا خلال وقت قصير، اعمل بحث تاني بعد شوية.</p>`;
+    if (!phoneGiven) return `<p class="st-warn">اكتب رقم الموبايل اللي سجلت بيه واعمل بحث تاني عشان يظهرلك وصل القبول ولينك جروب كليتك.</p>`;
+    if (!priv || !priv.receiptCode) return `<p class="st-warn">رقم الموبايل مش مطابق للي سجلت بيه، أو وصل القبول لسه بيتجهز. اتأكد من الرقم واعمل بحث تاني بعد شوية.</p>`;
+    d = priv;
     const date = d.acceptedAt ? new Date(d.acceptedAt).toLocaleDateString("ar-EG", { year: "numeric", month: "long", day: "numeric" }) : "-";
     return `<div class="receipt" id="receiptCard">
       <div class="rc-top"><div class="rc-org">مبادرة رعاية الشباب<small>جامعة القاهرة</small></div><div class="rc-title">وصل قبول</div></div>
@@ -1984,12 +2017,15 @@ document.addEventListener("click", e => {
 });
 $("statusForm").addEventListener("submit", async e => {
   e.preventDefault();
-  const nid = toLatin($("searchNid").value);
+  const nid = toLatin($("searchNid").value), phoneRaw = $("searchPhone").value.trim();
   const err = $("statusErr"), res = $("statusResult");
   err.className = "notice"; res.style.display = "none";
   if (!/^\d{14}$/.test(nid)) return notice(err, "bad", "اكتب رقماً قومياً صحيحاً من 14 رقم.");
+  const pk = phoneRaw ? await privKey(nid, phoneRaw) : null;
+  if (phoneRaw && !pk) return notice(err, "bad", "رقم الموبايل غير صحيح (11 رقم يبدأ بـ 01)، أو سيبه فاضي.");
   $("statusBtn").disabled = true;
   try {
+    const priv = pk ? await retry(() => getDoc(doc(db, "status_private", pk)), 2).then(s => s.exists() ? s.data() : null).catch(() => null) : null;
     const lookups = [
       ["حالة تسجيل الاستمارة (الطلب العادي)", "status"],
       ["حالة تسجيل طلب الانتخابات", "election_status"],
@@ -2003,7 +2039,7 @@ $("statusForm").addEventListener("submit", async e => {
     if (!found.length) return notice(err, "bad", "لا يوجد طلب بهذا الرقم القومي.");
     $("stRows").innerHTML = found.map(({ label, col, d }) => {
       const st = ["accepted", "rejected"].includes(d.status) ? d.status : "pending";
-      return `<div class="st-row"><div class="st-top"><span class="st-label">${esc(label)}</span><span class="badge badge-${st}">${ST_LABELS[st]}</span></div><p>${esc(d.adminMessage || STATUS_MSG[st])}</p>${statusExtra(col, st, d, nid)}${col === "status" && st === "accepted" && GROUP_RE.test(d.groupLink || "") ? `<a class="st-group" href="${esc(d.groupLink)}" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i> انضم لجروب كلية ${esc(d.groupName || "")}</a><p class="st-warn">الجروب خاص بطلاب المبادرة فقط، ممنوع مشاركة اللينك. دخولك بيتم بعد الموافقة والتأكد من رقمك.</p>` : ""}</div>`;
+      return `<div class="st-row"><div class="st-top"><span class="st-label">${esc(label)}</span><span class="badge badge-${st}">${ST_LABELS[st]}</span></div><p>${esc(d.adminMessage || STATUS_MSG[st])}</p>${statusExtra(col, st, d, nid, priv, !!pk)}${col === "status" && st === "accepted" && priv && GROUP_RE.test(priv.groupLink || "") ? `<a class="st-group" href="${esc(priv.groupLink)}" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i> انضم لجروب كلية ${esc(priv.groupName || "")}</a><p class="st-warn">الجروب خاص بطلاب المبادرة فقط، ممنوع مشاركة اللينك. دخولك بيتم بعد الموافقة والتأكد من رقمك.</p>` : ""}</div>`;
     }).join("");
     res.style.display = "block";
   } catch { notice(err, "bad", "تعذر البحث الآن، حاول مرة أخرى."); }
@@ -2138,13 +2174,13 @@ document.addEventListener("click", async e => {
   b.disabled = true;
   try {
     const links = await loadGroupLinks().catch(() => ({}));
-    for (let i = 0; i < ids.length; i += 200) {
+    for (let i = 0; i < ids.length; i += 120) {   // كل طالب = 3-4 عمليات، والحد 500 للدفعة
       const wb = writeBatch(db);
-      ids.slice(i, i + 200).forEach(id => {
+      for (const id of ids.slice(i, i + 120)) {
         const d = dataOf(id), rf = receiptFields(d, act);
         wb.update(doc(db, "students", id), { status: act, adminMessage: msg, ...rf });
-        wb.set(doc(db, "status", id), { status: act, adminMessage: msg, ...groupFields(d.college, act, links), ...rf, ...receiptInfo(d, act) }, { merge: true });
-      });
+        await writeStatusDocs(wb, id, d, act, rf, links, { status: act, adminMessage: msg });
+      }
       await wb.commit();
     }
     selected.clear(); fetchStudentStats();
@@ -2569,6 +2605,21 @@ function receiptFields(d, status) {
 function receiptInfo(d, status) {
   return status === "accepted" ? { receiptName: d.fullName || "", receiptCollege: d.college || "", receiptLevel: d.level || "" } : { receiptName: "", receiptCollege: "", receiptLevel: "" };
 }
+/* الحقول دي كانت بتتكتب في status العام زمان، بنفضّيها عشان متتقريش بالرقم القومي لوحده */
+const PUBLIC_CLEAR = { groupLink: "", groupName: "", receiptCode: "", acceptedAt: 0, receiptName: "", receiptCollege: "", receiptLevel: "" };
+/* بيكتب حالة الطالب: status العام (الحالة + الرسالة) و status_private (الوصل + الجروب) لو مقبول.
+   publicPatch = null معناه منغيّرش الحالة/الرسالة في status (بنفضّي الحقول القديمة بس). */
+async function writeStatusDocs(b, id, d, status, rf, links, publicPatch, oldPhone) {
+  b.set(doc(db, "status", id), { ...(publicPatch || {}), ...PUBLIC_CLEAR }, { merge: true });
+  const key = await privKey(id, d.phone);
+  if (oldPhone && normPhone(oldPhone) !== normPhone(d.phone)) {
+    const oldKey = await privKey(id, oldPhone);
+    if (oldKey && oldKey !== key) b.delete(doc(db, "status_private", oldKey));
+  }
+  if (!key) return;
+  if (status === "accepted") b.set(doc(db, "status_private", key), { ...groupFields(d.college, status, links), ...rf, ...receiptInfo(d, status) });
+  else b.delete(doc(db, "status_private", key));
+}
 const grpNote = (kind, text) => notice($("grpNotice"), kind, text);
 function renderGroupsPanel() {
   const acc = {};
@@ -2585,16 +2636,16 @@ async function applyGroupLinks() {
   const links = await loadGroupLinks().catch(() => ({}));
   const list = cache.filter(({ data: d }) => d.status === "accepted");
   if (!list.length) return grpNote("ok", "لا يوجد طلاب مقبولين لتطبيق اللينكات عليهم.");
-  for (let i = 0; i < list.length; i += 400) {
+  for (let i = 0; i < list.length; i += 150) {
     const b = writeBatch(db);
-    list.slice(i, i + 400).forEach(({ id, data: d }) => {
+    for (const { id, data: d } of list.slice(i, i + 150)) {
       const rf = receiptFields(d, "accepted");
-      b.set(doc(db, "status", id), { ...groupFields(d.college, "accepted", links), ...rf, ...receiptInfo(d, "accepted") }, { merge: true });
+      await writeStatusDocs(b, id, d, "accepted", rf, links, null);
       if (!d.receiptCode) { b.update(doc(db, "students", id), rf); d.receiptCode = rf.receiptCode; d.acceptedAt = rf.acceptedAt; }
-    });
+    }
     await b.commit();
   }
-  grpNote("ok", `تم تحديث ${list.length} طالب مقبول ✅ (لينك الجروب + وصل القبول) — بيشمل آخر الطلبات المعروضة في اللوحة`);
+  grpNote("ok", `تم تحديث ${list.length} طالب مقبول ✅ (لينك الجروب + وصل القبول، وبيظهروا للطالب برقمه القومي + موبايله بس) — بيشمل آخر الطلبات المعروضة في اللوحة`);
 }
 $("btnSaveGroups").onclick = async () => {
   const links = {}; let bad = "";
@@ -2628,11 +2679,12 @@ $("btnCheckPhone").onclick = () => {
     : `<p class="st-warn">❌ الرقم ده مش مسجل كطالب في المبادرة — ما توافقش على دخوله.</p>`;
 };
 
-async function saveStatus(id, patch, statusPatch) {
+async function saveStatus(id, patch, d, status, rf, links, publicPatch, oldPhone) {
   const b = writeBatch(db);
   b.update(doc(db, "students", id), patch);
-  if (statusPatch) b.set(doc(db, "status", id), statusPatch, { merge: true });
+  await writeStatusDocs(b, id, d, status, rf, links, publicPatch, oldPhone);
   await b.commit();
+  fetchStudentStats();
 }
 
 document.addEventListener("click", async e => {
@@ -2644,16 +2696,21 @@ document.addEventListener("click", async e => {
       if (msg === null) return;
       const links = await loadGroupLinks().catch(() => ({}));
       const d = dataOf(id), rf = receiptFields(d, act);
-      await saveStatus(id, { status: act, adminMessage: msg, ...rf }, { status: act, adminMessage: msg, ...groupFields(d.college, act, links), ...rf, ...receiptInfo(d, act) });
+      await saveStatus(id, { status: act, adminMessage: msg, ...rf }, d, act, rf, links, { status: act, adminMessage: msg });
     } else if (act === "delete") {
-      if (!confirm("هل أنت متأكد من المسح؟ لا يمكن التراجع.")) return;
-      const b = writeBatch(db); b.delete(doc(db, "students", id)); b.delete(doc(db, "status", id)); await b.commit();
+      if (!confirm("هل أنت متأكد من المسح؟ هيتمسح الطلب وصوره نهائياً ولا يمكن التراجع.")) return;
+      const d = dataOf(id);
+      const b = writeBatch(db); b.delete(doc(db, "students", id)); b.delete(doc(db, "status", id));
+      const pk = await privKey(id, d.phone); if (pk) b.delete(doc(db, "status_private", pk));
+      await b.commit();
+      const r = await deleteCloudImages(imgUrlsOf(d));
+      if (!r.ok) alert("اتمسح الطلب، لكن تعذر مسح صوره من Cloudinary. امسحها يدوياً من مكتبة الوسائط.");
     } else if (act === "save") {
       const row = document.querySelector(`[data-row="${CSS.escape(id)}"]`), p = {};
       row.querySelectorAll("[data-f]").forEach(i => p[i.dataset.f] = i.value.trim());
       const links = await loadGroupLinks().catch(() => ({}));
       const old = dataOf(id), nd = { ...old, ...p }, rf = receiptFields(old, p.status);
-      await saveStatus(id, { ...p, ...rf }, { status: p.status, ...groupFields(nd.college, p.status, links), ...rf, ...receiptInfo(nd, p.status) });
+      await saveStatus(id, { ...p, ...rf }, nd, p.status, rf, links, { status: p.status }, old.phone);
     }
   } catch { alert("حدث خطأ أثناء الحفظ، حاول مرة أخرى."); }
 });
@@ -2854,7 +2911,7 @@ mForm.addEventListener("submit", async e => {
     mForm.reset(); roleChips.forEach(b => b.setAttribute("aria-pressed", "false")); uploaded.clear();
   } catch (err) {
     const denied = err && err.code === "permission-denied";
-    notice(box, "bad", denied
+    notice(box, "bad", err && err.userMsg ? err.userMsg : denied
       ? "هذا الرقم القومي مسجل من قبل في فريق الميديا، أو لا توجد صلاحية للإرسال. تواصل معنا على واتساب."
       : "تعذر إتمام الإرسال بسبب ضعف الاتصال. بياناتك وصورك ما زالت في الصفحة، اضغط «إرسال طلب الانضمام» مرة أخرى.");
   } finally {
@@ -2917,8 +2974,11 @@ document.addEventListener("click", async e => {
   const id = btn.dataset.id, act = btn.dataset.mact;
   try {
     if (act === "delete") {
-      if (!confirm("هل أنت متأكد من مسح هذا الطلب؟ لا يمكن التراجع.")) return;
+      if (!confirm("هل أنت متأكد من مسح هذا الطلب؟ هيتمسح الطلب وصوره نهائياً ولا يمكن التراجع.")) return;
+      const md = (mediaCache.find(r => r.id === id) || {}).data || {};
       const b = writeBatch(db); b.delete(doc(db, "media_applicants", id)); if (/^\d{14}$/.test(id)) b.delete(doc(db, "media_status", id)); await b.commit();
+      const r = await deleteCloudImages(imgUrlsOf(md));
+      if (!r.ok) alert("اتمسح الطلب، لكن تعذر مسح صوره من Cloudinary. امسحها يدوياً من مكتبة الوسائط.");
     } else {
       const b = writeBatch(db);
       b.update(doc(db, "media_applicants", id), { status: act });
@@ -3028,7 +3088,7 @@ eForm.addEventListener("submit", async e => {
   } catch (err) {
     console.error("election registration error:", err);
     const denied = err && err.code === "permission-denied";
-    notice(box, "bad", denied
+    notice(box, "bad", err && err.userMsg ? err.userMsg : denied
       ? "هذا الرقم القومي مسجل من قبل في الانتخابات، أو لا توجد صلاحية للإرسال. تواصل معنا على واتساب."
       : "تعذر إتمام الإرسال بسبب ضعف الاتصال. بياناتك وصورك ما زالت في الصفحة، اضغط «إرسال البيانات» مرة أخرى.");
   } finally {
@@ -3098,8 +3158,11 @@ document.addEventListener("click", async e => {
   const id = btn.dataset.id, act = btn.dataset.eact;
   try {
     if (act === "delete") {
-      if (!confirm("هل أنت متأكد من مسح هذا التسجيل؟ لا يمكن التراجع.")) return;
+      if (!confirm("هل أنت متأكد من مسح هذا التسجيل؟ هيتمسح التسجيل وصوره نهائياً ولا يمكن التراجع.")) return;
+      const ed = (electionCache.find(r => r.id === id) || {}).data || {};
       const b = writeBatch(db); b.delete(doc(db, COL_ELECTION, id)); b.delete(doc(db, "election_status", id)); await b.commit();
+      const r = await deleteCloudImages(imgUrlsOf(ed));
+      if (!r.ok) alert("اتمسح التسجيل، لكن تعذر مسح صوره من Cloudinary. امسحها يدوياً من مكتبة الوسائط.");
     } else {
       const b = writeBatch(db);
       b.update(doc(db, COL_ELECTION, id), { status: act });
@@ -3235,9 +3298,13 @@ $("btnDeleteAll").onclick = async () => {
     await deleteAllDocsInCollection("status");
     await deleteAllDocsInCollection("media_applicants");
     try { await deleteAllDocsInCollection("election_applicants"); } catch (e) { console.warn("election delete", e); }
-    for (const c of ["election_status", "media_status"]) { try { await deleteAllDocsInCollection(c); } catch (e) { console.warn(c, e); } }
+    for (const c of ["election_status", "media_status", "status_private"]) { try { await deleteAllDocsInCollection(c); } catch (e) { console.warn(c, e); } }
 
-    alert("تم أخذ نسخة احتياطية بالإكسل، وتم مسح كل البيانات بنجاح.");
+    btn.innerHTML = "جاري مسح الصور...";
+    const imgs = await deleteCloudImages([...allStudents, ...allMedia, ...allElection].flatMap(x => imgUrlsOf(x.data)));
+    alert(imgs.ok
+      ? "تم أخذ نسخة احتياطية بالإكسل، وتم مسح كل البيانات والصور بنجاح."
+      : "تم أخذ نسخة احتياطية بالإكسل ومسح كل البيانات، لكن تعذر مسح بعض الصور من Cloudinary. امسح مجلد mobadara/submissions يدوياً من مكتبة الوسائط.");
     fetchStudents();
   } catch (e) {
     console.error(e);
