@@ -1661,7 +1661,7 @@ function setFbAvatar(imgId, customImg, pageUrl) {
   const def = img.dataset.default;
   const user = fbUsername(pageUrl);
   const chain = [];
-  if (customImg && customImg.trim()) chain.push(safeUrl(customImg.trim()));
+  if (customImg && customImg.trim() && !isExpiringImg(customImg.trim())) chain.push(safeUrl(customImg.trim()));
   if (user) chain.push(`https://graph.facebook.com/${encodeURIComponent(user)}/picture?type=large&width=200&height=200`);
   if (def) chain.push(def);
   let i = 0;
@@ -1673,12 +1673,15 @@ function setFbAvatar(imgId, customImg, pageUrl) {
   next();
 }
 
+/* روابط صور البروفايل من سيرفرات إنستجرام/تيك توك/فيسبوك بتنتهي صلاحيتها بعد أيام (وبترجع 403)،
+   فبنتجاهلها ونعرض الأيقونة. الحل الدائم: ارفع الصورة على Cloudinary وحط رابطها في الإعدادات. */
+const isExpiringImg = u => { try { return /(^|\.)(tiktokcdn[\w-]*\.com|cdninstagram\.com|fbcdn\.net|tiktokcdn-us\.com)$/i.test(new URL(u).hostname); } catch { return false; } };
 function setSocAvatar(imgId, url) {
   const img = $(imgId); if (!img) return;
   const btn = img.closest(".fbtn");
   btn.classList.remove("hasimg");
   const u = url && url.trim() ? safeUrl(url.trim()) : "#";
-  if (u === "#") return;
+  if (u === "#" || isExpiringImg(u)) return;
   img.onload = () => btn.classList.add("hasimg");
   img.onerror = () => { btn.classList.remove("hasimg"); console.warn("تعذر تحميل الصورة:", u); };
   img.src = u;
@@ -1906,15 +1909,35 @@ comChips.forEach(b => b.addEventListener("click", () => {
 }));
 function resetCommittees() { comChips.forEach(b => b.setAttribute("aria-pressed", "false")); syncCommittees(); }
 
+/* لينك فيسبوك: قواعد Firestore بتقبل facebook.com أو www.facebook.com أو fb.com أو fb.me بس.
+   لينكات الموبايل (m.facebook.com / web.facebook.com / mbasic...) بنحوّلها لـ www.facebook.com بدل ما الطلب يترفض بعد رفع الصور. */
+function normFb(v) {
+  let s = toLatin(v || "").trim(); if (!s) return "";
+  if (!/^https?:\/\//i.test(s)) s = "https://" + s;
+  try {
+    const u = new URL(s); let h = u.hostname.toLowerCase();
+    if (/(^|\.)facebook\.com$/.test(h)) h = "www.facebook.com";
+    else if (/(^|\.)fb\.com$/.test(h)) h = "fb.com";
+    else if (/(^|\.)fb\.me$/.test(h)) h = "fb.me";
+    else return "";
+    u.protocol = "https:"; u.hostname = h;
+    return u.href.length <= 300 ? u.href : "";
+  } catch { return ""; }
+}
+const fbOk = v => /^https?:\/\/(www\.)?(facebook\.com|fb\.com|fb\.me)\/.*$/.test(normFb(v));
+/* الاسم: نفس شرط قواعد Firestore (8 حروف على الأقل) + عدد الكلمات المطلوب */
+const cleanName = v => String(v || "").trim().replace(/\s+/g, " ");
+const nameOk = (v, words) => { const n = cleanName(v); return n.split(" ").filter(Boolean).length >= words && n.length >= 8 && n.length <= 120; };
+
 function validate() {
   const v = id => toLatin($(id).value);
   let bad = false;
-  bad |= setInvalid("fullName", v("fullName").split(/\s+/).filter(Boolean).length < 4);
+  bad |= setInvalid("fullName", !nameOk($("fullName").value, 4));
   bad |= setInvalid("phone", !/^01[0125]\d{8}$/.test(v("phone")));
   bad |= setInvalid("nationalId", !/^\d{14}$/.test(v("nationalId"))); 
   bad |= setInvalid("college", !$("college").value);
   bad |= setInvalid("level", !$("level").value);
-  bad |= setInvalid("facebookLink", !/facebook\.com|fb\.com|fb\.me/i.test(v("facebookLink")));
+  bad |= setInvalid("facebookLink", !fbOk($("facebookLink").value));
   bad |= setInvalid("gmail", !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v("gmail")));
   bad |= setInvalid("hobby", $("hobby").value.trim().length < 2);
   bad |= setInvalid("committees", getCommittees().length < 1 || getCommittees().length > MAX_COMMITTEES);
@@ -1923,6 +1946,11 @@ function validate() {
   return !bad;
 }
 function notice(el, cls, msg) { el.className = "notice " + cls; el.textContent = msg; }
+/* قبل رفع الصور: لو الرقم القومي مقدّم قبل كده (ومش مرفوض) نوقف من الأول، بدل ما الصور تترفع وبعدين الحفظ يترفض وتفضل صور ملهاش طلب */
+async function priorStatus(col, nid) {
+  try { const s = await getDoc(doc(db, col, nid)); return s.exists() && s.data().status !== "rejected" ? (s.data().status || "pending") : null; }
+  catch { return null; }   // لو الاستعلام نفسه فشل، القواعد هي اللي هتحكم وقت الحفظ
+}
 
 let submitting = false;
 form.addEventListener("submit", async e => {
@@ -1958,7 +1986,7 @@ form.addEventListener("submit", async e => {
     ]);
 
     setP(90, "جاري حفظ البيانات...");
-    let fb = toLatin($("facebookLink").value); if (!/^https?:\/\//i.test(fb)) fb = "https://" + fb;
+    const fb = normFb($("facebookLink").value);
 
     await retry(async () => {
       const batch = writeBatch(db);
@@ -2364,7 +2392,9 @@ $("btnSaveSettings").onclick = async () => {
       electionOpen: $("adminElectionOpen").value !== "false",
       electionClosedMsg: $("adminElectionClosedMsg").value.trim()
     });
-    notice(noticeBox, "ok", "تم حفظ الإعدادات بنجاح. ستتغير الروابط والأزرار في الموقع فوراً.");
+    const expiring = ["adminFbImg", "adminFb2Img", "adminInstaImg", "adminTiktokImg"].some(id => isExpiringImg($(id).value.trim()));
+    notice(noticeBox, "ok", "تم حفظ الإعدادات بنجاح. ستتغير الروابط والأزرار في الموقع فوراً." +
+      (expiring ? " ⚠️ تنبيه: رابط صورة من إنستجرام/تيك توك/فيسبوك مباشرة بينتهي بعد أيام ومش هيظهر — ارفع الصورة على Cloudinary وحط رابطها بدله." : ""));
     loadSocialLinks(); 
   } catch (error) {
     notice(noticeBox, "bad", "حدث خطأ أثناء الحفظ. تأكد من صلاحيات الحساب (Firestore Rules).");
@@ -2773,7 +2803,9 @@ document.addEventListener("click", async e => {
       row.querySelectorAll("[data-f]").forEach(i => p[i.dataset.f] = i.value.trim());
       const links = await loadGroupLinks().catch(() => ({}));
       const old = dataOf(id), nd = { ...old, ...p }, rf = receiptFields(old, p.status);
-      await saveStatus(id, { ...p, ...rf }, nd, p.status, rf, links, { status: p.status }, old.phone);
+      /* لو الحالة اتغيرت من هنا، الرسالة اللي الطالب بيشوفها في الاستعلام تتغير معاها (بدل ما يفضل مكتوب "تم القبول" وهو مرفوض) */
+      const msgPatch = (old.status || "pending") !== p.status ? { adminMessage: STATUS_MSG[p.status] || STATUS_MSG.pending } : {};
+      await saveStatus(id, { ...p, ...rf, ...msgPatch }, nd, p.status, rf, links, { status: p.status, ...msgPatch }, old.phone);
     }
   } catch { alert("حدث خطأ أثناء الحفظ، حاول مرة أخرى."); }
 });
@@ -2933,7 +2965,7 @@ const DRIVE_RE = /^(https?:\/\/)?(drive\.google\.com|docs\.google\.com|drive\.ap
 function validateMedia() {
   const v = id => toLatin($(id).value);
   let bad = false;
-  bad |= setInvalid("mName", v("mName").split(/\s+/).filter(Boolean).length < 3);
+  bad |= setInvalid("mName", !nameOk($("mName").value, 3));
   bad |= setInvalid("mPhone", !/^01[0125]\d{8}$/.test(v("mPhone")));
   bad |= setInvalid("mNid", !/^\d{14}$/.test(v("mNid")));
   bad |= setInvalid("mDrive", !DRIVE_RE.test(v("mDrive")));
@@ -2963,6 +2995,9 @@ mForm.addEventListener("submit", async e => {
   mSubmitting = true; $("mSubmitBtn").disabled = true; $("mProgress").style.display = "block";
   const setP = (n, t) => { $("mFill").style.width = n + "%"; $("mProgressText").textContent = t; };
   try {
+    setP(3, "جاري التحقق من الرقم القومي...");
+    const prev = await priorStatus("media_status", toLatin($("mNid").value));
+    if (prev) { notice(box, "bad", prev === "accepted" ? "الرقم القومي ده اتقبل قبل كده في فريق الميديا، مش محتاج تقدّم تاني." : "الرقم القومي ده مقدّم قبل كده في فريق الميديا وطلبه قيد المراجعة. تابع حالته من «حالة الطلب»."); return; }
     setP(5, "جاري رفع الصور...");
     let done = 0;
     const tick = () => setP(5 + (++done) * 25, `تم رفع ${done} من 3 صور`);
@@ -3112,12 +3147,12 @@ elChips.forEach(b => b.addEventListener("click", () => {
 function validateElection() {
   const v = id => toLatin($(id).value);
   let bad = false;
-  bad |= setInvalid("elName", v("elName").split(/\s+/).filter(Boolean).length < 4);
+  bad |= setInvalid("elName", !nameOk($("elName").value, 4));
   bad |= setInvalid("elPhone", !/^01[0125]\d{8}$/.test(v("elPhone")));
   bad |= setInvalid("elNid", !/^\d{14}$/.test(v("elNid")));
   bad |= setInvalid("elCollege", !$("elCollege").value);
   bad |= setInvalid("elLevel", !$("elLevel").value);
-  bad |= setInvalid("elFb", !/facebook\.com|fb\.com|fb\.me/i.test(v("elFb")));
+  bad |= setInvalid("elFb", !fbOk($("elFb").value));
   bad |= setInvalid("elGmail", !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v("elGmail")));
   bad |= setInvalid("elHobby", $("elHobby").value.trim().length < 2);
   bad |= setInvalid("elCommittees", !getElCommittee());
@@ -3139,6 +3174,9 @@ eForm.addEventListener("submit", async e => {
   const setP = (n, t) => { $("elFill").style.width = n + "%"; $("elProgressText").textContent = t; };
   try {
     const nid = toLatin($("elNid").value);
+    setP(5, "جاري التحقق من الرقم القومي...");
+    const prev = await priorStatus("election_status", nid);
+    if (prev) { notice(box, "bad", prev === "accepted" ? "الرقم القومي ده اتقبل قبل كده في الانتخابات، مش محتاج تسجّل تاني." : "الرقم القومي ده مسجّل قبل كده في الانتخابات وطلبه قيد المراجعة. تابع حالته من «حالة الطلب»."); return; }
     setP(10, "جاري رفع الصور...");
     let done = 0;
     const tick = () => setP(10 + (++done) * 25, `تم رفع ${done} من 3 صور`);
@@ -3148,7 +3186,7 @@ eForm.addEventListener("submit", async e => {
       uploadImage($("elCard").files[0], "c", tick)
     ]);
     setP(90, "جاري حفظ البيانات...");
-    let fb = toLatin($("elFb").value); if (!/^https?:\/\//i.test(fb)) fb = "https://" + fb;
+    const fb = normFb($("elFb").value);
     const committee = getElCommittee();
     await retry(async () => { const batch = writeBatch(db); batch.set(doc(db, COL_ELECTION, nid), {
       fullName: $("elName").value.trim().replace(/\s+/g, " "), phone: toLatin($("elPhone").value), nationalId: nid,
